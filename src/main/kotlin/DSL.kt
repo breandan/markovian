@@ -23,13 +23,16 @@ val util = ExprEvaluator(false, 100)
 val rand = kotlin.random.Random(1)
 fun main() {
     measureTimeMillis {
+        // TODO: Use regularization to prevent exponents from exploding?
         val a = randomKumaraswamy()
         val b = randomKumaraswamy()
         val c = randomKumaraswamy()
+        val d = randomKumaraswamy()
 
-        val mixture = "$a*($b + $c)".also { println("Mixture: $it") }
-        val integral = util.eval("integrate($mixture, x)").also { println("Integral: $it") }.also { it.plot2D() }
+        val mixture = util.eval("$a*($b + $c + $d)").also { println("Mixture: $it") }.also { it.plot2D("PDF") }
+        val integral = util.eval("integrate($mixture, x)").also { println("Integral: $it") }.also { it.plot2D("CDF") }
         val variate = rand.nextDouble().toString().also { println("Variate: $it") }
+        // TODO: use Newton's method, SymJa doesn't seem to work here
         val result = util.eval("solve({$integral-$variate==0, 0<=x, x<=1}, {x})").also { println("Result: $it") }
     }.also { println("Time: $it ms") }
 
@@ -53,18 +56,16 @@ fun main() {
 //        } // + setOf(-5, -3, -1, 1, 3, 5).random() * 5 }
 //            .also { println(it.count { it < 0 }) }
 //    )
-
-
 }
 
-private fun IExpr.plot2D() {
+private fun IExpr.plot2D(title: String) {
     val labels = arrayOf("y")
     val xs = (0.0..1.0 step 0.01).toList()
     val ys = listOf(xs.map { util.eval("f(x_):=$this; f($it)").also { println(it) }.evalDouble() })
     val data = (labels.zip(ys) + ("x" to xs)).toMap()
     val colors = listOf("dark_green", "gray", "black", "red", "orange", "dark_blue")
     val geoms = labels.zip(colors).map { geom_path(size = 2.0, color = it.second) { x = "x"; y = "y" } }
-    val plot = geoms.foldRight(ggplot(data)) { it, acc -> acc + it } + ggtitle("CDF")
+    val plot = geoms.foldRight(ggplot(data)) { it, acc -> acc + it } + ggtitle(title)
     plot.display()
 }
 
@@ -86,9 +87,11 @@ enum class Domain { INT, RATIONAL, DOUBLE }
 // https://en.wikipedia.org/wiki/Kumaraswamy_distribution
 fun randomKumaraswamy(domain: Domain = Domain.INT) =
     when(domain) {
-       Domain.INT -> (("${rand.nextInt(2, 5)}") to ("${rand.nextInt(2, 5)}"))
-       Domain.RATIONAL -> (("${rand.nextInt(2, 5)}/${rand.nextInt(2, 5)}") to ("${rand.nextInt(2, 5)}/${rand.nextInt(2, 5)}"))
-       Domain.DOUBLE ->  (("${rand.nextDouble()* 5.0}") to ("${rand.nextDouble() * 5.0}"))
+        Domain.INT -> (("${rand.nextInt(1, 5)}") to ("${rand.nextInt(1, 5)}"))
+        Domain.RATIONAL -> (("${rand.nextInt(2, 5)}/${rand.nextInt(2, 5)}") to
+                ("${rand.nextInt(2, 5)}/${rand.nextInt(2, 5)}"))
+//               ("1"))
+        Domain.DOUBLE -> (("${rand.nextDouble() * 5.0}") to ("${rand.nextDouble() * 5.0}"))
     }.let { (a, b) ->
         "($a*$b*x^($a-1)*(1-x^$a)^($b-1))"
     }
@@ -106,6 +109,18 @@ fun randomHarmonic() =
     (rand.nextInt(-10, 10) to rand.nextInt(0, 10)).let { (i, j) ->
         "x^$i * log(x)^$j"
     }
+
+fun randomExpontential() = (rand.nextInt(0, 10) to rand.nextInt(0, 10)).let { (i, j) ->
+    "$i * E^(x-$j)"
+}
+
+fun randomPolynomial() = (rand.nextDouble() to rand.nextInt(1, 3)).let { (i, j) ->
+    "$i * x^$j"
+}
+
+fun randomSigmoid() = (rand.nextDouble()).let { i ->
+    "ln(1 + E^(x))"
+}
 
 val POPCOUNT = 1000
 
