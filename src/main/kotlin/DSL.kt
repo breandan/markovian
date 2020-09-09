@@ -10,58 +10,68 @@ import jetbrains.letsPlot.label.ggtitle
 import jetbrains.letsPlot.lets_plot
 import org.hipparchus.special.Gamma
 import org.matheclipse.core.eval.ExprEvaluator
-import org.matheclipse.core.graphics.Show2SVG
 import org.matheclipse.core.interfaces.IExpr
 import java.io.File
 import java.util.*
-import kotlin.math.PI
-import kotlin.math.sqrt
+import kotlin.math.*
 import kotlin.system.measureTimeMillis
 
 val util = ExprEvaluator(false, 100)
 
 val rand = kotlin.random.Random(1)
 fun main() {
+    // TODO: Use regularization to prevent exponents from exploding?
+    val a = randomKumaraswamy()
+    val b = randomKumaraswamy()
+    val c = randomKumaraswamy()
+    val d = randomKumaraswamy()
+
+    val mixture = util.eval("$a*($b + $c + $d)").also { println("Mixture: $it") }.also { it.plot2D("PDF") }
+    val integral = util.eval("integrate($mixture, x)").also { println("Integral: $it") }
+    val normd = util.eval("f(x_):=$integral; f(1.0)").evalDouble().also { println("Normd:$it") }
+        val norm = util.eval("$integral").also { println("CDF: $it") }.also { it.plot2D("CDF", normd) }
     measureTimeMillis {
-        // TODO: Use regularization to prevent exponents from exploding?
-        val a = randomKumaraswamy()
-        val b = randomKumaraswamy()
-        val c = randomKumaraswamy()
-        val d = randomKumaraswamy()
+        compare({ binarySearch(zero = rand.nextDouble() * normd, exp = norm) })
+    }.also { println("Inversion sampling time: $it ms") }
 
-        val mixture = util.eval("$a*($b + $c + $d)").also { println("Mixture: $it") }.also { it.plot2D("PDF") }
-        val integral = util.eval("integrate($mixture, x)").also { println("Integral: $it") }.also { it.plot2D("CDF") }
-        val variate = rand.nextDouble().toString().also { println("Variate: $it") }
-        // TODO: use Newton's method, SymJa doesn't seem to work here
-        val result = util.eval("solve({$integral-$variate==0, 0<=x, x<=1}, {x})").also { println("Result: $it") }
-    }.also { println("Time: $it ms") }
-
-//    compare(
-////        {
-////        util.eval("x = ${rand.nextDouble()}")
-////        util.eval("RandomVariate(NormalDistribution(0,1), 10^1)")
-////            .toString().drop(1).dropLast(1).split(",").first() .toDouble()
-////    },
-////        util.eval("integrate(PDF(NormalDistribution(0, 1), x))").toString().toDouble() },
-////        { //0.5 * rand.nextGaussian() + 0.5 * (rand.nextGaussian() + 4)
-////        {
-////            util.eval("integrate(0.25 * sech((x-10)/2)^2 + 0.25 * sech((x+10)/2)^2, x)")
-////                .also { println(it) }
-////                .toString().toDouble()
-////        }
-//        List(POPCOUNT) {
-//            val t = rand.nextGaussian()
-//            val p = if(rand.nextBoolean()) 1 else -1
-//            p * (t + 5) + (1-p) *(t-5)
-//        } // + setOf(-5, -3, -1, 1, 3, 5).random() * 5 }
-//            .also { println(it.count { it < 0 }) }
-//    )
+    measureTimeMillis {
+        compare({
+            val t = Random().nextGaussian()
+            val p = if(rand.nextBoolean()) 1 else -1
+            p * (t + 5) + (1-p) *(t-5)})
+    } // + setOf(-5, -3, -1, 1, 3, 5).random() * 5 }
+        .also { println("Gaussian sampling time: $it ms") }
 }
 
-private fun IExpr.plot2D(title: String) {
+tailrec fun newtonSolver(
+    exp: IExpr,
+    zero: Double = 0.0,
+    guess: Double = binarySearch(exp = exp, zero = zero),
+    exp_dx: IExpr = util.eval("D($exp, x)"),
+    nextGuess: Double = guess - util.eval("f(x_):=($exp)/($exp_dx); f($guess)").evalDouble(),
+): Double =
+    if (abs(util.eval("f(x_):=$exp - $zero; f($guess)").evalDouble()) < 0.001)
+        guess.also { println("$zero/$it: ${util.eval("f(x_):=$exp; f($guess)").evalDouble()}") }
+    else newtonSolver(zero = zero, guess = nextGuess, exp = exp, exp_dx = exp_dx)
+
+// Only works on monotonically increasing functions (e.g. CDF)
+tailrec fun binarySearch(
+    exp: IExpr,
+    zero: Double,
+    iter: Int = 1,
+    range: ClosedFloatingPointRange<Double> = 0.0..1.0,
+    guess: Double = (range.endInclusive - range.start) / 2.0,
+    delta: Double = 0.5.pow(iter) * (range.endInclusive - range.start).absoluteValue,
+    eval: Double = util.eval("f(x_):=$exp; f($guess)").evalDouble(),
+    error: Double = zero - eval
+): Double = if (error.absoluteValue < 0.01 || iter > 20) guess
+else if (error < 0) binarySearch(iter = iter + 1, guess = guess - delta, exp = exp, zero = zero)
+else binarySearch(iter = iter + 1, guess = guess + delta, exp = exp, zero = zero)
+
+private fun IExpr.plot2D(title: String, norm: Double = 1.0) {
     val labels = arrayOf("y")
     val xs = (0.0..1.0 step 0.01).toList()
-    val ys = listOf(xs.map { util.eval("f(x_):=$this; f($it)").also { println(it) }.evalDouble() })
+    val ys = listOf(xs.map { util.eval("f(x_):=$this; f($it)").evalDouble() / norm })
     val data = (labels.zip(ys) + ("x" to xs)).toMap()
     val colors = listOf("dark_green", "gray", "black", "red", "orange", "dark_blue")
     val geoms = labels.zip(colors).map { geom_path(size = 2.0, color = it.second) { x = "x"; y = "y" } }
@@ -97,7 +107,7 @@ fun randomKumaraswamy(domain: Domain = Domain.INT) =
     }
 
 // https://escholarship.org/content/qt0wz7n7nm/qt0wz7n7nm.pdf#page=5
-fun randomGottschling()=
+fun randomGottschling() =
     rand.nextDouble().let { l ->
         val g1 = Gamma.gamma((l + 1)/l)
         val g2 = Gamma.gamma(1/(2*l))
