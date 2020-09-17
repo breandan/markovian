@@ -44,14 +44,6 @@ fun main() {
     measureTimeMillis {
         compare({ binarySearch(zero = rand.nextDouble(), exp = cdf) })
     }.also { println("Inversion sampling time: $it ms") }
-
-//    measureTimeMillis {
-//        compare({
-//            val t = Random().nextGaussian()
-//            val p = if(rand.nextBoolean()) 1 else -1
-//            p * (t + 5) + (1-p) *(t-5)})
-//    } // + setOf(-5, -3, -1, 1, 3, 5).random() * 5 }
-//        .also { println("Gaussian sampling time: $it ms") }
 }
 
 tailrec fun newtonSolver(
@@ -79,11 +71,11 @@ else if (error < 0) binarySearch(iter = iter + 1, guess = guess - delta, exp = e
 else binarySearch(iter = iter + 1, guess = guess + delta, exp = exp, zero = zero)
 
 private fun IExpr.plot2D(title: String, norm: Double = 1.0) {
-    val labels = arrayOf("y")
+    val labels = arrayOf("density")
     val xs = (0.01..1.0 step 0.01).toList()
     val ys = listOf(xs.map { util.eval("f(x_):=$this; f($it)").evalDouble() / norm })
     val data = (labels.zip(ys) + ("x" to xs)).toMap()
-    val geoms = labels.map { geom_area(size = 2.0, color = "dark_green", fill = "light_green") { x = "x"; y = "y" } }
+    val geoms = labels.map { geom_area(size = 2.0, color = "dark_green", fill = "light_green") { x = "x"; y = "density" } }
     val plot = geoms.foldRight(ggplot(data)) { it, acc -> acc + it } + ggtitle(title)
     plot.display()
 }

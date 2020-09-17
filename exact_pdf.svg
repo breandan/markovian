@@ -254,7 +254,7 @@
         <g class="plt-axis">
             <g transform="translate(4.0 247.5 ) rotate(-90.0 ) " class="plt-axis-title">
                 <text text-anchor="middle" dy="0.7em">
-                    y
+                    density
                 </text>
             </g>
         </g>
