@@ -31,9 +31,9 @@ fun main() {
     val d = randomKumaraswamy()
 
 //    val mixture = util.eval("$a + $b + $c + $d")
-//    val mixture = util.eval("(($a+$b) * ($c+$d))")
+    val mixture = util.eval("(($a+$b) * ($c+$d))")
 //    val mixture = util.eval("(($a+$b) * ($c+$d))*(($b+$a) * ($c+$d))*(($c+$a) * ($b+$d))")
-    val mixture = util.eval("1.5*5*x^(1.5-1)*(1-x^1.5)^(5-1) + (5*2*x^(5-1)*(1-x^5)^(2-1))")
+//    val mixture = util.eval("1.5*5*x^(1.5-1)*(1-x^1.5)^(5-1) + (5*2*x^(5-1)*(1-x^5)^(2-1))")
     val mixPlot = mixture.let { println("Mixture: $it"); it.plot2D("Exact PDF") }
     val integral = measureTimedValue { util.eval("Integrate($mixture, x) + 1") }
         .let { println("Integration time: ${it.duration}"); it.value }
@@ -93,18 +93,20 @@ infix fun ClosedRange<Double>.step(step: Double): Iterable<Double> {
 }
 
 enum class Domain { INT, RATIONAL, DOUBLE }
+//var switch = false
 
 // https://en.wikipedia.org/wiki/Kumaraswamy_distribution
 fun randomKumaraswamy(v: String = "x", domain: Domain = Domain.RATIONAL) =
     when(domain) {
         Domain.INT -> "${rand.nextInt(2, 10)}".let {
-            it to "${rand.nextInt(2, 10)}"
-//            if (rand.nextBoolean()) "1" to it else it to "1"
-        }//"${rand.nextInt(1, 5)}"
-        Domain.RATIONAL -> rand.nextInt(2, 10).let { a -> "$a/${rand.nextInt(1, a)}" }.let {
-//            it to "1"
+//            it to "${rand.nextInt(2, 10)}"
             if (rand.nextBoolean()) "1" to it else it to "1"
-//            it to rand.nextInt(2, 10).let { a -> "$a/${rand.nextInt(1, a)}" }
+        }//"${rand.nextInt(1, 5)}"
+        Domain.RATIONAL -> rand.nextInt(2, 50).let { a -> "$a/${rand.nextInt(1, a)}" }.let {
+//            it to "1"
+//            switch = !switch
+            if (rand.nextBoolean()) "1" to it else it to "1"
+//            it to rand.nextInt(2, 50).let { a -> "$a/${rand.nextInt(1, a)}" }
         }
         Domain.DOUBLE -> "${rand.nextDouble() * 5.0 + 1}".take(3) to "${rand.nextDouble() * 5.0 + 1}".take(3)
     }.let { (a, b) ->
