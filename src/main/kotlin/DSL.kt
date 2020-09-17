@@ -160,16 +160,13 @@ fun compare(vararg samplers: () -> Double) =
 
 fun compare(vararg samples: List<Double>) {
     val data = mapOf<String, Any>(
-        "rating" to samples.fold(listOf<Double>()) { acc, function ->
+        "x" to samples.fold(listOf<Double>()) { acc, function ->
             acc + function
-        },
-        "cond" to samples.foldIndexed(listOf<String>()) { i, acc, function ->
-            acc + function.map { "$i" }
         }
     )
 
     var p = lets_plot(data)
-    p += geom_density(color = "dark_green", alpha = .3) { x = "rating"; fill = "cond" }
+    p += geom_density(color = "dark_green", alpha = .3, fill = "light_green") { x = "x" }
     p + ggsize(2000, 1000)
     p.display()
 }
