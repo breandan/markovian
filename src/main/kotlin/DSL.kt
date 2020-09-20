@@ -99,7 +99,6 @@ infix fun ClosedRange<Double>.step(step: Double): Iterable<Double> {
 }
 
 enum class Domain { INT, RATIONAL, DOUBLE }
-//var switch = false
 
 // https://en.wikipedia.org/wiki/Kumaraswamy_distribution
 fun Random.nextKumaraswamy(v: String = "x", domain: Domain = Domain.RATIONAL) =
@@ -109,10 +108,8 @@ fun Random.nextKumaraswamy(v: String = "x", domain: Domain = Domain.RATIONAL) =
             if (nextBoolean()) "1" to it else it to "1"
         }//"${nextInt(1, 5)}"
         Domain.RATIONAL -> nextRational().let {
-//            it to "1"
-//            switch = !switch
             if (nextBoolean()) "1" to it else it to "1"
-//            it to nextInt(2, 50).let { a -> "$a/${nextInt(1, a)}" }
+//            it to nextRational()
         }
         Domain.DOUBLE -> "${nextDouble() * 5.0 + 1}".take(3) to "${nextDouble() * 5.0 + 1}".take(3)
     }.let { (a, b) ->
