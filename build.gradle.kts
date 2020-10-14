@@ -14,6 +14,9 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
+
+    implementation("guru.nidi:graphviz-kotlin:0.17.0")
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")

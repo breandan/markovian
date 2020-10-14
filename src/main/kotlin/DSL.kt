@@ -25,15 +25,15 @@ val util = ExprEvaluator(false, 100)
 @ExperimentalTime
 fun main(): Unit = with(Random(3)) {
     // TODO: Use regularization to prevent exponents from exploding?
-    val a = nextKumaraswamy()
-    val b = nextKumaraswamy()
-    val c = nextKumaraswamy()
-    val d = nextKumaraswamy()
+//    val a = nextKumaraswamy()
+//    val b = nextKumaraswamy()
+//    val c = nextKumaraswamy()
+//    val d = nextKumaraswamy()
 
-    val mixture = util.eval("$a + $b + $c + $d")
+//    val mixture = util.eval("$a + $b + $c + $d")
 //    val mixture = util.eval("(($a+$b) * ($c+$d))")
 //    val mixture = util.eval("(($a+$b) * ($c+$d))*(($b+$a) * ($c+$d))*(($c+$a) * ($b+$d))")
-//    val mixture = util.eval("1.5*5*x^(1.5-1)*(1-x^1.5)^(5-1) + (5*2*x^(5-1)*(1-x^5)^(2-1))")
+    val mixture = util.eval("1.5*5*x^(1.5-1)*(1-x^1.5)^(5-1) + (5*2*x^(5-1)*(1-x^5)^(2-1))")
     val mixPlot = mixture.let { println("Mixture: $it"); it.plot2D("Exact PDF") }
     val integral = measureTimedValue { util.eval("Integrate($mixture, x)") }
         .let { println("Integration time: ${it.duration}"); it.value }
