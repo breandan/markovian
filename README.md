@@ -55,4 +55,4 @@ Below, we show the posterior distribution from simple mixture of two Kumaraswamy
 
 * [JavaBayes](https://github.com/joeschweitzer/javabayes): Bayesian networks in [Java](https://www.cs.cmu.edu/~javabayes/Home/node6.html)
 * [Credici](https://github.com/IDSIA/credici): Credal Models Algorithms
-* [Credal](https://github.com/IDSIA/credal): Credal Inference for Causal Inference
+* [Crema](https://github.com/IDSIA/crema): Credal Inference for Causal Inference
