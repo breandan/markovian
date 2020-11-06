@@ -13,11 +13,11 @@ fun main() {
     val u by Uniform()
 }
 
-open class Distribution() {
+open class Distribution {
     open operator fun getValue(nothing: Nothing?, property: KProperty<*>): Distribution = this
 }
 
-class Dirichlet() : Distribution()
-class Gaussian() : Distribution()
-class Uniform() : Distribution()
-class Poisson() : Distribution()
+class Dirichlet : Distribution()
+class Gaussian : Distribution()
+class Uniform : Distribution()
+class Poisson : Distribution()
