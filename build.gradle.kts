@@ -31,6 +31,8 @@ dependencies {
     implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
     implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.0.0")
 
+    implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
+
     // MPJ (required for Poon's SPN)
     implementation(files("$projectDir/libs/mpj-0.44.jar"))
 }
