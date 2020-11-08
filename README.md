@@ -32,12 +32,11 @@ But this might not be a valid operation depending on the units. We could "mix" t
 
 But the mean of the mixture might not give the mean of the two datasets. Or we could multiply the PDFs:
 
-![](two_gaussians_mixed.svg)
+![](two_gaussians_conflated.svg)
 
 Two Gaussian distributions, when multiplied together form another Gaussian! This is a nice property.
 
 This means we do not need to sample from the parents, but can do inverse sampling directly on the child!
-
 
 
 See [notebook](notebooks/combinator_exploration.ipynb) for implementation details.
