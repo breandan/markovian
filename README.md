@@ -2,7 +2,7 @@
 
 Symbolic integration and probabilistic programming in the spirit of [Church](https://web.stanford.edu/~ngoodman/papers/churchUAI08_rev2.pdf) and [Anglican](https://probprog.github.io/anglican/index.html).
 
-# Research Questions
+## Research Questions
 
 * Is there a way to compile PGMs to [probabilistic circuits](https://web.cs.ucla.edu/~guyvdb/slides/TPMTutorialUAI19.pdf#1)?
 * Is there a algebra that unifies belief prop on PGMs/PCs and backprop on computation graphs?
@@ -10,21 +10,15 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
 
-# Combinatorial Properties
+## Combinatorial Properties
 
 * [Stable distributions](https://en.wikipedia.org/wiki/Stable_distribution) are closed under convolution and linear combination of their random variables.
 * A distribution is called [infinitely divisible](https://en.wikipedia.org/wiki/Infinite_divisibility_(probability)) if it can be expressed as the sum of an arbitrary number of IID RVs.
 * Gaussian distributions form a [monoid](https://izbicki.me/blog/gausian-distributions-are-monoids).
 
-# Example
+## Example
 
-Below, we show the posterior distribution from simple mixture of two Kumaraswamy distributions. The CDF is computed using [Rubi's symbolic integration scheme](https://rulebasedintegration.org/).
-
-![](exact_pdf.svg)
-
-![](exact_cdf.svg)
-
-![](inversion_sampled_pdf.svg)
+See [notebook](notebooks/combinator_exploration.ipynb).
 
 # References
 
