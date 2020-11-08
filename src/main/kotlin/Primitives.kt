@@ -1,6 +1,8 @@
 @file:Suppress("NonAsciiCharacters")
 
+import edu.mcgill.kaliningraph.DEFAULT_RANDOM
 import umontreal.ssj.probdist.*
+import kotlin.math.pow
 import kotlin.reflect.KProperty
 
 // TODO: https://en.wikipedia.org/wiki/Plate_notation
@@ -17,12 +19,10 @@ abstract class Distribution : (Double) -> Double {
 
     // TODO: Combinators: average, convolution, product, sum...
 
-    tailrec fun cdf(
-        z: Double,
-        sum: Double = 0.0,
-        term: Double = z,
-        i: Int = 3
-    ): Double =
+    tailrec fun cdf(z: Double,
+                    sum: Double = 0.0,
+                    term: Double = z,
+                    i: Int = 3): Double =
         when {
             z < -8.0 -> 0.0
             z > 8.0 -> 1.0
@@ -55,15 +55,21 @@ class Beta(override val name: String = "", val a: Double = 2.0, val b: Double = 
 class Gaussian(override val name: String = "", val μ: Double = 0.1, val σ: Double = 1.0) : Distribution() {
     override val density: ContinuousDistribution = NormalDist(μ, σ)
     override fun new(name: String): Gaussian = Gaussian(name, μ, σ)
+    // TODO: can we get the graph compiler to infer this?
+    infix operator fun times(that: Gaussian) =
+        Gaussian(
+            "$name + ${that.name}",
+            (μ * that.σ.pow(2) + that.μ * σ.pow(2)) / (σ.pow(2) + that.σ.pow(2)),
+            (σ.pow(2) * that.σ.pow(2)) / (σ.pow(2) + that.σ.pow(2))
+        )
 }
 
 const val precision = 0.00000001
 
 fun main() {
     val g0 by Gaussian()
-    val b0 by Beta()
-    val g1 = { it: Double -> g0(it) * 1.4 + 3.0 }
-    val g2 = { it: Double -> (g0(it) + g1(it)) / 2.0 }
+    val g1 by Gaussian("", 3.0, 1.4)
+    val g2 = { it: Double -> (g0 as Gaussian * g1 as Gaussian)(it) }
 
-    compare(g0, g1, g2, b0).display()
+    compare(g0, g1, g2).display()
 }

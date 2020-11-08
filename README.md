@@ -18,7 +18,29 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 
 ## Example
 
-See [notebook](notebooks/combinator_exploration.ipynb).
+Suppose we have two Gaussian distributions with known parameters and want to combine them somehow:
+
+![](two_gaussians.svg)
+
+How could we combine them to form a new distribution? We could simply average their densities:
+
+![](two_gaussians_averaged.svg)
+
+But this might not be a valid operation depending on the units. We could "mix" them by flipping a coin:
+
+![](two_gaussians_mixed.svg)
+
+But the mean of the mixture might not give the mean of the two datasets. Or we could multiply the PDFs:
+
+![](two_gaussians_mixed.svg)
+
+Two Gaussian distributions, when multiplied together form another Gaussian! This is a nice property.
+
+This means we do not need to sample from the parents, but can do inverse sampling directly on the child!
+
+
+
+See [notebook](notebooks/combinator_exploration.ipynb) for implementation details.
 
 # References
 
