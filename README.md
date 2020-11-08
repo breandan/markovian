@@ -9,6 +9,12 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a probability distribution which can be combined linearly to form an algebra which is closed over integration?
 * Is there an efficient symbolic or numerical procedure to run inverse transform sampling on higher dimensional quantiles?
 
+# Combinatorial Properties
+
+* [Stable distributions](https://en.wikipedia.org/wiki/Stable_distribution) are closed under convolution and linear combination of their random variables.
+* A distribution is called [infinitely divisible](https://en.wikipedia.org/wiki/Infinite_divisibility_(probability)) if it can be expressed as the sum of an arbitrary number of IID RVs.
+* Gaussian distributions form a [monoid](https://izbicki.me/blog/gausian-distributions-are-monoids).
+
 # Example
 
 Below, we show the posterior distribution from simple mixture of two Kumaraswamy distributions. The CDF is computed using [Rubi's symbolic integration scheme](https://rulebasedintegration.org/).

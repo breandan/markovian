@@ -32,6 +32,7 @@ dependencies {
     implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.0.0")
 
     implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
+    implementation("ca.umontreal.iro.simul:ssj:3.3.1")
 
     // MPJ (required for Poon's SPN)
     implementation(files("$projectDir/libs/mpj-0.44.jar"))

@@ -12,9 +12,7 @@ import kotlinx.coroutines.*
 import org.matheclipse.core.eval.ExprEvaluator
 import org.matheclipse.core.interfaces.IExpr
 import java.io.File
-import kotlin.math.abs
-import kotlin.math.absoluteValue
-import kotlin.math.pow
+import kotlin.math.*
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 import kotlin.time.ExperimentalTime
@@ -159,40 +157,7 @@ tailrec fun Int.gcd(b: Int): Int =
 
 val POPCOUNT = 10000
 
+// https://medium.com/@elizarov/the-reason-to-avoid-globalscope-835337445abc
 fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = runBlocking {
     map { async { f(it) } }.awaitAll()
-}
-
-fun compare(vararg samplers: () -> Double): Unit =
-    compare(*samplers.map { f -> (0..POPCOUNT).pmap { f() } }.toTypedArray())
-
-fun compare(vararg samples: List<Double>) {
-    val data = mapOf<String, Any>(
-        "x" to samples.fold(listOf<Double>()) { acc, function ->
-            acc + function
-        }
-    )
-
-    var p = lets_plot(data)
-    p += geom_density(color = "dark_green", alpha = .3, fill = "light_green") { x = "x" }
-    p + ggsize(2000, 1000)
-    p.display()
-}
-
-fun Plot.display() =
-    File.createTempFile("test", ".svg").also {
-        val plotSize = DoubleVector(1000.0, 500.0)
-        val plot = PlotSvgExport.buildSvgImageFromRawSpecs(this@display.toSpec(), plotSize)
-        it.writeText(plot)
-    }.also {
-        ProcessBuilder(browserCmd, it.path).start()
-    }
-
-val browserCmd = System.getProperty("os.name").toLowerCase().let { os ->
-    when {
-        "win" in os -> "rundll32 url.dll,FileProtocolHandler"
-        "mac" in os -> "open"
-        "nix" in os || "nux" in os -> "x-www-browser"
-        else -> throw Exception("Unable to open browser for unknown OS: $os")
-    }
 }
