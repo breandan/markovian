@@ -10,12 +10,6 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
 
-## Combinatorial Properties
-
-* [Stable distributions](https://en.wikipedia.org/wiki/Stable_distribution) are closed under convolution and linear combination of their random variables.
-* A distribution is called [infinitely divisible](https://en.wikipedia.org/wiki/Infinite_divisibility_(probability)) if it can be expressed as the sum of an arbitrary number of IID RVs.
-* Gaussian distributions form a [monoid](https://izbicki.me/blog/gausian-distributions-are-monoids).
-
 ## Example
 
 Suppose we have two Gaussian distributions with known parameters and want to combine them somehow:
@@ -34,12 +28,19 @@ But the mean of the mixture might not give the mean of the two datasets. Or we c
 
 ![](two_gaussians_conflated.svg)
 
-Two Gaussian distributions, when multiplied together form another Gaussian! This is a nice property.
+Two Gaussian distributions, when multiplied together form another Gaussian! This is a very nice property.
 
-This means we do not need to sample from the parents, but can do inverse sampling directly on the child!
+Now we do not need to sample from the parents, but can discard them and sample directly from the child!
 
+## Combinatorial Properties
 
-See [notebook](notebooks/combinator_exploration.ipynb) for implementation details.
+* [Stable distributions](https://en.wikipedia.org/wiki/Stable_distribution) are closed under convolution and linear combination of their random variables.
+* A distribution is called [infinitely divisible](https://en.wikipedia.org/wiki/Infinite_divisibility_(probability)) if it can be expressed as the sum of an arbitrary number of IID RVs.
+* Gaussian distributions form a [monoid](https://izbicki.me/blog/gausian-distributions-are-monoids).
+
+We can use these algebraic properties to signficantly simplify certain mixture distributions.
+
+See [notebook](notebooks/combinator_exploration.ipynb) for further implementation details.
 
 # References
 
