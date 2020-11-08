@@ -15,6 +15,8 @@ abstract class Distribution : (Double) -> Double {
     override fun invoke(p1: Double): Double = density.inverseF(p1)
     fun pdf(x: Double) = density.density(x)
 
+    // TODO: Combinators: average, convolution, product, sum...
+
     tailrec fun cdf(
         z: Double,
         sum: Double = 0.0,
