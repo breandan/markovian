@@ -1,6 +1,8 @@
 import edu.mcgill.kaliningraph.DEFAULT_RANDOM
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExport
+import jetbrains.letsPlot.geom.geom_abline
+import jetbrains.letsPlot.geom.geom_contourf
 import jetbrains.letsPlot.geom.geom_density
 import jetbrains.letsPlot.ggsize
 import jetbrains.letsPlot.intern.Plot
@@ -25,6 +27,8 @@ val browserCmd = System.getProperty("os.name").toLowerCase().let { os ->
         else -> throw Exception("Unable to open browser for unknown OS: $os")
     }
 }
+
+const val POPCOUNT = 10000
 
 fun compare(vararg samplers: (Double) -> Double) =
     compare(

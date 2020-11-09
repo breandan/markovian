@@ -1,3 +1,4 @@
+import edu.mcgill.kaliningraph.DEFAULT_RANDOM
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExport
 import jetbrains.letsPlot.geom.geom_area
@@ -21,7 +22,7 @@ import kotlin.time.measureTimedValue
 val util = ExprEvaluator(false, 100)
 
 @ExperimentalTime
-fun main(): Unit = with(Random(3)) {
+fun main(): Unit = with(util) {
     // TODO: Use regularization to prevent exponents from exploding?
 //    val a = nextKumaraswamy()
 //    val b = nextKumaraswamy()
@@ -31,15 +32,15 @@ fun main(): Unit = with(Random(3)) {
 //    val mixture = util.eval("$a + $b + $c + $d")
 //    val mixture = util.eval("(($a+$b) * ($c+$d))")
 //    val mixture = util.eval("(($a+$b) * ($c+$d))*(($b+$a) * ($c+$d))*(($c+$a) * ($b+$d))")
-    val mixture = util.eval("1.5*5*x^(1.5-1)*(1-x^1.5)^(5-1) + (5*2*x^(5-1)*(1-x^5)^(2-1))")
+    val mixture = eval("1.5*5*x^(1.5-1)*(1-x^1.5)^(5-1) + (5*2*x^(5-1)*(1-x^5)^(2-1))")
     val mixPlot = mixture.let { println("Mixture: $it"); it.plot2D("Exact PDF") }
-    val integral = measureTimedValue { util.eval("Integrate($mixture, x)") }
+    val integral = measureTimedValue { util.eval("Integrate(Simplify($mixture), x)") }
         .let { println("Integration time: ${it.duration}"); it.value }
-    val zero = util.eval("f(x_):=$integral; f(0)").also { println("Zero:$it") }
-    val norm = util.eval("f(x_):=$integral - $zero; f(1)").evalDouble().also { println("Norm:$it") }
-    val cdf = util.eval("($integral - $zero) / $norm")
+    val zero = eval("f(x_):=$integral; f(0)").also { println("Zero:$it") }
+    val norm = eval("f(x_):=$integral - $zero; f(1)").evalDouble().also { println("Norm:$it") }
+    val cdf = eval("($integral - $zero) / $norm")
 //    cdf.also { println("CDF: $it"); it.plot2D("Exact CDF") }
-    measureTimeMillis { compare({ cdf.sample(this) }) }
+    measureTimeMillis { compare({ cdf.sample(DEFAULT_RANDOM) }) }
         .also { println("Inversion sampling time: $it ms") }
 }
 
@@ -68,7 +69,7 @@ tailrec fun binarySearch(
     range: ClosedFloatingPointRange<Double> = 0.0..1.0,
     guess: Double = (range.endInclusive - range.start) / 2.0,
     delta: Double = 0.5.pow(iter) * (range.endInclusive - range.start).absoluteValue,
-    eval: IExpr= util.eval("f(x_):=$exp; f($guess)"),
+    eval: IExpr = util.eval("f(x_):=$exp; f($guess)"),
     error: Double = util.eval("$zero - $eval").evalDouble()
 ): Double = if (error.absoluteValue < 0.01 || iter > 200) guess
 else if (error < 0) binarySearch(iter = iter + 1, guess = guess - delta, exp = exp, zero = zero)
@@ -79,7 +80,8 @@ private fun IExpr.plot2D(title: String, norm: Double = 1.0) {
     val xs = (0.01..1.0 step 0.01).toList()
     val ys = listOf(xs.pmap { util.eval("f(x_):=$this; f($it)").evalDouble() / norm })
     val data = (labels.zip(ys) + ("x" to xs)).toMap()
-    val geoms = labels.map { geom_area(size = 2.0, color = "dark_green", fill = "light_green") { x = "x"; y = "density" } }
+    val geoms =
+        labels.map { geom_area(size = 2.0, color = "dark_green", fill = "light_green") { x = "x"; y = "density" } }
     val plot = geoms.foldRight(ggplot(data)) { it, acc -> acc + it } + ggtitle(title)
     plot.display()
 }
@@ -100,7 +102,7 @@ enum class Domain { INT, RATIONAL, DOUBLE }
 
 // https://en.wikipedia.org/wiki/Kumaraswamy_distribution
 fun Random.nextKumaraswamy(v: String = "x", domain: Domain = Domain.RATIONAL) =
-    when(domain) {
+    when (domain) {
         Domain.INT -> "${nextInt(2, 10)}".let {
 //            it to "${nextInt(2, 10)}"
             if (nextBoolean()) "1" to it else it to "1"
@@ -154,8 +156,6 @@ tailrec fun Int.gcd(b: Int): Int =
     if (this == b) this
     else if (this > b) (this - b).gcd(b)
     else gcd(b - this)
-
-val POPCOUNT = 10000
 
 // https://medium.com/@elizarov/the-reason-to-avoid-globalscope-835337445abc
 fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = runBlocking {

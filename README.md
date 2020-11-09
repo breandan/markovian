@@ -9,6 +9,7 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a family of functions which is closed over differentiation and integration?
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
+* Is there a [formula](https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulae) for propagating uncertainty through elementary functions?
 
 ## Example
 
