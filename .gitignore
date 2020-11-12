@@ -1,3 +1,5 @@
 .idea
+out
+**/.ipynb_checkpoints
 build
 .gradle
