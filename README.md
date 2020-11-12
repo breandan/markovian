@@ -61,6 +61,8 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ## Algebraic Methods
 
+* [Semiring Programming: A Declarative Framework for Generalized Sum Product Problems](https://arxiv.org/pdf/1609.06954.pdf), Belle and De Raedt (2020)
+* [Algebraic Model Counting](https://arxiv.org/pdf/1211.4475.pdf), Kimmig et al. (2012)
 * [The Generalized Distributive Law](https://authors.library.caltech.edu/1541/1/AJIieeetit00.pdf), Aji and McEliece (2000)
 * [A Logical Approach for Factoring Belief Networks](http://reasoning.cs.ucla.edu/fetch.php?id=24&type=pdf), Darwiche (2002)
 * [Algebra of inference in graphical models revisited](https://www.researchgate.net/profile/Russ_Greiner/publication/266262013_Algebra_of_inference_in_graphical_models_revisited/links/543bb0350cf204cab1db12fa/Algebra-of-inference-in-graphical-models-revisited.pdf), Ravanbakhsh and Greiner (2014)
@@ -107,6 +109,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ### Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
 
+* [Probabilistic Circuits: A Unifying Framework for Tractable Probabilistic Models](http://starai.cs.ucla.edu/papers/ProbCirc20.pdf), Choi et al. (2020)
 * [Probabilistic Circuits: Representations, Inference, Learning and Theory](https://web.cs.ucla.edu/~guyvdb/slides/TPMTutorialUAI19.pdf), Vergari et al. (2020) [[ECML-PKDD talk](https://www.youtube.com/watch?v=2RAG5-L9R70)]
 * [Sum-product networks: A survey](https://arxiv.org/pdf/2004.01167.pdf), París et al. (2020)
 * [Sum-Product Networks: A New Deep Architecture](http://spn.cs.washington.edu/spn/poon11.pdf), Poon and Domingos (2012) [[source code](http://spn.cs.washington.edu/spn/downloadspn.php), [user guide](http://spn.cs.washington.edu/spn/spn-user-guide.pdf)]

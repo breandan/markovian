@@ -76,7 +76,7 @@
 \printAffiliationsAndNotice{} % otherwise use the standard text.
 
 \begin{abstract}
-    In this work, we present a framework for belief propagation on probabilistic graphical models by observing the algebraic structure of the condition
+    Probabilistic graphical models are very expressive, but even approximate inference on belief networks is NP-hard.\citep{dagum1993approximating} We can faithfully represent a large class of PGMs and their corresponding distributions as probabilistic circuits (PCs)\citep{choiprobabilistic}, which are capable of answering MAP queries exactly in polynomial time and empirically tractable to calibrate. A PC is formed by taking recursive sums and products of probability functions, whose parameters may be learned via SGD or EM. Its semiring structure shares many similarities to PGMs and allows us to propagate statistical estimators like variance and higher moments using simple algebraic rules. I show how to compile tree belief networks to PCs and demonstrate their equivalence on a few toy problems.
 \end{abstract}
 
 \section{Electronic Submission}
