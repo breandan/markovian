@@ -118,12 +118,13 @@
 \printAffiliationsAndNotice{} % otherwise use the standard text.
 
 \begin{abstract}
-    Probabilistic graphical models (PGMs) are very expressive, but even approximate inference on belief networks is NP-hard.~\citep{dagum1993approximating} We can faithfully represent a large class of PGMs and their corresponding distributions as probabilistic circuits (PCs)~\citep{choi2020probabilistic}, which are capable of answering MAP queries exactly in polynomial time and are empirically tractable to calibrate. A PC is formed by taking recursive sums and products of probability functions, whose parameters may be learned via SGD or EM. Its semiring structure shares many similarities to PGMs and allows us to propagate statistical estimators like variance and higher moments using simple algebraic rules. In this work, I show how to compile tree belief networks to PCs and demonstrate their equivalence on a few toy problems.
+    Probabilistic graphical models (PGMs) are very expressive, but even approximate inference on belief networks (BNs) is NP-hard.~\citep{dagum1993approximating} We can faithfully represent a large class of PGMs and their corresponding distributions as probabilistic circuits (PCs)~\citep{choi2020probabilistic}, which are capable of exact inference in polynomial time and empirically tractable to calibrate using SGD or EM. PCs share many algebraic properties with PGMs and can propagate statistical estimators like variance and higher moments using simple rules. In this work, I show how to compile tree BNs to PCs and demonstrate their equivalence on a few toy inference problems.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 
-A random variable (RV) is a variable which may take on values with certain probabilities, which sum to 1. A probability distribution is a distribution over one or more random variables. Syntactically, it has the following grammar:
+%A random variable (RV) is a variable which may take on values with certain probabilities, which sum to 1.
+A probability distribution is a distribution over one or more random variables (RVs). It has the following grammar:
 
 \begin{align*}
     \mathcal{D} & \rightarrow \mathcal{U} \ldots \mathcal{N} \\
@@ -137,7 +138,20 @@ A factorized distribution is a factorization over the joint probability. It has 
     X\perp Y \mid Z \overset{\text{def}}{\longleftrightarrow} P(X,Y\mid Z) \propto P(X \mid Z)P(Y \mid Z)
 \end{align*}
 
-A directed graphical model (DGM) is a graph whose edges represent the conditional dependence between RVs.
+\citet{pearl1985graphoids} define certain conditional independence relations:
+
+\begin{align*}
+    X \perp Y &\leftrightarrow Y \perp X \\
+    X \perp Y, Z & \leftrightarrow
+    \begin{cases}
+      X \perp Y \mid Z \text{ and }\\
+      X \perp W \mid Z
+    \end{cases} \\
+\end{align*}
+
+A factorized distribution is a factorization over the joint probability. It has the following denotational semantics:
+
+A directed graphical model (DGM) is a graph whose edges capture the conditional dependence relations between RVs.
 
 A DGM has the following denotational semantics (todo):
 
@@ -165,7 +179,7 @@ A path between two vertices $\ccirc{A} \ldots \ccirc{B}$ is blocked if:
 
 $\ccirc{A}$ and $\ccirc{B}$ are d-separated if all paths are blocked.
 
-A probabilisitc circuit (PC) is a grammar over distributions:
+A probabilistic circuit (PC) is a semiring over distributions:
 
 \begin{align*}
     PC &\rightarrow v \sim \mathcal{D} \\
@@ -173,8 +187,7 @@ A probabilisitc circuit (PC) is a grammar over distributions:
     PC &\rightarrow PC \times PC
 \end{align*}
 
-
-
+We can compile a tree BN to a PC as follows: \ldots
 %\begin{center}
 %    \begin{tabular}{cc}
 %        \begin{figure}
