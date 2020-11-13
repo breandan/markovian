@@ -64,7 +64,7 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{IFT 6269 Final Project: From Probabilistic Graphical Models to Circuits}
+\icmltitle{IFT 6269 Final Project: Probabilistic Models, from Graphs to Circuits}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -117,11 +117,28 @@
 \section{Introduction}\label{sec:intro}
 
 %A random variable (RV) is a variable which may take on values with certain probabilities, which sum to 1.
-A probability distribution $P(\mathcal D)$ is a function which satisfies the Kolmogorov axioms: \ldots
+A probability distribution $P: \mathcal S \rightarrow \mathbb R^+$ is a function which satisfies the Kolmogorov axioms: \ldots
 
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
 
-A joint distribution describes the relationship between random variables (RVs), and can be defined recursively.
+The simplest distribution assigns equal probability to all $s \in \mathcal S$. This is called the uniform distribution $\mathcal{U}: \mathcal{S} \rightarrow \mathbb{R}^+$.
+
+$$
+\forall s_1, s_2 \in \mathcal S, P(s_1) = P(s_2)
+$$
+
+Other common distributions include the Gaussian, Beta, logarithmic, and exponential families.
+
+\begin{center}
+    \begin{tabular}{cccc}
+        $\mathcal{D} \rightarrow \mathcal{G}$ &
+        $\mathcal{D} \rightarrow \mathcal{B}$ &
+        $\mathcal{D} \rightarrow \mathcal{L}$ &
+        $\mathcal{D} \rightarrow \mathcal{E}$ &
+    \end{tabular}
+\end{center}
+
+When we combine distributions to form a new distribution, this resulting distribution is called a \textit{joint}:
 
 \begin{center}
 \begin{tabular}{ccc}
@@ -129,7 +146,7 @@ A joint distribution describes the relationship between random variables (RVs), 
 \end{tabular}
 \end{center}
 
-If a distribution $P(X, Y)$ can be decomposed as the product of RVs $P(X)P(Y)$, $X$ and $Y$ are said to be \textit{independent}.
+When two distributions $P(X)$, and $P(Y)$ are combined via multiplication, $X$ and $Y$ are said to be \textit{independent}.
 
 \begin{prooftree}
     \AxiomC{$P(X, Y) \propto P(X)P(Y)$}
@@ -137,30 +154,29 @@ If a distribution $P(X, Y)$ can be decomposed as the product of RVs $P(X)P(Y)$, 
     \UnaryInfC{$X \perp Y$}
 \end{prooftree}
 
-We can think of a conditional distribution $P(X \mid Y)$ as a distribution given an assignment of $Y$, $P(X, Y = y)$:
+If we have a joint $P(X, Y)$, and observe a value of $Y$, the resulting distribution is over $X$ is called a \textit{conditional}:
 
 \begin{prooftree}
-    \AxiomC{$P: \mathbb{X}\times\mathbb{Y}\rightarrow\mathbb{R}^+$}
-    \AxiomC{$X: \mathbb{X}$}
-    \AxiomC{$Y: \mathbb{Y}$}
+    \AxiomC{$P: X \times Y\rightarrow\mathbb{R}^+$}
+    \AxiomC{$X \mid Y$}
     \RightLabel{COND}
-    \TrinaryInfC{$P(X | Y): \mathbb{X}\rightarrow\mathbb{R}^+$}
+    \BinaryInfC{$P(X | Y): X\rightarrow\mathbb{R}^+$}
 \end{prooftree}
 
-\begin{prooftree}
-    \AxiomC{$P: \mathbb{X}\times\mathbb{Y}\rightarrow\mathbb{R}^+$}
-    \AxiomC{$X: \mathbb{X}$}
-    \AxiomC{$Y: \mathbb{Y}$}
-    \RightLabel{MARG}
-    \TrinaryInfC{$P(X) \propto \sum_{y\in Y} P(X | Y)$}
-\end{prooftree}
-
-If $P(X, Y \mid Z)$ can be factored as a product of conditionals, $X$ and $Y$ are said to be \textit{conditionally independent} given $Z$:
+When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are combined via multiplication to form a new distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
 
 \begin{prooftree}
     \AxiomC{$P(X,Y\mid Z) \propto P(X \mid Z)P(Y \mid Z)$}
     \RightLabel{CIND}
     \UnaryInfC{$X\perp Y \mid Z$}
+\end{prooftree}
+
+We may also remove a distribution from a joint, by summing over all values it may take on. This is called a \textit{marginal}:
+
+\begin{prooftree}
+    \AxiomC{$P: X\times Y\rightarrow\mathbb{R}^+$}
+    \RightLabel{MARG}
+    \UnaryInfC{$P(X) \propto \sum_{Y} P(X | Y)$}
 \end{prooftree}
 
 Following \citet{pearl1985graphoids}, the grammar of conditional independence statements has some equivalence relations:
@@ -193,7 +209,7 @@ Following \citet{pearl1985graphoids}, the grammar of conditional independence st
     \BinaryInfC{$X \perp W \mid Y$}
 \end{prooftree}
 
-A directed graphical model (DGM) is a graph whose edges capture the conditional dependence relations between RVs.
+A directed graphical model (DGM) is a graph whose edges capture conditional dependence relations between RVs.
 
 % http://maximustann.github.io/mach/2015/07/06/belief-network-2/
 % http://frnsys.com/notes/ai/foundations/probabilistic_graphical_models.html
