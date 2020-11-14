@@ -116,37 +116,43 @@
 
 \section{Introduction}\label{sec:intro}
 
-%A random variable (RV) is a variable which may take on values with certain probabilities, which sum to 1.
 A probability distribution $P: \mathcal S \rightarrow \mathbb R^+$ is a function which satisfies the Kolmogorov axioms: \ldots
+
+A random variable (RV) is a variable whose values occur with certain probabilities, which always sum to 1.
+
+A random variable (RV) is a variable whose values occur with certain probabilities, which always sum to 1.
 
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
 
 The simplest distribution assigns equal probability to all $s \in \mathcal S$. This is called the uniform distribution $\mathcal{U}: \mathcal{S} \rightarrow \mathbb{R}^+$.
 
 $$
-\forall s_1, s_2 \in \mathcal S, P(s_1) = P(s_2)
+\forall s_1, s_2 \in \mathcal S, P(\mathcal{S} = s_1) = P(\mathcal{S} = s_2)
 $$
 
-Other common distributions include the Gaussian, Beta, logarithmic, and exponential families.
+Some common exponential family distributions include:
 
-\begin{center}
-    \begin{tabular}{cccc}
-        $\mathcal{D} \rightarrow \mathcal{G}$ &
-        $\mathcal{D} \rightarrow \mathcal{B}$ &
-        $\mathcal{D} \rightarrow \mathcal{L}$ &
-        $\mathcal{D} \rightarrow \mathcal{E}$ &
-    \end{tabular}
-\end{center}
+\begin{tabular}{cccc}
+    $\mathcal{D} \rightarrow \mathtt{Normal}$ &
+    $\mathcal{D} \rightarrow \mathtt{Bernoulli}$ &
+    $\mathcal{D} \rightarrow \mathtt{Dirichlet}$ &
+\end{tabular}
 
-When we combine distributions to form a new distribution, this resulting distribution is called a \textit{joint}:
+%We can assign a probability distribution to a variable, by \textit{sampling} from it. As we increase the sample size, the distribution of values will converge to the true distribution.
+%
+%$$
+%d \sim \mathcal{D}
+%$$
+
+When we combine distributions to form a new distribution, the resulting distribution is called a \textit{joint distribution}:
 
 \begin{center}
 \begin{tabular}{ccc}
-    $\mathcal{D} \rightarrow \mathcal{D}, \mathcal{D}$ &$\mathcal{J} \rightarrow P(\mathcal{D})$ &$\mathcal{J} \rightarrow \mathcal{J}\mathcal{J}$\\
+    $\mathcal{D} \rightarrow \mathcal{D}, \mathcal{D}$ &$\mathcal{J} \rightarrow P(\mathcal{D})$ &$\mathcal{J} \rightarrow \mathcal{J}\mathcal{J}$
 \end{tabular}
 \end{center}
 
-When two distributions $P(X)$, and $P(Y)$ are combined via multiplication, $X$ and $Y$ are said to be \textit{independent}.
+When two distributions $P(X)$, and $P(Y)$ are combined via multiplication, this denotes $X$ and $Y$ are \textit{independent} RVs.
 
 \begin{prooftree}
     \AxiomC{$P(X, Y) \propto P(X)P(Y)$}
@@ -154,7 +160,7 @@ When two distributions $P(X)$, and $P(Y)$ are combined via multiplication, $X$ a
     \UnaryInfC{$X \perp Y$}
 \end{prooftree}
 
-If we have a joint $P(X, Y)$, and observe a value of $Y$, the resulting distribution is over $X$ is called a \textit{conditional}:
+If we have a joint distribution $P(X, Y)$, and observe a specific value $y: Y$, this operation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional}:
 
 \begin{prooftree}
     \AxiomC{$P: X \times Y\rightarrow\mathbb{R}^+$}
@@ -171,13 +177,12 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are combined via multiplicati
     \UnaryInfC{$X\perp Y \mid Z$}
 \end{prooftree}
 
-We may also remove a distribution from a joint, by summing over all values it may take on. This is called a \textit{marginal}:
 
-\begin{prooftree}
-    \AxiomC{$P: X\times Y\rightarrow\mathbb{R}^+$}
-    \RightLabel{MARG}
-    \UnaryInfC{$P(X) \propto \sum_{Y} P(X | Y)$}
-\end{prooftree}
+%To draw a single sample from a distribution $\mathcal{D}$, we can do so as follows:
+%
+%$$
+%
+%$$
 
 Following \citet{pearl1985graphoids}, the grammar of conditional independence statements has some equivalence relations:
 
@@ -187,29 +192,35 @@ Following \citet{pearl1985graphoids}, the grammar of conditional independence st
     \AxiomC{$X \perp Y \mid Z$}
     \RightLabel{SYM}
     \UnaryInfC{$Y \perp X \mid Z$}
-\end{prooftree}
+    \DisplayProof
+    \hskip 1.5em
+    \AxiomC{$X \perp Y, W \mid Z$}
+    \RightLabel{DCOMP}
+    \UnaryInfC{$X \perp Y \mid Z$}
+    \DisplayProof
 
-\begin{prooftree}
     \AxiomC{$X \perp Y \mid Z$}
     \AxiomC{$X \perp Z \mid Y$}
     \RightLabel{UNION}
     \BinaryInfC{$X \perp Y,W \mid Z$}
-\end{prooftree}
+    \DisplayProof
 
-\begin{prooftree}
-    \AxiomC{$X \perp Y, W \mid Z$}
-    \RightLabel{DECOMP}
-    \UnaryInfC{$X \perp Y \mid Z$}
-\end{prooftree}
-
-\begin{prooftree}
     \AxiomC{$X \perp W \mid Y, Z$}
     \AxiomC{$X \perp Z \mid Y$}
     \RightLabel{CONTRACT}
     \BinaryInfC{$X \perp W \mid Y$}
 \end{prooftree}
 
-A directed graphical model (DGM) is a graph whose edges capture conditional dependence relations between RVs.
+We may remove some variable $Y$ from a joint $P(X, Y)$ by accumulating its values via addition. This operation is called \textit{marginalization}, and the resulting distribution, a \textit{marginal}:
+
+\begin{prooftree}
+    \AxiomC{$P: X\times Y\rightarrow\mathbb{R}^+$}
+    \AxiomC{$P(X)$}
+    \RightLabel{MARG}
+    \BinaryInfC{$P(X) \propto \sum_{y \in Y} P(X | Y = y)$}
+\end{prooftree}
+
+A directed graphical model (DGM) is a graph whose edges capture conditional independence relations between RVs.
 
 % http://maximustann.github.io/mach/2015/07/06/belief-network-2/
 % http://frnsys.com/notes/ai/foundations/probabilistic_graphical_models.html
@@ -218,17 +229,13 @@ A directed graphical model (DGM) is a graph whose edges capture conditional depe
     \AxiomC{$X \not\perp Y \mid Z$}
     \RightLabel{CLDR}
     \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\leftarrow\ccirc{Y}$}
-\end{prooftree}
-
-
-\begin{prooftree}
+    \DisplayProof
+    \hskip .6em
     \AxiomC{$X \perp Y \mid Z$}
     \RightLabel{FORK}
     \UnaryInfC{$\ccirc{X}\leftarrow\gcirc{Z}\rightarrow\ccirc{Y}$}
-\end{prooftree}
+    \DisplayProof
 
-
-\begin{prooftree}
     \AxiomC{$X \perp Y \mid Z$}
     \RightLabel{CHAIN}
     \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\rightarrow\ccirc{Y}$}

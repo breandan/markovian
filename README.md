@@ -5,7 +5,7 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 ## Research Questions
 
 * Is there a way to compile PGMs to [probabilistic circuits](https://web.cs.ucla.edu/~guyvdb/slides/TPMTutorialUAI19.pdf#1)?
-* Is there a algebra that unifies belief prop on PGMs/PCs and backprop on computation graphs?
+* Is there a algebra that unifies [back/belief/expectation/equilibrium]-prop on PGMs/PCs?
 * Is there a family of functions which is closed over differentiation and integration?
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
@@ -87,6 +87,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [Propagating Covariance in Computer Vision](http://www.haralick.org/conferences/Propagating_Covariance.pdf), Haralick (1994)
 * [Propagation of Probabilities, Means, and Variances in Mixed Graphical Association Models](https://doi.org/10.1080/01621459.1992.10476265), Lauritzen (1992)
 * [Uncertainty Propagation in Data Processing Systems](https://doi.org/10.1145/3267809.3267833), Manousakis et al. (2018)
+* [Expectation propagation for t-Exponential family using q-algebra](https://proceedings.neurips.cc/paper/2017/file/17fafe5f6ce2f1904eb09d2e80a4cbf6-Paper.pdf), Futami et al. (2017)
 
 ### Tutorials
 
