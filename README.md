@@ -77,6 +77,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [A computational system for uncertainty propagation of measurement results](https://doi.org/10.1016/j.measurement.2009.01.011), Mari (2009)
 * [Notes on the Use of Propagation of Error Formulas](https://nvlpubs.nist.gov/nistpubs/jres/70C/jresv70Cn4p263_A1b.pdf), Ku (1966)
 * [Calculating measurement uncertainty using automatic differentiation](https://doi.org/10.1088/0957-0233/13/4/301), Hall (2001)
+* [Uncertainty of Measurement: A Review of the Rules for Calculating Uncertainty Components through Functional Relationships](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3387884/pdf/cbr_33_2_49.pdf#page=10), Farrance and Frenkel (2012)
 * [Propagating Uncertainty in Instrumentation Systems](https://doi.org/10.1109/TIM.2005.859142), Hall (2005)
 * [Object-oriented software for evaluating measurement uncertainty](https://doi.org/10.1088%2F0957-0233%2F24%2F5%2F055004), Hall (2013)
 * [Propagation of uncertainty: Expressions of second and third order uncertainty with third and fourth moments](https://doi.org/10.1016/j.measurement.2007.07.004), Mekid and Vaja (2008)

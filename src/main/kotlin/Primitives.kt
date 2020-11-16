@@ -7,6 +7,11 @@ import kotlin.reflect.KProperty
 // TODO: https://en.wikipedia.org/wiki/Plate_notation
 // cf. https://github.com/todesking/platebuilder
 
+// https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulae
+// https://en.wikipedia.org/wiki/Exponential_family#Table_of_distributions
+// https://en.wikipedia.org/wiki/Cumulant
+// http://indico.ictp.it/event/a0143/contribution/2/material/0/0.pdf
+
 abstract class Distribution : (Double) -> Double {
     open val name: String = ""
     abstract val μ: Double
