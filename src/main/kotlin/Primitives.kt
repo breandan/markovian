@@ -1,5 +1,6 @@
 @file:Suppress("NonAsciiCharacters")
 
+import astminer.featureextraction.className
 import umontreal.ssj.probdist.*
 import kotlin.math.pow
 import kotlin.reflect.KProperty
@@ -12,17 +13,21 @@ import kotlin.reflect.KProperty
 // https://en.wikipedia.org/wiki/Cumulant
 // http://indico.ictp.it/event/a0143/contribution/2/material/0/0.pdf
 
-abstract class Distribution : (Double) -> Double {
+abstract class Distribution<T: Distribution<T>> : (Double) -> Double {
     open val name: String = ""
     abstract val μ: Double
     abstract val σ: Double
 
-    open operator fun getValue(nothing: Nothing?, property: KProperty<*>): Distribution = new(property.name)
+    open operator fun getValue(nothing: Nothing?, property: KProperty<*>): T =
+        new(property.name)
     abstract val density: ContinuousDistribution
 
-    abstract fun new(name: String): Distribution
+    abstract fun new(name: String): T
     override fun invoke(p1: Double): Double = density.inverseF(p1)
     fun pdf(x: Double) = density.density(x)
+
+//    abstract operator fun plus(distribution: T): T
+//    abstract operator fun times(distribution: T): T
 
     /**
      * When observing new data, we should:
@@ -32,7 +37,7 @@ abstract class Distribution : (Double) -> Double {
      *  3. Propagate uncertainty forward.
      */
 
-    fun observe(vararg pairs: Pair<Distribution, List<Double>>): Distribution =
+    fun observe(vararg pairs: Pair<T, List<Double>>): T =
         TODO()
 
     // TODO: Combinators: average, convolution, product, sum...
@@ -59,6 +64,13 @@ abstract class Distribution : (Double) -> Double {
         cdf(mid) < y -> invcdf(y, mid, hi)
         else -> invcdf(y, lo, mid)
     }
+
+    override fun equals(other: Any?) =
+      other is Distribution<*> &&
+        javaClass == other.javaClass &&
+          μ == other.μ && σ == other.σ
+
+    override fun toString() = "${javaClass.simpleName}($μ, $σ)"
 }
 
 //class Dirichlet : Distribution()
@@ -68,7 +80,7 @@ class Uniform(
     val hi: Double = 1.0,
     override val μ: Double = (hi - lo) / 2.0,
     override val σ: Double = (hi - lo).pow(2) / 12.0
-) : Distribution() {
+) : Distribution<Uniform>() {
     override val density: ContinuousDistribution = UniformDist(lo, hi)
     override fun new(name: String): Uniform = Uniform(name, lo, hi)
 }
@@ -79,7 +91,7 @@ class Beta(
     val β: Double = 2.0,
     override val μ: Double = α / (α + β),
     override val σ: Double = α * β / ((α + β).pow(2) * (α + β + 1))
-) : Distribution() {
+) : Distribution<Beta>() {
     override val density: ContinuousDistribution = BetaDist(α, β)
     override fun new(name: String): Beta = Beta(name, α, β)
 }
@@ -88,12 +100,13 @@ class Gaussian(
     override val name: String = "",
     override val μ: Double = 0.1,
     override val σ: Double = 1.0
-) : Distribution() {
+) : Distribution<Gaussian>() {
     override val density: ContinuousDistribution = NormalDist(μ, σ)
     override fun new(name: String): Gaussian = Gaussian(name, μ, σ)
 
     // TODO: can we get the graph compiler to infer this?
-    infix operator fun times(that: Gaussian) = combine(this, that) { μ1, μ2, σ1, σ2 ->
+    operator fun times(that: Gaussian) =
+        combine(this, that) { μ1, μ2, σ1, σ2 ->
         Gaussian(
             "$name * ${that.name}",
             μ = (μ1 * σ2 * σ2 + μ2 * σ1 * σ1) / (σ1 * σ1 + σ2 * σ2),
@@ -101,7 +114,7 @@ class Gaussian(
         )
     }
 
-    infix operator fun plus(that: Gaussian) = combine(this, that) { μ1, μ2, σ1, σ2 ->
+    operator fun plus(that: Gaussian) = combine(this, that) { μ1, μ2, σ1, σ2 ->
         Gaussian(
             "($name + ${that.name})",
             μ = μ1 + μ2,

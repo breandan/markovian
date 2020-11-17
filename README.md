@@ -111,6 +111,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ### Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
 
+* [On the Relationship between Sum-Product Networks and Bayesian Networks](http://proceedings.mlr.press/v37/zhaoc15.pdf), Zhao et al. (2015) [[supplementary material](https://hanzhaoml.github.io/papers/ICML2015/SPN-supplementary.pdf)]
 * [Probabilistic Circuits: A Unifying Framework for Tractable Probabilistic Models](http://starai.cs.ucla.edu/papers/ProbCirc20.pdf), Choi et al. (2020)
 * [Probabilistic Circuits: Representations, Inference, Learning and Theory](https://web.cs.ucla.edu/~guyvdb/slides/TPMTutorialUAI19.pdf), Vergari et al. (2020) [[ECML-PKDD talk](https://www.youtube.com/watch?v=2RAG5-L9R70)]
 * [Sum-product networks: A survey](https://arxiv.org/pdf/2004.01167.pdf), París et al. (2020)
