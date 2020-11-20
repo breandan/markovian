@@ -2,7 +2,7 @@ import kotlin.reflect.KProperty
 
 // https://hanzhaoml.github.io/papers/ICML2015/SPN-supplementary.pdf
 // http://proceedings.mlr.press/v37/zhaoc15.pdf
-// https://cedar.buffalo.edu/~srihari/CSE674/Chap9/9.3-VE-Algorithm.pdf
+// https://cedar.buffalo.edu/~srihari/CSE674/Chap9/9.3-VE-Algorithm.pdf#page=24
 
 sealed class SPN(open val name: String? = null) {
   open operator fun plus(that: SPN): SPN = SNode(this, that)
@@ -41,8 +41,8 @@ class Leaf(override val name: String? = null): SPN(name) {
 }
 
 class Dist(val g: Gaussian): SPN() {
-  override fun plus(that: SPN): SPN =
-    if (that is Dist) Dist(g + that.g) else super.plus(that)
+  override fun plus(that: SPN): SPN = TODO()
+//    if (that is Dist) Dist(g + that.g) else super.plus(that)
 
   override fun times(that: SPN): SPN =
     if (that is Dist) Dist(g * that.g) else super.plus(that)
