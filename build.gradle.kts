@@ -1,5 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.4.20"
+    id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 group = "org.example"
@@ -24,12 +25,12 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation("com.github.breandan:kaliningraph:0.1.2")
-    implementation("ch.idsia:crema:0.1.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    implementation("ch.idsia:crema:0.1.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
     implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
-    implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.0.0")
+    implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.1.0")
 
     implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
     implementation("ca.umontreal.iro.simul:ssj:3.3.1")
