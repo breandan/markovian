@@ -107,6 +107,12 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [Fast Random Integer Generation in an Interval](https://arxiv.org/pdf/1805.10941.pdf), Lemire (2018)
 * [Fast Evaluation of Transcendental Functions](https://www.researchgate.net/profile/Ekaterina_Karatsuba/publication/246166981_Fast_evaluation_of_transcendental_functions/links/0deec528ab5b45f8bc000000/Fast-evaluation-of-transcendental-functions.pdf), Karatsuba (1991)
 
+## Online Estimation
+
+* [Space-Efficient Online Computation of Quantile Summaries](http://infolab.stanford.edu/~datar/courses/cs361a/papers/quantiles.pdf), Greenwald and Khanna (2001)
+* [Frugal Streaming for Estimating Quantiles: One (or two) memory suffices](https://arxiv.org/pdf/1407.1121.pdf), Ma et al. (2014)
+* [Smooth estimates of multiple quantiles in dynamically varying data streams](https://doi.org/10.1007/s10044-019-00794-3), Hammer and Yazidi (2019)
+
 ### Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
 
 * [Probabilistic Circuits: A Unifying Framework for Tractable Probabilistic Models](http://starai.cs.ucla.edu/papers/ProbCirc20.pdf), Choi et al. (2020)
