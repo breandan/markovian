@@ -9,26 +9,19 @@
 \usepackage{booktabs} % for professional tables
 \usepackage{enumitem}
 
-\usepackage{graphicx}
+\usepackage{bussproofs}
+
 \usepackage{sourcecodepro}
 \usepackage{listings}
 \usepackage{amsfonts}
-\usepackage{tikz}
 \usepackage{tikz-qtree}
 \usepackage{amsthm}
 \usepackage{bm}
 \usetikzlibrary{bayesnet}
 \usetikzlibrary{arrows}
-\usepackage{color}
 \usepackage{caption}
 \usepackage{subcaption}
 \usetikzlibrary{backgrounds}
-%\usepackage{tikz}
-%\usepackage{tikz-qtree}
-%\usepackage{amsthm}
-%\usepackage{bm}
-%\usetikzlibrary{bayesnet}
-%\usetikzlibrary{arrows}
 
 \usepackage{mathtools}% superior to amsmath
 \usepackage{tikz}
@@ -71,7 +64,7 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{IFT 6269 Final Project: From Probabilistic Graphical Models to Circuits}
+\icmltitle{IFT 6269 Final Project: Probabilistic Models, from Graphs to Circuits}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -123,51 +116,135 @@
 
 \section{Introduction}\label{sec:intro}
 
-%A random variable (RV) is a variable which may take on values with certain probabilities, which sum to 1.
-A probability distribution is a distribution over one or more random variables (RVs). It has the following grammar:
+A probability distribution $P: \mathcal S \rightarrow \mathbb R^+$ is a function which satisfies the Kolmogorov axioms: \ldots
 
-\begin{align*}
-    \mathcal{D} & \rightarrow \mathcal{U} \ldots \mathcal{N} \\
-    V & \rightarrow v \sim \mathcal{D}\\
-    P(V, V) & \rightarrow P(V | V)
-\end{align*}
+A random variable (RV) is a variable whose values occur with certain probabilities, which always sum to 1.
 
-A factorized distribution is a factorization over the joint probability. It has the following denotational semantics:
+A random variable (RV) is a variable whose values occur with certain probabilities, which always sum to 1.
 
-\begin{align*}
-    X\perp Y \mid Z \overset{\text{def}}{\longleftrightarrow} P(X,Y\mid Z) \propto P(X \mid Z)P(Y \mid Z)
-\end{align*}
+% https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
 
-\citet{pearl1985graphoids} define certain conditional independence relations:
+The simplest distribution assigns equal probability to all $s \in \mathcal S$. This is called the uniform distribution $\mathcal{U}: \mathcal{S} \rightarrow \mathbb{R}^+$.
 
-\begin{align*}
-    X \perp Y &\leftrightarrow Y \perp X \\
-    X \perp Y, Z & \leftrightarrow
-    \begin{cases}
-      X \perp Y \mid Z \text{ and }\\
-      X \perp W \mid Z
-    \end{cases} \\
-\end{align*}
+$$
+\forall s_1, s_2 \in \mathcal S, P(\mathcal{S} = s_1) = P(\mathcal{S} = s_2)
+$$
 
-A factorized distribution is a factorization over the joint probability. It has the following denotational semantics:
+Some common exponential family distributions include:
 
-A directed graphical model (DGM) is a graph whose edges capture the conditional dependence relations between RVs.
+\begin{tabular}{cccc}
+    $\mathcal{D} \rightarrow \mathtt{Normal}$ &
+    $\mathcal{D} \rightarrow \mathtt{Bernoulli}$ &
+    $\mathcal{D} \rightarrow \mathtt{Dirichlet}$ &
+\end{tabular}
 
-A DGM has the following denotational semantics (todo):
+%We can assign a probability distribution to a variable, by \textit{sampling} from it. As we increase the sample size, the distribution of values will converge to the true distribution.
+%
+%$$
+%d \sim \mathcal{D}
+%$$
+
+When we combine distributions to form a new distribution, the resulting distribution is called a \textit{joint distribution}:
+
+\begin{center}
+\begin{tabular}{ccc}
+    $\mathcal{D} \rightarrow \mathcal{D}, \mathcal{D}$ &$\mathcal{J} \rightarrow P(\mathcal{D})$ &$\mathcal{J} \rightarrow \mathcal{J}\mathcal{J}$
+\end{tabular}
+\end{center}
+
+When two distributions $P(X)$, and $P(Y)$ are combined via multiplication, this denotes $X$ and $Y$ are \textit{independent} RVs.
+
+\begin{prooftree}
+    \AxiomC{$P(X, Y) \propto P(X)P(Y)$}
+    \RightLabel{IND}
+    \UnaryInfC{$X \perp Y$}
+\end{prooftree}
+
+If we have a joint distribution $P(X, Y)$, and observe a specific value $y: Y$, this operation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional}:
+
+\begin{prooftree}
+    \AxiomC{$P: X \times Y\rightarrow\mathbb{R}^+$}
+    \AxiomC{$X \mid Y$}
+    \RightLabel{COND}
+    \BinaryInfC{$P(X | Y): X\rightarrow\mathbb{R}^+$}
+\end{prooftree}
+
+When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are combined via multiplication to form a new distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
+
+\begin{prooftree}
+    \AxiomC{$P(X,Y\mid Z) \propto P(X \mid Z)P(Y \mid Z)$}
+    \RightLabel{CIND}
+    \UnaryInfC{$X\perp Y \mid Z$}
+\end{prooftree}
+
+
+%To draw a single sample from a distribution $\mathcal{D}$, we can do so as follows:
+%
+%$$
+%
+%$$
+
+Following \citet{pearl1985graphoids}, the grammar of conditional independence statements has some equivalence relations:
+
+% http://ftp.cs.ucla.edu/pub/stat_ser/r53-L.pdf#page=8
+
+\begin{prooftree}
+    \AxiomC{$X \perp Y \mid Z$}
+    \RightLabel{SYM}
+    \UnaryInfC{$Y \perp X \mid Z$}
+    \DisplayProof
+    \hskip 1.5em
+    \AxiomC{$X \perp Y, W \mid Z$}
+    \RightLabel{DCOMP}
+    \UnaryInfC{$X \perp Y \mid Z$}
+    \DisplayProof
+
+    \AxiomC{$X \perp Y \mid Z$}
+    \AxiomC{$X \perp Z \mid Y$}
+    \RightLabel{UNION}
+    \BinaryInfC{$X \perp Y,W \mid Z$}
+    \DisplayProof
+
+    \AxiomC{$X \perp W \mid Y, Z$}
+    \AxiomC{$X \perp Z \mid Y$}
+    \RightLabel{CONTRACT}
+    \BinaryInfC{$X \perp W \mid Y$}
+\end{prooftree}
+
+We may remove some variable $Y$ from a joint $P(X, Y)$ by accumulating its values via addition. This operation is called \textit{marginalization}, and the resulting distribution, a \textit{marginal}:
+
+\begin{prooftree}
+    \AxiomC{$P: X\times Y\rightarrow\mathbb{R}^+$}
+    \AxiomC{$P(X)$}
+    \RightLabel{MARG}
+    \BinaryInfC{$P(X) \propto \sum_{y \in Y} P(X | Y = y)$}
+\end{prooftree}
+
+A directed graphical model (DGM) is a graph whose edges capture conditional independence relations between RVs.
 
 % http://maximustann.github.io/mach/2015/07/06/belief-network-2/
+% http://frnsys.com/notes/ai/foundations/probabilistic_graphical_models.html
 
-\begin{align*}
-  P(X, Y | Z) \propto P(X|Z)P(Y|Z)&\overset{\text{def}}{\longleftrightarrow}\ccirc{X}\leftarrow\gcirc{Z}\rightarrow\ccirc{Y}  \\
-  P(X, Y | Z) \propto P(X|Z)P(Y|Z)&\overset{\text{def}}{\longleftrightarrow}\ccirc{X}\rightarrow\gcirc{Z}\leftarrow\ccirc{Y}  \\
-  P(X, Y | Z) \propto P(X|Z)P(Y|Z)&\overset{\text{def}}{\longleftrightarrow}\ccirc{X}\rightarrow\gcirc{Z}\rightarrow\ccirc{Y} \\
-%    X\perp Y \mid Z \overset{\text{def}}{\longleftrightarrow} P(X,Y\mid Z) = P(X \mid Z)P(Y \mid Z)
-\end{align*}
+\begin{prooftree}
+    \AxiomC{$X \not\perp Y \mid Z$}
+    \RightLabel{CLDR}
+    \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\leftarrow\ccirc{Y}$}
+    \DisplayProof
+    \hskip .6em
+    \AxiomC{$X \perp Y \mid Z$}
+    \RightLabel{FORK}
+    \UnaryInfC{$\ccirc{X}\leftarrow\gcirc{Z}\rightarrow\ccirc{Y}$}
+    \DisplayProof
+
+    \AxiomC{$X \perp Y \mid Z$}
+    \RightLabel{CHAIN}
+    \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\rightarrow\ccirc{Y}$}
+\end{prooftree}
 
 A belief network (BN) is an acyclic DGM of the form:
 
 \begin{equation}
-    P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i|\texttt{parents}(x_i))
+    P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i \mid \texttt{parents}(x_i))
 \end{equation}
 
 A path between two vertices $\ccirc{A} \ldots \ccirc{B}$ is blocked if:
@@ -181,11 +258,21 @@ $\ccirc{A}$ and $\ccirc{B}$ are d-separated if all paths are blocked.
 
 A probabilistic circuit (PC) is a semiring over distributions:
 
-\begin{align*}
-    PC &\rightarrow v \sim \mathcal{D} \\
-    PC &\rightarrow PC + PC \\
-    PC &\rightarrow PC \times PC
-\end{align*}
+\begin{center}
+    \begin{tabular}{ccc}
+        $PC \rightarrow v \sim \mathcal{D}$ &
+        $PC \rightarrow PC + PC$ &
+        $PC \rightarrow PC \times PC$
+    \end{tabular}
+\end{center}
+
+To obtain statistical estimators for $PC$:
+
+TODO: Moralization as "marrying" the parents
+
+TODO: Plate notation
+
+% https://en.wikipedia.org/wiki/Propagation_of_uncertainty
 
 We can compile a tree BN to a PC as follows: \ldots
 %\begin{center}

@@ -5,7 +5,7 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 ## Research Questions
 
 * Is there a way to compile PGMs to [probabilistic circuits](https://web.cs.ucla.edu/~guyvdb/slides/TPMTutorialUAI19.pdf#1)?
-* Is there a algebra that unifies belief prop on PGMs/PCs and backprop on computation graphs?
+* Is there a algebra that unifies [back/belief/expectation/equilibrium]-prop on PGMs/PCs?
 * Is there a family of functions which is closed over differentiation and integration?
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
@@ -77,6 +77,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [A computational system for uncertainty propagation of measurement results](https://doi.org/10.1016/j.measurement.2009.01.011), Mari (2009)
 * [Notes on the Use of Propagation of Error Formulas](https://nvlpubs.nist.gov/nistpubs/jres/70C/jresv70Cn4p263_A1b.pdf), Ku (1966)
 * [Calculating measurement uncertainty using automatic differentiation](https://doi.org/10.1088/0957-0233/13/4/301), Hall (2001)
+* [Uncertainty of Measurement: A Review of the Rules for Calculating Uncertainty Components through Functional Relationships](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3387884/pdf/cbr_33_2_49.pdf#page=10), Farrance and Frenkel (2012)
 * [Propagating Uncertainty in Instrumentation Systems](https://doi.org/10.1109/TIM.2005.859142), Hall (2005)
 * [Object-oriented software for evaluating measurement uncertainty](https://doi.org/10.1088%2F0957-0233%2F24%2F5%2F055004), Hall (2013)
 * [Propagation of uncertainty: Expressions of second and third order uncertainty with third and fourth moments](https://doi.org/10.1016/j.measurement.2007.07.004), Mekid and Vaja (2008)
@@ -87,6 +88,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [Propagating Covariance in Computer Vision](http://www.haralick.org/conferences/Propagating_Covariance.pdf), Haralick (1994)
 * [Propagation of Probabilities, Means, and Variances in Mixed Graphical Association Models](https://doi.org/10.1080/01621459.1992.10476265), Lauritzen (1992)
 * [Uncertainty Propagation in Data Processing Systems](https://doi.org/10.1145/3267809.3267833), Manousakis et al. (2018)
+* [Expectation propagation for t-Exponential family using q-algebra](https://proceedings.neurips.cc/paper/2017/file/17fafe5f6ce2f1904eb09d2e80a4cbf6-Paper.pdf), Futami et al. (2017)
 
 ### Tutorials
 
@@ -115,6 +117,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ### Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
 
+* [On the Relationship between Sum-Product Networks and Bayesian Networks](http://proceedings.mlr.press/v37/zhaoc15.pdf), Zhao et al. (2015) [[supplementary material](https://hanzhaoml.github.io/papers/ICML2015/SPN-supplementary.pdf)]
 * [Probabilistic Circuits: A Unifying Framework for Tractable Probabilistic Models](http://starai.cs.ucla.edu/papers/ProbCirc20.pdf), Choi et al. (2020)
 * [Probabilistic Circuits: Representations, Inference, Learning and Theory](https://web.cs.ucla.edu/~guyvdb/slides/TPMTutorialUAI19.pdf), Vergari et al. (2020) [[ECML-PKDD talk](https://www.youtube.com/watch?v=2RAG5-L9R70)]
 * [Sum-product networks: A survey](https://arxiv.org/pdf/2004.01167.pdf), París et al. (2020)
