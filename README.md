@@ -136,9 +136,10 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 ## Software
 
 * [SPFlow: An easy and extensible library for deep probabilistic learning using sum-product networks](https://arxiv.org/pdf/1901.03704.pdf), Molina et al. (2019) [[source code](https://github.com/SPFlow/SPFlow)]
+* [Dimple: Java and Matlab libraries for probabilistic inference](https://s3.amazonaws.com/files.dimple.probprog.org/DimpleUserManual_v0.07_Java_API.pdf#section.4), Barber (2016) [[source code](https://github.com/analog-garage/dimple/tree/master/solvers/java/src/main/java/com/analog/lyric/dimple/solvers/sumproduct)]
 * [CREMA: A Java Library for Credal Network Inference](https://pgm2020.cs.aau.dk/wp-content/uploads/2020/09/huber20.pdf), Huber et al. (2020) [[source code](https://github.com/IDSIA/crema)]
 * [CREDICI: A Java Library for Causal Inference by Credal Networks](https://pgm2020.cs.aau.dk/wp-content/uploads/2020/09/cabanas20a.pdf), Cabañas et al. (2020) [[source code](https://github.com/IDSIA/credici)]
+* [Computing Extremely Accurate Quantiles Using t-Digests](https://raw.githubusercontent.com/tdunning/t-digest/master/docs/t-digest-paper/histo.pdf), Dunning and Ertl (2019) [[source code](https://github.com/tdunning/t-digest)]
 * [JavaBayes: Bayesian networks in Java](https://people.montefiore.uliege.be/lwh/javabayes/javabayes-manual-0.346.pdf), Cozman (2001) [[source code](https://github.com/joeschweitzer/javabayes)]
-* [Dimple: Java and Matlab libraries for probabilistic inference](https://s3.amazonaws.com/files.dimple.probprog.org/DimpleUserManual_v0.07_Java_API.pdf) [[source code](https://github.com/analog-garage/dimple)]
 * [Theano-PyMC](https://pymc-devs.medium.com/the-future-of-pymc3-or-theano-is-dead-long-live-theano-d8005f8a0e9b), Willard (2020) [[source code](https://github.com/pymc-devs/Theano-PyMC)]
 * [MonteCarloMeasurements.jl: Nonlinear Propagation of Arbitrary MultivariateDistributions by means of Method Overloading](https://arxiv.org/pdf/2001.07625.pdf), Carlson (2020) [[source code](https://github.com/baggepinnen/MonteCarloMeasurements.jl)]
