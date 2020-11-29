@@ -1,4 +1,5 @@
 plugins {
+    application
     kotlin("jvm") version "1.4.20"
     id("com.github.ben-manes.versions") version "0.36.0"
 }
@@ -26,7 +27,7 @@ dependencies {
 
     implementation("com.github.breandan:kaliningraph:0.1.2")
     implementation("ch.idsia:crema:0.1.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
     implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
@@ -37,4 +38,8 @@ dependencies {
 
     // MPJ (required for Poon's SPN)
     implementation(files("$projectDir/libs/mpj-0.44.jar"))
+}
+
+application {
+    mainClassName = "DSLKt"
 }

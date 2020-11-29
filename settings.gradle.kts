@@ -1,2 +1,1 @@
-rootProject.name = "katholic"
-
+rootProject.name = "markovian"
