@@ -32,6 +32,7 @@ dependencies {
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
     implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
     implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.1.0")
+    implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
     implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
     implementation("ca.umontreal.iro.simul:ssj:3.3.1")
