@@ -1,9 +1,6 @@
 package edu.washington.data;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class Discretized extends SparseDataset{
 	// Comma-separated
@@ -118,7 +115,7 @@ public class Discretized extends SparseDataset{
 		int c = 0;
 
 		System.out.println("Dataset "+name+", "+numVar+" vars, "+numTrain+"tr, "+numValid+"va, "+numTest+"te");
-		String prefix = "edu/caltech/data/";
+		String prefix = "src/main/resources/edu/caltech/data/";
 		String trainfilename = prefix + name + ".ts.data";
 		String validfilename = prefix + name + ".valid.data";
 		String testfilename  = prefix + name + ".test.data";
