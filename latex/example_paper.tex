@@ -1,4 +1,4 @@
-%%%%%%%% ICML 2018 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+%%%%%%% ICML 2018 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
 
 \documentclass{article}
 
@@ -22,6 +22,10 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usetikzlibrary{backgrounds}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
 
 \usepackage{mathtools}% superior to amsmath
 \usepackage{tikz}
@@ -57,14 +61,139 @@
 \usepackage[accepted]{icml2018_ift6269}
 % SLJ: -> use this for your IFT 6269 project report!
 
+\usepackage[skins,breakable,listings]{tcolorbox}
+
+\lstset{basicstyle=\ttfamily,breaklines=true}
+\usepackage{upquote}
+%\def\backtick{\char18}
+\lstdefinestyle{backtickstyle}{literate={`}{\char}1, escapechar=@}
+
+\usepackage{fontspec}
+
+\makeatletter
+\def\verbatim@nolig@list{}
+\makeatother
+
+\setmonofont{JetBrains Mono}[Contextuals=Alternate]
+
+\usepackage{ocr}
+\usepackage[T1]{fontenc}
+
+\usepackage{accsupp}
+\newcommand{\noncopyable}[1]{%
+\BeginAccSupp{method=escape,ActualText={}}%
+#1%
+\EndAccSupp{}%
+}
+
+\lstdefinelanguage{kotlin}{
+comment=[l]{//},
+commentstyle={\color{gray}\ttfamily},
+emph={delegate, filter, firstOrNull, forEach, it, lazy, mapNotNull, println, repeat, assert, with, head, tail, len, return@},
+numberstyle=\noncopyable,
+emphstyle={\color{olive}},
+identifierstyle=\color{black},
+keywords={abstract, actual, as, as?, break, by, class, companion, continue, data, do, dynamic, else, enum, expect, false, final, for, fun, get, if, import, in, infix, interface, internal, is, null, object, open, operator, override, package, private, public, return, sealed, set, super, suspend, this, throw, true, try, catch, typealias, val, var, vararg, when, where, while, tailrec, reified, Repeat},
+keywordstyle={\color{blue}\bfseries},
+morecomment=[s]{/*}{*/},
+morestring=[b]",
+morestring=[s]{"""*}{*"""},
+ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, Array, Byte, Double, Float, Boolean, Int, Integer, Iterable, Long, Runnable, Short, String, Pair, Gaussian},
+ndkeywordstyle={\color{purple}\bfseries},
+sensitive=true,
+stringstyle={\color{green}\ttfamily},
+literate={`}{{\char0}}1
+}
+
+\newtcblisting{kotlinlisting}[1][]{%
+listing options={
+language=kotlin,
+basicstyle=\scriptsize\ttfamily,
+%numberstyle=\footnotesize\noncopyable,
+showstringspaces=false,
+tabsize=2,
+breaklines=true,
+%numbers=right,
+inputencoding=utf8,
+escapeinside={(*@}{@*)},
+#1
+},
+underlay unbroken and first={%
+\path[draw=none] (interior.north west) rectangle node[white]{\includegraphics[width=4mm]{kotlin_file.png}} ([xshift=-10mm,yshift=-12mm]interior.north west);
+}
+}
+
+\tcbset{
+enhanced jigsaw,
+listing only,
+%boxsep=-1pt,
+%top=-1pt,
+%bottom=-0.5pt,
+center,
+width=0.42\textwidth,
+%right=-0.5pt,
+overlay first={
+\node[black!50] (S) at (frame.south) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.south west) -- (S) -- (frame.south east);
+},
+overlay middle={
+\node[black!50] (S) at (frame.south) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.south west) -- (S) -- (frame.south east);
+\node[black!50] (S) at (frame.north) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.north west) -- (S) -- (frame.north east);
+},
+overlay last={
+\node[black!50] (S) at (frame.north) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.north west) -- (S) -- (frame.north east);
+},
+before={\par\vspace{5pt}},
+after={\par\vspace{5pt}\noindent}
+}
+
+\newcommand*{\inlineimg}[1]{%
+\raisebox{-.3\baselineskip}{%
+\includegraphics[
+height=\baselineskip,
+width=\baselineskip,
+keepaspectratio,
+]{#1}%
+}%
+}
+
+\definecolor{slightgray}{rgb}{0.90, 0.90, 0.90}
+
+\usepackage{soul}
+\usepackage{hyperref}
+\makeatletter
+\def\SOUL@hlpreamble{%
+\setul{}{3.0ex}%
+\let\SOUL@stcolor\SOUL@hlcolor%
+\SOUL@stpreamble%
+}
+\makeatother
+
+\newcommand{\inline}[1]{%
+\begingroup%
+\sethlcolor{slightgray}%
+\hl{\ttfamily\footnotesize #1}%
+\endgroup
+}
+
+\newcommand{\tinline}[1]{%
+\begingroup%
+\sethlcolor{slightgray}%
+\hl{\ttfamily\tiny #1}%
+\endgroup
+}
+
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{IFT 6269 Final Project: Probabilistic Reasoning, from Graphs to Circuits}
+\icmltitlerunning{IFT 6269 Progress Report: Probabilistic Reasoning, from Graphs to Circuits}
 
 \begin{document}
 
 \twocolumn[
-\icmltitle{IFT 6269 Final Project: Probabilistic Reasoning, from Graphs to Circuits}
+\icmltitle{IFT 6269 Progress Report: Probabilistic Reasoning, from Graphs to Circuits}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -112,16 +241,17 @@
 
 \begin{abstract}
     Graphical models (PGMs) are very expressive, but even approximate inference on belief networks (BNs) is NP-hard~\citep{dagum1993approximating}. We can faithfully represent a large class of PGMs and their corresponding distributions as probabilistic circuits (PCs)~\citep{choi2020probabilistic}, which are capable of exact inference in polynomial time and tractable to calibrate using SGD or EM. PCs share many algebraic properties with PGMs and can propagate statistical estimators using simple algebraic rules. In this work, we will see how to compile BNs to PCs using the approach developed by \citet{zhao2015relationship}, and demonstrate their equivalence on a few toy inference problems.
-
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 
-Graphical models~\citep{jordan2003introduction,koller2009probabilistic} are a framework for modeling probability distributions over variables whose conditional dependence structure can be expressed as a graph. In general, inference on PGMs is NP-hard~\citep{cooper1990computational}. Recent work~\citep{choi2020probabilistic} has explored computationally tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
+Graphical models~\citep{jordan2003introduction,koller2009probabilistic} are a framework for modeling probability distributions over variables whose conditional dependence structure can be expressed as a graph. In general, inference on PGMs is NP-hard~\citep{cooper1990computational}. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
+
+By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. In this work, we provide a denotational and operational semantics for that framework, and a \href{https://github.com/breandan/markovian}{concrete implementation} in the Kotlin language.
 
 Let $\Omega$ be a set of events and $\Sigma$ a collection of subsets of $\Omega$. A probability distribution is a function $P: \Sigma \rightarrow \mathbb{R}^{+}$ which satisfies the~\citet{kolmogorov1933grundbegriffe} axioms, in particular:
 
-\begin{itemize}
+\vspace{-9pt}\begin{itemize}
     \itemsep-1em
     \item [(4)] $P(\Omega) = 1$ & \\
     \item [(5)] $P(A + B) = P(A) + P(B)$, when $A \cap B = \emptyset$
@@ -130,16 +260,17 @@ Let $\Omega$ be a set of events and $\Sigma$ a collection of subsets of $\Omega$
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
 % https://archive.org/details/foundationsofthe00kolm/page/2/mode/2up
 
-The simplest distribution assigns equal probability to all $\omega \in \Omega$. This is called the uniform distribution, $\mathcal{U}$.
 
-$$
-\mathcal U(\omega_1) = \mathcal U(\omega_2)\text{, } \forall \omega_1, \omega_2 \in \Omega
-$$
+%The simplest distribution assigns equal probability to all $\omega \in \Omega$. This is called the uniform distribution, $\mathcal{U}$.
+%
+%$$
+%\mathcal U(\omega_1) = \mathcal U(\omega_2)\text{, } \forall \omega_1, \omega_2 \in \Omega
+%$$
 
 Some common exponential family distributions include:
 
 \begin{tabular}{cccc}
-    $\mathcal{D} \rightarrow \mathtt{Normal}$ &
+    $\mathcal{D} \rightarrow \mathtt{Gaussian}$ &
     $\mathcal{D} \rightarrow \mathtt{Bernoulli}$ &
     $\mathcal{D} \rightarrow \mathtt{Dirichlet}$ &
 \end{tabular}
@@ -159,7 +290,7 @@ We can join two distributions to form a \textit{joint distribution}:
 %d \sim \mathcal{D}
 %$$
 
-The joint distribution, $P(X, Y)$ is a new distribution over the Cartesian product of the two input spaces, $X \times Y$:
+The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of the sets $X$ and $Y$, denoted $X \times Y$:
 
 \begin{prooftree}
     \AxiomC{$P(X): X\rightarrow \mathbb R^{+}$}
@@ -168,7 +299,7 @@ The joint distribution, $P(X, Y)$ is a new distribution over the Cartesian produ
     \BinaryInfC{$P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
 \end{prooftree}
 
-If we have a joint distribution $P(X, Y)$, and observe a specific event $y: Y$, this operation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional}:
+Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional distribution}:
 
 % https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#page=325
 
@@ -179,7 +310,7 @@ If we have a joint distribution $P(X, Y)$, and observe a specific event $y: Y$, 
     \BinaryInfC{$P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
 \end{prooftree}
 
-We may decompose a joint distribution $P(X, Y)$ by \textit{marginalizing}, or summing over all possible conditionals. The resulting distribution is called a \textit{marginal}:
+We may decompose a joint distribution $P(X, Y)$ by \textit{marginalizing}, or summing over all possible conditionals. The resulting distribution is called a \textit{marginal distribution}:
 
 \begin{prooftree}
     \AxiomC{$P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
@@ -191,16 +322,16 @@ When a conditional distribution $P(X \mid Y)$ does not depend on the conditioned
 
 \begin{prooftree}
     \AxiomC{$P(X \mid Y) = P(X)$}
-    \RightLabel{IND}
+    \RightLabel{INDEP}
     \UnaryInfC{$X \perp Y$}
 \end{prooftree}
 
 
-Equivalently, when two distributions $P(X)$ and $P(Y)$ are multiplied to form a joint distribution $P(X, Y)$, we may also conclude $X$ and $Y$ are independent:
+Equivalently, when two distributions $P(X)$ and $P(Y)$ are multiplied to form a joint distribution $P(X, Y)$, we may conclude that $X$ and $Y$ are independent:
 
 \begin{prooftree}
     \AxiomC{$P(X, Y) = P(X)P(Y)$}
-    \RightLabel{IND}
+    \RightLabel{FACT}
     \UnaryInfC{$X \perp Y$}
 \end{prooftree}
 
@@ -217,6 +348,107 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a join
 %$$
 %
 %$$
+
+\section{Formal Language}\label{sec:language}
+
+A semiring algebra has two operators, $\oplus$ and $\otimes$, with the usual properties. In particular, distributivity holds:
+
+\begin{prooftree}
+    \AxiomC{$X \otimes (Y \oplus Z)$}
+    \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
+    \DisplayProof
+    \AxiomC{$(Y \oplus Z) \otimes X$}
+    \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
+\end{prooftree}
+
+The sum product network (SPN) is a commutative semiring over univariate distributions~\citep{friesen2016sum}:
+
+\begin{center}
+    \begin{tabular}{ccc}
+        $PC \rightarrow v \sim \mathcal{D}$ &
+        $PC \rightarrow PC \oplus PC$ &
+        $PC \rightarrow PC \otimes PC$
+    \end{tabular}
+\end{center}
+
+We can derive closed form estimators for SPNs, including expectation and variance, using the following formulae:
+
+% https://en.wikipedia.org/wiki/Propagation_of_uncertainty
+
+\begin{prooftree}
+    \AxiomC{$A: \mathcal D$}
+    \AxiomC{$B: \mathcal D$}
+    \AxiomC{$C = A + B$}
+    \RightLabel{VSum}
+    \TrinaryInfC{$\Var[C]^2 = \sqrt{\Var[A]^2 + \Var[B]^2 + 2\cdot\Cov[A, B]}$}
+    \DisplayProof
+
+    \AxiomC{$A: \mathcal D$}
+    \AxiomC{$B: \mathcal D$}
+    \AxiomC{$C = AB$}
+    \RightLabel{VProd}
+    \TrinaryInfC{$\Var[C]^2 = C\sqrt{\frac{\Var[A]^2}{A^2} + \frac{\Var[B]^2}{B^2} + 2\frac{\Cov[A, B]}{AB}}$}
+    \DisplayProof
+
+
+    \AxiomC{$A: \mathcal D$}
+    \AxiomC{$B: \mathcal D$}
+    \AxiomC{$C = A + B$}
+    \RightLabel{ESum}
+    \TrinaryInfC{$\E[C] = \E[A] + \E[B]$}
+    \DisplayProof
+
+    \AxiomC{$A: \mathcal D$}
+    \AxiomC{$B: \mathcal D$}
+    \AxiomC{$C = AB$}
+    \RightLabel{EProd (IID)}
+    \TrinaryInfC{$\E[C] = \E[A]\E[B]$}
+\end{prooftree}
+
+Our DSL implements these rules for Gaussian SPNs.
+
+\begin{kotlinlisting}
+val g0 = Gaussian(mu = 0.1,  sigma = 1.0)
+val g1 = Gaussian(mu = 5.0,  sigma = 1.0)
+val g2 = Gaussian(mu = 10.0, sigma = 1.0)
+val g3 = Gaussian(mu = 5.0,  sigma = 2.0)
+val g4 = g0 + g1 + g2
+val g5 = g3 * g4
+compare(g0, g1, g2, g3, g4, g5).display()
+\end{kotlinlisting}
+
+This program produces the following image when run:
+
+\begin{figure}[h]
+    \includegraphics[width=0.4\textwidth]{plot.png}
+    \centering
+    \caption{10k samples from the SPN defined above.}
+\end{figure}
+
+Our implementation is available at the following URL: \url{https://github.com/breandan/markovian}
+
+\section{Inference}
+
+EVI, MAR, CON, MAP, KLD inference is computationally tractable~\citep{choi2020probabilistic}. (TODO)
+
+\section{Learning}
+
+The strucutre of SPNs can be learned using the algorithm proposed by~\citet{gens2013learning}. (TODO)
+
+\section{Conclusion}
+
+Prior work~\citep{considine2019kotlingrad,considine2019programming} explored differentiable programming. Differentiability plays a key role in learning, but does not provide the necessary vocabulary to describe human knowledge. In order to capture human knowledge and begin to reason as humans do, programs must be able to express \textit{uncertainty}.
+
+What is the probability of observing local variations? How are those observations related? And how do local variations affect global behavior? In order to correctly pose these questions and begin to answer them, we must be able to reason about uncertainty~\citep{pearl2014probabilistic}. In order to do so, we first defined some relations between probability distributions. We showed how to rewrite and factorize them in various contexts, and sample from them programmatically.
+
+Graphs are a natural representation for both programs~\citep{allamanis2017learning} and probabilistic models~\citep{pearl2014probabilistic}. The language of linear algebra provides a unifying framework for many graph algorithms and computational tasks~\citep{kepner2011graph}. Recent evidence suggests probabilisitic inference is tractable for a large class of graphical models~\citep{choi2020probabilistic}. And sparse matrix representations enable efficient execution of large graphs on modern graphics processors~\citep{kepner2016mathematical}.
+
+In future work, we will show how to learn a BN from data, compare its performance with BNs using a toy dataset and show that inference is empirically tractable.
+\bibliography{example_paper}
+\bibliographystyle{icml2018}
+
+
+\section{Appendix}\label{sec:appendix}
 
 Following \citet{pearl1985graphoids}, the grammar of conditional independence statements has some equivalence relations:
 
@@ -266,6 +498,29 @@ A directed graphical model (DGM) is a graph whose edges capture conditional inde
     \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\rightarrow\ccirc{Y}$}
 \end{prooftree}
 
+\begin{center}
+    \begin{tabular}{ccc}
+        \begin{tikzpicture}
+            \node[obs] (z) {$Z$};%
+            \node[latent,above=of z,xshift=-1cm,fill] (x) {$X$}; %
+            \node[latent,above=of z,xshift=1cm] (y) {$Y$}; %
+            \edge {x,y} {z}
+        \end{tikzpicture} & \begin{tikzpicture}
+                           \node[obs] (z) {$Z$};%
+                           \node[latent,below=of z,xshift=-1cm,fill] (x) {$X$}; %
+                           \node[latent,below=of z,xshift=1cm] (y) {$Y$}; %
+                           \edge {z} {x,y}
+        \end{tikzpicture} & \begin{tikzpicture}
+                                \node[obs] (z) {$Z$};%
+                                \node[latent,above=of z,xshift=-1cm,fill] (x) {$X$}; %
+                                \node[latent,below=of z,xshift=1cm] (y) {$Y$}; %
+                                \edge {x} {z}
+                                \edge {z} {y}
+        \end{tikzpicture} \\
+        $\overline{X\not\perp Y \mid Z}^{\text{CLDR}}$ & $\overline{X \perp Y \mid Z}^{\text{FORK}}$ & $\overline{X \perp Y \mid Z}^{\text{CHAIN}}$
+    \end{tabular} \\
+\end{center}
+
 A belief network (BN) is an acyclic DGM of the form:
 
 \begin{equation}
@@ -281,45 +536,8 @@ A path between two vertices $\ccirc{A} \ldots \ccirc{B}$ is blocked if:
 
 $\ccirc{A}$ and $\ccirc{B}$ are d-separated if all paths are blocked.
 
-A probabilistic circuit (PC) is a semiring over distributions:
-
-\begin{center}
-    \begin{tabular}{ccc}
-        $PC \rightarrow v \sim \mathcal{D}$ &
-        $PC \rightarrow PC + PC$ &
-        $PC \rightarrow PC \times PC$
-    \end{tabular}
-\end{center}
-
-To obtain statistical estimators for $PC$:
-
-TODO: Moralization as "marrying" the parents
-
-TODO: Plate notation
-
-% https://en.wikipedia.org/wiki/Propagation_of_uncertainty
-
-We can compile a tree BN to a PC as follows: \ldots
-
-%\begin{center}
-%    \begin{tabular}{cc}
-%        \begin{figure}
-%            \tikz{
-%            \node[obs] (z) {$z$};%
-%            \node[latent,above=of z,xshift=-1cm,fill] (x) {$x$}; %
-%            \node[latent,above=of z,xshift=1cm] (y) {$y$}; %
-%            \edge {x,y} {z}  }
-%        \end{figure} & \begin{figure}
-%                           \tikz{
-%                           \node[obs] (z) {$z$};%
-%                           \node[latent,above=of z,xshift=-1cm,fill] (x) {$x$}; %
-%                           \node[latent,above=of z,xshift=1cm] (y) {$y$}; %
-%                           \edge {z} {x,y}   } \end{figure}
-%    \end{tabular} \\
-%    $P(X,Y|Z) \propto P(Z|X,Y)P(X)P(Y)$ & $P(X,Y|Z)=P(X|Z)P(Y|Z)$
-%\end{center}
-
-\bibliography{example_paper}
-\bibliographystyle{icml2018}
+%TODO: Moralization as "marrying" the parents
+%
+%TODO: Plate notation
 
 \end{document}
