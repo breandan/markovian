@@ -59,12 +59,12 @@
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{Submission and Formatting Instructions for ICML 2018}
+\icmltitlerunning{IFT 6269 Final Project: Probabilistic Reasoning, from Graphs to Circuits}
 
 \begin{document}
 
 \twocolumn[
-\icmltitle{IFT 6269 Final Project: Probabilistic Models, from Graphs to Circuits}
+\icmltitle{IFT 6269 Final Project: Probabilistic Reasoning, from Graphs to Circuits}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -111,23 +111,29 @@
 \printAffiliationsAndNotice{} % otherwise use the standard text.
 
 \begin{abstract}
-    Probabilistic graphical models (PGMs) are very expressive, but even approximate inference on belief networks (BNs) is NP-hard.~\citep{dagum1993approximating} We can faithfully represent a large class of PGMs and their corresponding distributions as probabilistic circuits (PCs)~\citep{choi2020probabilistic}, which are capable of exact inference in polynomial time and empirically tractable to calibrate using SGD or EM. PCs share many algebraic properties with PGMs and can propagate statistical estimators like variance and higher moments using simple rules. In this work, I show how to compile tree BNs to PCs and demonstrate their equivalence on a few toy inference problems.
+    Graphical models (PGMs) are very expressive, but even approximate inference on belief networks (BNs) is NP-hard~\citep{dagum1993approximating}. We can faithfully represent a large class of PGMs and their corresponding distributions as probabilistic circuits (PCs)~\citep{choi2020probabilistic}, which are capable of exact inference in polynomial time and tractable to calibrate using SGD or EM. PCs share many algebraic properties with PGMs and can propagate statistical estimators using simple algebraic rules. In this work, we will see how to compile BNs to PCs using the approach developed by \citet{zhao2015relationship}, and demonstrate their equivalence on a few toy inference problems.
+
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 
-A probability distribution $P: \mathcal S \rightarrow \mathbb R^+$ is a function which satisfies the Kolmogorov axioms: \ldots
+Graphical models~\citep{jordan2003introduction,koller2009probabilistic} are a framework for modeling probability distributions over variables whose conditional dependence structure can be expressed as a graph. In general, inference on PGMs is NP-hard~\citep{cooper1990computational}. Recent work~\citep{choi2020probabilistic} has explored computationally tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
 
-A random variable (RV) is a variable whose values occur with certain probabilities, which always sum to 1.
+Let $\Omega$ be a set of events and $\Sigma$ a collection of subsets of $\Omega$. A probability distribution is a function $P: \Sigma \rightarrow \mathbb{R}^{+}$ which satisfies the~\citet{kolmogorov1933grundbegriffe} axioms, in particular:
 
-A random variable (RV) is a variable whose values occur with certain probabilities, which always sum to 1.
+\begin{itemize}
+    \itemsep-1em
+    \item [(4)] $P(\Omega) = 1$ & \\
+    \item [(5)] $P(A + B) = P(A) + P(B)$, when $A \cap B = \emptyset$
+\end{itemize}
 
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
+% https://archive.org/details/foundationsofthe00kolm/page/2/mode/2up
 
-The simplest distribution assigns equal probability to all $s \in \mathcal S$. This is called the uniform distribution $\mathcal{U}: \mathcal{S} \rightarrow \mathbb{R}^+$.
+The simplest distribution assigns equal probability to all $\omega \in \Omega$. This is called the uniform distribution, $\mathcal{U}$.
 
 $$
-\forall s_1, s_2 \in \mathcal S, P(\mathcal{S} = s_1) = P(\mathcal{S} = s_2)
+\mathcal U(\omega_1) = \mathcal U(\omega_2)\text{, } \forall \omega_1, \omega_2 \in \Omega
 $$
 
 Some common exponential family distributions include:
@@ -138,13 +144,7 @@ Some common exponential family distributions include:
     $\mathcal{D} \rightarrow \mathtt{Dirichlet}$ &
 \end{tabular}
 
-%We can assign a probability distribution to a variable, by \textit{sampling} from it. As we increase the sample size, the distribution of values will converge to the true distribution.
-%
-%$$
-%d \sim \mathcal{D}
-%$$
-
-When we combine distributions to form a new distribution, the resulting distribution is called a \textit{joint distribution}:
+We can join two distributions to form a \textit{joint distribution}:
 
 \begin{center}
 \begin{tabular}{ccc}
@@ -152,33 +152,65 @@ When we combine distributions to form a new distribution, the resulting distribu
 \end{tabular}
 \end{center}
 
-When two distributions $P(X)$, and $P(Y)$ are combined via multiplication, this denotes $X$ and $Y$ are \textit{independent} RVs.
+
+%We can assign a probability distribution to a variable, by \textit{sampling} from it. As we increase the sample size, the distribution of values will converge to the true distribution.
+%
+%$$
+%d \sim \mathcal{D}
+%$$
+
+The joint distribution, $P(X, Y)$ is a new distribution over the Cartesian product of the two input spaces, $X \times Y$:
 
 \begin{prooftree}
-    \AxiomC{$P(X, Y) \propto P(X)P(Y)$}
-    \RightLabel{IND}
-    \UnaryInfC{$X \perp Y$}
+    \AxiomC{$P(X): X\rightarrow \mathbb R^{+}$}
+    \AxiomC{$P(Y): Y\rightarrow \mathbb R^{+}$}
+    \RightLabel{JOIN}
+    \BinaryInfC{$P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
 \end{prooftree}
 
-If we have a joint distribution $P(X, Y)$, and observe a specific value $y: Y$, this operation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional}:
+If we have a joint distribution $P(X, Y)$, and observe a specific event $y: Y$, this operation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional}:
 
 % https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#page=325
 
 \begin{prooftree}
-    \AxiomC{$P: X \times Y\rightarrow\mathbb{R}^+$}
-    \AxiomC{$X \mid Y$}
+    \AxiomC{$P(X, Y): X \times Y\rightarrow\mathbb{R}^+$}
+    \AxiomC{$y: Y$}
     \RightLabel{COND}
-    \BinaryInfC{$P(X | Y): X\rightarrow\mathbb{R}^+$}
+    \BinaryInfC{$P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
 \end{prooftree}
 
-When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are combined via multiplication to form a new distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
+We may decompose a joint distribution $P(X, Y)$ by \textit{marginalizing}, or summing over all possible conditionals. The resulting distribution is called a \textit{marginal}:
 
 \begin{prooftree}
-    \AxiomC{$P(X,Y\mid Z) \propto P(X \mid Z)P(Y \mid Z)$}
-    \RightLabel{CIND}
-    \UnaryInfC{$X\perp Y \mid Z$}
+    \AxiomC{$P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
+    \RightLabel{MARG}
+    \UnaryInfC{$P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
 \end{prooftree}
 
+When a conditional distribution $P(X \mid Y)$ does not depend on the conditioned event, $X$ and $Y$ are called \textit{independent}.
+
+\begin{prooftree}
+    \AxiomC{$P(X \mid Y) = P(X)$}
+    \RightLabel{IND}
+    \UnaryInfC{$X \perp Y$}
+\end{prooftree}
+
+
+Equivalently, when two distributions $P(X)$ and $P(Y)$ are multiplied to form a joint distribution $P(X, Y)$, we may also conclude $X$ and $Y$ are independent:
+
+\begin{prooftree}
+    \AxiomC{$P(X, Y) = P(X)P(Y)$}
+    \RightLabel{IND}
+    \UnaryInfC{$X \perp Y$}
+\end{prooftree}
+
+When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a joint distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
+
+\begin{prooftree}
+    \AxiomC{$P(X,Y\mid Z) = P(X \mid Z)P(Y \mid Z)$}
+    \RightLabel{CIND}
+    \UnaryInfC{$X\perp Y \mid Z$ }
+\end{prooftree}
 
 %To draw a single sample from a distribution $\mathcal{D}$, we can do so as follows:
 %
@@ -211,15 +243,6 @@ Following \citet{pearl1985graphoids}, the grammar of conditional independence st
     \AxiomC{$X \perp Z \mid Y$}
     \RightLabel{CONTRACT}
     \BinaryInfC{$X \perp W \mid Y$}
-\end{prooftree}
-
-We may remove some variable $Y$ from a joint $P(X, Y)$ by accumulating its values via addition. This operation is called \textit{marginalization}, and the resulting distribution, a \textit{marginal}:
-
-\begin{prooftree}
-    \AxiomC{$P: X\times Y\rightarrow\mathbb{R}^+$}
-    \AxiomC{$P(X)$}
-    \RightLabel{MARG}
-    \BinaryInfC{$P(X) \propto \sum_{y \in Y} P(X | Y = y)$}
 \end{prooftree}
 
 A directed graphical model (DGM) is a graph whose edges capture conditional independence relations between RVs.
