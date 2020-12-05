@@ -8,10 +8,10 @@ sealed class SPN(open val name: String? = null) {
   open operator fun plus(that: SPN): SPN = SNode(this, that)
   open operator fun times(that: SPN): SPN = PNode(this, that)
 
-  operator fun invoke(vararg pairs: Pair<SPN, Gaussian>): SPN =
+  operator fun invoke(vararg pairs: Pair<SPN, GaussianMixture>): SPN =
     invoke(pairs.toMap())
 
-  operator fun invoke(map: Map<SPN, Gaussian>): SPN =
+  operator fun invoke(map: Map<SPN, GaussianMixture>): SPN =
     when (this) {
       is Dist -> this
       is Leaf -> map[this]?.let { Dist(it) } ?: this
@@ -40,7 +40,7 @@ class Leaf(override val name: String? = null): SPN(name) {
   override fun hashCode() = name.hashCode()
 }
 
-class Dist(val g: Gaussian): SPN() {
+class Dist(val g: GaussianMixture): SPN() {
   override fun plus(that: SPN): SPN = TODO()
 //    if (that is Dist) Dist(g + that.g) else super.plus(that)
 
@@ -64,7 +64,7 @@ fun main() {
   val res1 = spn1(a to x, b to y, c to z)
 
   val spn2 = a * b + a * c
-  val res2 = spn2(a to x, b to y, c to z)
+  val res2: SPN = spn2.invoke(a to x, b to y, c to z)
 
   compare(res1.toDist(), res2.toDist()).display()
 }
