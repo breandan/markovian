@@ -3,3 +3,10 @@ out
 **/.ipynb_checkpoints
 build
 .gradle
+*.aux
+*.log
+*.out
+*.pdf
+*.gz
+*.blg
+*.bbl
