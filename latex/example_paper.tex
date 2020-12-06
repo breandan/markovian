@@ -29,18 +29,19 @@
 
 \usepackage{mathtools}% superior to amsmath
 \usepackage{tikz}
+\tikzset{latent/.append style={minimum size=14pt, inner sep=1pt, node distance=10pt}, every node/.append style={draw,circle, inner sep=1pt}}
 \makeatletter
 \newcommand\ccirc[1]{%
 \mathpalette\@ccirc{#1}%
 }
 \newcommand\@ccirc[2]{%
-\tikz[baseline=(math.base)] \node[draw,circle, inner sep=1pt] (math) {$\m@th#1#2$};%
+\tikz[baseline=(math.base)] \node (math) {$\m@th#1#2$};%
 }
 \newcommand\gcirc[1]{%
 \mathpalette\@gcirc{#1}%
 }
 \newcommand\@gcirc[2]{%
-\tikz[baseline=(math.base)] \node[draw,circle, fill=gray!30, inner sep=1pt] (math) {$\m@th#1#2$};%
+\tikz[baseline=(math.base)] \node[fill=gray!30] (math) {$\m@th#1#2$};%
 }
 \makeatother
 
@@ -188,12 +189,12 @@ keepaspectratio,
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{IFT 6269 Progress Report: Probabilistic Reasoning, from Graphs to Circuits}
+\icmltitlerunning{IFT 6269 Final Report: Probabilistic Reasoning, from Graphs to Circuits}
 
 \begin{document}
 
 \twocolumn[
-\icmltitle{IFT 6269 Progress Report: Probabilistic Reasoning, from Graphs to Circuits}
+\icmltitle{IFT 6269 Final Report: Probabilistic Reasoning, from Graphs to Circuits}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -245,16 +246,15 @@ keepaspectratio,
 
 \section{Introduction}\label{sec:intro}
 
-Graphical models~\citep{jordan2003introduction,koller2009probabilistic} are a framework for modeling probability distributions over variables whose conditional dependence structure can be expressed as a graph. In general, inference on PGMs is NP-hard~\citep{cooper1990computational}. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
+Probabilistic inference is logical framework for reasoning about uncertainty. In this work, we define a denotational and operational semantics for probabilisic inference based on constructive logic, then build a \href{https://github.com/breandan/markovian}{concrete implementation} by translating those inference rules to the Kotlin language.
 
-By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. In this work, we provide a denotational and operational semantics for that framework, and a \href{https://github.com/breandan/markovian}{concrete implementation} in the Kotlin language.
+Let $\Omega$ be a set of events and $\Sigma$ be a set of subsets of $\Omega$. A probability distribution is a function $P: \Sigma \rightarrow \mathbb{R}^{+}$ which satisfies the~\citet{kolmogorov1933grundbegriffe} axioms, in particular:
 
-Let $\Omega$ be a set of events and $\Sigma$ a collection of subsets of $\Omega$. A probability distribution is a function $P: \Sigma \rightarrow \mathbb{R}^{+}$ which satisfies the~\citet{kolmogorov1933grundbegriffe} axioms, in particular:
-
-\vspace{-9pt}\begin{itemize}
+\begin{itemize}
     \itemsep-1em
+    \item [(3)] $\forall \sigma \in \Sigma, P(\sigma) \in \mathbb{R}^{+}$. $P(\sigma)$ is called the \textit{probability}.& \\
     \item [(4)] $P(\Omega) = 1$ & \\
-    \item [(5)] $P(A + B) = P(A) + P(B)$, when $A \cap B = \emptyset$
+    \item [(5)] $P(X + Y) = P(X) + P(Y)$, for $X \cap Y = \emptyset$
 \end{itemize}
 
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
@@ -270,9 +270,9 @@ Let $\Omega$ be a set of events and $\Sigma$ a collection of subsets of $\Omega$
 Some common exponential family distributions include:
 
 \begin{tabular}{cccc}
-    $\mathcal{D} \rightarrow \mathtt{Gaussian}$ &
-    $\mathcal{D} \rightarrow \mathtt{Bernoulli}$ &
-    $\mathcal{D} \rightarrow \mathtt{Dirichlet}$ &
+    $\mathcal{D} \rightarrow \text{Gaussian}$ &
+    $\mathcal{D} \rightarrow \text{Bernoulli}$ &
+    $\mathcal{D} \rightarrow \text{Dirichlet}$ &
 \end{tabular}
 
 We can join two distributions to form a \textit{joint distribution}:
@@ -293,10 +293,10 @@ We can join two distributions to form a \textit{joint distribution}:
 The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of the sets $X$ and $Y$, denoted $X \times Y$:
 
 \begin{prooftree}
-    \AxiomC{$P(X): X\rightarrow \mathbb R^{+}$}
-    \AxiomC{$P(Y): Y\rightarrow \mathbb R^{+}$}
-    \RightLabel{JOIN}
-    \BinaryInfC{$P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
+    \AxiomC{$\Gamma \vdash P(X): X\rightarrow \mathbb R^{+}$}
+    \AxiomC{$\Gamma \vdash P(Y): Y\rightarrow \mathbb R^{+}$}
+    \RightLabel{Join}
+    \BinaryInfC{$\Gamma \vdash P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
 \end{prooftree}
 
 Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional distribution}:
@@ -304,43 +304,52 @@ Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observatio
 % https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#page=325
 
 \begin{prooftree}
-    \AxiomC{$P(X, Y): X \times Y\rightarrow\mathbb{R}^+$}
-    \AxiomC{$y: Y$}
-    \RightLabel{COND}
-    \BinaryInfC{$P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
+    \AxiomC{$\Gamma \vdash P(X, Y): X \times Y\rightarrow\mathbb{R}^+$}
+    \AxiomC{$\Gamma \vdash y: Y$}
+    \RightLabel{Cond}
+    \BinaryInfC{$\Gamma \vdash P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
 \end{prooftree}
 
-We may decompose a joint distribution $P(X, Y)$ by \textit{marginalizing}, or summing over all possible conditionals. The resulting distribution is called a \textit{marginal distribution}:
+To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or sum over all possible conditionals. The resulting distribution is called a \textit{marginal distribution}:
 
 \begin{prooftree}
-    \AxiomC{$P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
-    \RightLabel{MARG}
-    \UnaryInfC{$P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
+    \AxiomC{$\Gamma \vdash P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
+    \RightLabel{Margin}
+    \UnaryInfC{$\Gamma \vdash P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
 \end{prooftree}
 
-When a conditional distribution $P(X \mid Y)$ does not depend on the conditioned event, $X$ and $Y$ are called \textit{independent}.
+Given a conditional distribution and its prior, to exchange the order of conditioning, we can use \citet{bayes1763essay} rule:
 
 \begin{prooftree}
-    \AxiomC{$P(X \mid Y) = P(X)$}
-    \RightLabel{INDEP}
-    \UnaryInfC{$X \perp Y$}
+    \AxiomC{$\Gamma \vdash P(X \mid Y)$}
+    \AxiomC{$\Gamma \vdash P(Y)$}
+    \RightLabel{Bayes}
+    \BinaryInfC{$\Gamma \vdash P(Y \mid X) \propto P(X \mid Y)P(Y)$}
+\end{prooftree}
+
+When a conditional distribution $P(X \mid Y)$ does not depend on its prior Y, $X$ and $Y$ are called \textit{independent}.
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash P(X \mid Y) = P(X)$}
+    \RightLabel{Ind}
+    \UnaryInfC{$\Gamma \vdash X \perp Y$}
 \end{prooftree}
 
 
 Equivalently, when two distributions $P(X)$ and $P(Y)$ are multiplied to form a joint distribution $P(X, Y)$, we may conclude that $X$ and $Y$ are independent:
 
 \begin{prooftree}
-    \AxiomC{$P(X, Y) = P(X)P(Y)$}
-    \RightLabel{FACT}
-    \UnaryInfC{$X \perp Y$}
+    \AxiomC{$\Gamma \vdash P(X, Y) = P(X)P(Y)$}
+    \RightLabel{Fact}
+    \UnaryInfC{$\Gamma \vdash X \perp Y$}
 \end{prooftree}
 
 When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a joint distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
 
 \begin{prooftree}
-    \AxiomC{$P(X,Y\mid Z) = P(X \mid Z)P(Y \mid Z)$}
-    \RightLabel{CIND}
-    \UnaryInfC{$X\perp Y \mid Z$ }
+    \AxiomC{$\Gamma \vdash P(X,Y \mid Z) = P(X \mid Z)P(Y \mid Z)$}
+    \RightLabel{CondInd}
+    \UnaryInfC{$\Gamma \vdash X \perp Y \mid Z$ }
 \end{prooftree}
 
 %To draw a single sample from a distribution $\mathcal{D}$, we can do so as follows:
@@ -350,6 +359,8 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a join
 %$$
 
 \section{Formal Language}\label{sec:language}
+
+By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
 
 A semiring algebra has two operators, $\oplus$ and $\otimes$, with the usual properties. In particular, distributivity holds:
 
@@ -371,40 +382,6 @@ The sum product network (SPN) is a commutative semiring over univariate distribu
     \end{tabular}
 \end{center}
 
-We can derive closed form estimators for SPNs, including expectation and variance, using the following formulae:
-
-% https://en.wikipedia.org/wiki/Propagation_of_uncertainty
-
-\begin{prooftree}
-    \AxiomC{$A: \mathcal D$}
-    \AxiomC{$B: \mathcal D$}
-    \AxiomC{$C = A + B$}
-    \RightLabel{VSum}
-    \TrinaryInfC{$\Var[C]^2 = \sqrt{\Var[A]^2 + \Var[B]^2 + 2\cdot\Cov[A, B]}$}
-    \DisplayProof
-
-    \AxiomC{$A: \mathcal D$}
-    \AxiomC{$B: \mathcal D$}
-    \AxiomC{$C = AB$}
-    \RightLabel{VProd}
-    \TrinaryInfC{$\Var[C]^2 = C\sqrt{\frac{\Var[A]^2}{A^2} + \frac{\Var[B]^2}{B^2} + 2\frac{\Cov[A, B]}{AB}}$}
-    \DisplayProof
-
-
-    \AxiomC{$A: \mathcal D$}
-    \AxiomC{$B: \mathcal D$}
-    \AxiomC{$C = A + B$}
-    \RightLabel{ESum}
-    \TrinaryInfC{$\E[C] = \E[A] + \E[B]$}
-    \DisplayProof
-
-    \AxiomC{$A: \mathcal D$}
-    \AxiomC{$B: \mathcal D$}
-    \AxiomC{$C = AB$}
-    \RightLabel{EProd (IID)}
-    \TrinaryInfC{$\E[C] = \E[A]\E[B]$}
-\end{prooftree}
-
 Our DSL implements these rules for Gaussian SPNs.
 
 \begin{kotlinlisting}
@@ -425,11 +402,65 @@ This program produces the following image when run:
     \caption{10k samples from the SPN defined above.}
 \end{figure}
 
-Our implementation is available at the following URL: \url{https://github.com/breandan/markovian}
+%Our implementation is available at the following URL: \url{https://github.com/breandan/markovian}
 
 \section{Inference}
 
 EVI, MAR, CON, MAP, KLD inference is computationally tractable~\citep{choi2020probabilistic}. (TODO)
+
+\section{Probabilistic Graphical Models}
+
+Probabilistic graphical models~\citep{jordan2003introduction,koller2009probabilistic} (PGMs) are a framework for probabilistic inference on distributions whose conditional dependence structure may be expressed as a graph whose edges capture conditional independence relations between RVs. One type of PGM is a directed graphical model (DGM).
+
+If we observe a variable with two latent variables which are not conditionally independent, we call this a \textit{collider}.
+
+% http://maximustann.github.io/mach/2015/07/06/belief-network-2/
+% http://frnsys.com/notes/ai/foundations/probabilistic_graphical_models.html
+\begin{prooftree}
+    \AxiomC{$X \not\perp Y \mid Z$}
+    \RightLabel{Collide}
+    \UnaryInfC{
+    \begin{tikzpicture}
+        \node[obs] (z) {$Z$};%
+        \node[latent,above=of z,xshift=-1cm,fill] (x) {$X$}; %
+        \node[latent,above=of z,xshift=1cm] (y) {$Y$}; %
+        \edge {x,y} {z}
+    \end{tikzpicture}
+    }
+\end{prooftree}
+
+If we observe a variable with conditionally independent latent variables, we call this a \textit{fork} or equivalently, a \textit{chain}.
+
+\begin{prooftree}
+    \AxiomC{$X \perp Y \mid Z$}
+    \RightLabel{Fork}
+    \UnaryInfC{
+    \begin{tikzpicture}
+        \node[obs] (z) {$Z$};%
+        \node[latent,below=of z,xshift=-1cm,fill] (x) {$X$}; %
+        \node[latent,below=of z,xshift=1cm] (y) {$Y$}; %
+        \edge {z} {x,y}
+    \end{tikzpicture}
+    }
+    \DisplayProof
+    \AxiomC{$X \perp Y \mid Z$}
+    \RightLabel{Chain}
+    \UnaryInfC{
+    \begin{tikzpicture}
+        \node[obs] (z) {$Z$};%
+        \node[latent,above=of z,yshift=-11pt, xshift=-32pt,fill] (x) {$X$}; %
+        \node[latent,below=of z,yshift=11pt, xshift=32pt] (y) {$Y$}; %
+        \edge {x} {z}
+        \edge {z} {y}
+    \end{tikzpicture}
+    }
+\end{prooftree}
+
+A belief network (BN) is an acyclic DGM of the form:
+
+\begin{equation}
+    P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i \mid \texttt{parents}(x_i))
+\end{equation}
 
 \section{Learning}
 
@@ -449,6 +480,40 @@ In future work, we will show how to learn a BN from data, compare its performanc
 
 
 \section{Appendix}\label{sec:appendix}
+
+\subsection{Formal Language}
+
+We can derive closed form estimators for SPNs, including expectation and variance, using the following formulae:
+
+% https://en.wikipedia.org/wiki/Propagation_of_uncertainty
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash A: \mathcal D, B: \mathcal D$}
+    \AxiomC{$C = A + B$}
+    \RightLabel{VSum}
+    \BinaryInfC{$\Var[C]^2 = \sqrt{\Var[A]^2 + \Var[B]^2 + 2\cdot\Cov[A, B]}$}
+    \DisplayProof
+
+    \AxiomC{$\Gamma \vdash A: \mathcal D, B: \mathcal D$}
+    \AxiomC{$C = AB$}
+    \RightLabel{VProd}
+    \BinaryInfC{$\Var[C]^2 = C\sqrt{\frac{\Var[A]^2}{A^2} + \frac{\Var[B]^2}{B^2} + 2\frac{\Cov[A, B]}{AB}}$}
+    \DisplayProof
+
+
+    \AxiomC{$\Gamma \vdash A: \mathcal D, B: \mathcal D$}
+    \AxiomC{$C = A + B$}
+    \RightLabel{ESum}
+    \BinaryInfC{$\E[C] = \E[A] + \E[B]$}
+    \DisplayProof
+
+    \AxiomC{$\Gamma \vdash A: \mathcal D, B: \mathcal D$}
+    \AxiomC{$C = AB$}
+    \RightLabel{EProd (IID)}
+    \BinaryInfC{$\E[C] = \E[A]\E[B]$}
+\end{prooftree}
+
+\subsection{Probabilistic Graphical Models}
 
 Following \citet{pearl1985graphoids}, the grammar of conditional independence statements has some equivalence relations:
 
@@ -476,56 +541,6 @@ Following \citet{pearl1985graphoids}, the grammar of conditional independence st
     \RightLabel{CONTRACT}
     \BinaryInfC{$X \perp W \mid Y$}
 \end{prooftree}
-
-A directed graphical model (DGM) is a graph whose edges capture conditional independence relations between RVs.
-
-% http://maximustann.github.io/mach/2015/07/06/belief-network-2/
-% http://frnsys.com/notes/ai/foundations/probabilistic_graphical_models.html
-
-\begin{prooftree}
-    \AxiomC{$X \not\perp Y \mid Z$}
-    \RightLabel{CLDR}
-    \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\leftarrow\ccirc{Y}$}
-    \DisplayProof
-    \hskip .6em
-    \AxiomC{$X \perp Y \mid Z$}
-    \RightLabel{FORK}
-    \UnaryInfC{$\ccirc{X}\leftarrow\gcirc{Z}\rightarrow\ccirc{Y}$}
-    \DisplayProof
-
-    \AxiomC{$X \perp Y \mid Z$}
-    \RightLabel{CHAIN}
-    \UnaryInfC{$\ccirc{X}\rightarrow\gcirc{Z}\rightarrow\ccirc{Y}$}
-\end{prooftree}
-
-\begin{center}
-    \begin{tabular}{ccc}
-        \begin{tikzpicture}
-            \node[obs] (z) {$Z$};%
-            \node[latent,above=of z,xshift=-1cm,fill] (x) {$X$}; %
-            \node[latent,above=of z,xshift=1cm] (y) {$Y$}; %
-            \edge {x,y} {z}
-        \end{tikzpicture} & \begin{tikzpicture}
-                           \node[obs] (z) {$Z$};%
-                           \node[latent,below=of z,xshift=-1cm,fill] (x) {$X$}; %
-                           \node[latent,below=of z,xshift=1cm] (y) {$Y$}; %
-                           \edge {z} {x,y}
-        \end{tikzpicture} & \begin{tikzpicture}
-                                \node[obs] (z) {$Z$};%
-                                \node[latent,above=of z,xshift=-1cm,fill] (x) {$X$}; %
-                                \node[latent,below=of z,xshift=1cm] (y) {$Y$}; %
-                                \edge {x} {z}
-                                \edge {z} {y}
-        \end{tikzpicture} \\
-        $\overline{X\not\perp Y \mid Z}^{\text{CLDR}}$ & $\overline{X \perp Y \mid Z}^{\text{FORK}}$ & $\overline{X \perp Y \mid Z}^{\text{CHAIN}}$
-    \end{tabular} \\
-\end{center}
-
-A belief network (BN) is an acyclic DGM of the form:
-
-\begin{equation}
-    P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i \mid \texttt{parents}(x_i))
-\end{equation}
 
 A path between two vertices $\ccirc{A} \ldots \ccirc{B}$ is blocked if:
 
