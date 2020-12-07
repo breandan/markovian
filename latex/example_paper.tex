@@ -11,6 +11,8 @@
 
 \usepackage{bussproofs}
 
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
 \usepackage{sourcecodepro}
 \usepackage{listings}
 \usepackage{amsfonts}
@@ -358,56 +360,6 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a join
 %
 %$$
 
-\section{Formal Language}\label{sec:language}
-
-By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
-
-A semiring algebra has two operators, $\oplus$ and $\otimes$, with the usual properties. In particular, distributivity holds:
-
-\begin{prooftree}
-    \AxiomC{$X \otimes (Y \oplus Z)$}
-    \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
-    \DisplayProof
-    \AxiomC{$(Y \oplus Z) \otimes X$}
-    \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
-\end{prooftree}
-
-The sum product network (SPN) is a commutative semiring over univariate distributions~\citep{friesen2016sum}:
-
-\begin{center}
-    \begin{tabular}{ccc}
-        $PC \rightarrow v \sim \mathcal{D}$ &
-        $PC \rightarrow PC \oplus PC$ &
-        $PC \rightarrow PC \otimes PC$
-    \end{tabular}
-\end{center}
-
-Our DSL implements these rules for Gaussian SPNs.
-
-\begin{kotlinlisting}
-val g0 = Gaussian(mu = 0.1,  sigma = 1.0)
-val g1 = Gaussian(mu = 5.0,  sigma = 1.0)
-val g2 = Gaussian(mu = 10.0, sigma = 1.0)
-val g3 = Gaussian(mu = 5.0,  sigma = 2.0)
-val g4 = g0 + g1 + g2
-val g5 = g3 * g4
-compare(g0, g1, g2, g3, g4, g5).display()
-\end{kotlinlisting}
-
-This program produces the following image when run:
-
-\begin{figure}[h]
-    \includegraphics[width=0.4\textwidth]{plot.png}
-    \centering
-    \caption{10k samples from the SPN defined above.}
-\end{figure}
-
-%Our implementation is available at the following URL: \url{https://github.com/breandan/markovian}
-
-\section{Inference}
-
-EVI, MAR, CON, MAP, KLD inference is computationally tractable~\citep{choi2020probabilistic}. (TODO)
-
 \section{Probabilistic Graphical Models}
 
 Probabilistic graphical models~\citep{jordan2003introduction,koller2009probabilistic} (PGMs) are a framework for probabilistic inference on distributions whose conditional dependence structure may be expressed as a graph whose edges capture conditional independence relations between RVs. One type of PGM is a directed graphical model (DGM).
@@ -462,9 +414,93 @@ A belief network (BN) is an acyclic DGM of the form:
     P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i \mid \texttt{parents}(x_i))
 \end{equation}
 
+% TODO: Variable elimination as graph transformation
+% https://cedar.buffalo.edu/~srihari/CSE674/Chap9/9.3-VE-Algorithm.pdf#page=24
+% https://www.youtube.com/watch?v=FDNB0A61PGE
+
+\section{Probabilistic Circuits}\label{sec:language}
+
+By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
+
+A semiring algebra has two operators, $\oplus$ and $\otimes$, with the usual properties. In particular, distributivity holds:
+
+\begin{prooftree}
+    \AxiomC{$X \otimes (Y \oplus Z)$}
+    \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
+    \DisplayProof
+    \AxiomC{$(Y \oplus Z) \otimes X$}
+    \RightLabel{Distrib}
+    \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
+\end{prooftree}
+
+The sum product network (SPN) is a commutative semiring over univariate distributions~\citep{friesen2016sum}:
+
+\begin{center}
+    \begin{tabular}{ccc}
+        $PC \rightarrow v \sim \mathcal{D}$ &
+        $PC \rightarrow PC \oplus PC$ &
+        $PC \rightarrow PC \otimes PC$
+    \end{tabular}
+\end{center}
+
+Given a BN, we can compile it to a SPN using the procedure described by~\citet{butz2019sum}:
+
+% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
+
+\begin{algorithm}[H]
+\caption{Bayes Network to Sum-Product Network}
+\begin{algorithmic}[1]
+\Procedure{BayesNetToSPN}{$bn$: BN}: SPN
+\State $ac \leftarrow $\Call{VariableEliminate}{$bn$}
+\State $ac \leftarrow $\Call{RedistributeParameters}{$ac$}
+\State $ac \leftarrow $\Call{CompileMarginalized}{$ac$}
+\State \Return{\Call{ReduceCircuit}{$ac$}}
+\EndProcedure\\
+\Procedure{ReduceCircuit}{$ac_0$: AC}: SPN
+\State $ac_1 \leftarrow $ \Call{AddTerminalNodes}{$ac_0$}
+\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
+\If{$ac_0 = ac_1$}
+\State \Return{$ac_0$}
+\Else
+\State \Return{\Call{ReduceCircuit}{$ac_1$}}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{DSL}
+
+Our DSL implements these rules for Gaussian SPNs.
+
+\begin{kotlinlisting}
+val g0 = Gaussian(mu = 0.1,  sigma = 1.0)
+val g1 = Gaussian(mu = 5.0,  sigma = 1.0)
+val g2 = Gaussian(mu = 10.0, sigma = 1.0)
+val g3 = Gaussian(mu = 5.0,  sigma = 2.0)
+val g4 = g0 + g1 + g2
+val g5 = g3 * g4
+compare(g0, g1, g2, g3, g4, g5).display()
+\end{kotlinlisting}
+
+This program produces the following image when run:
+
+\begin{figure}[h]
+    \includegraphics[width=0.4\textwidth]{plot.png}
+    \centering
+    \caption{10k samples from the SPN defined above.}
+\end{figure}
+
+%Our implementation is available at the following URL: \url{https://github.com/breandan/markovian}
+
+
+\section{Inference}
+
+EVI, MAR, CON, MAP, KLD inference is computationally tractable~\citep{choi2020probabilistic}. (TODO)
+
 \section{Learning}
 
 The strucutre of SPNs can be learned using the algorithm proposed by~\citet{gens2013learning}. (TODO)
+
 
 \section{Conclusion}
 
@@ -521,24 +557,24 @@ Following \citet{pearl1985graphoids}, the grammar of conditional independence st
 
 \begin{prooftree}
     \AxiomC{$X \perp Y \mid Z$}
-    \RightLabel{SYM}
+    \RightLabel{Sym}
     \UnaryInfC{$Y \perp X \mid Z$}
     \DisplayProof
     \hskip 1.5em
     \AxiomC{$X \perp Y, W \mid Z$}
-    \RightLabel{DCOMP}
+    \RightLabel{Decomp}
     \UnaryInfC{$X \perp Y \mid Z$}
     \DisplayProof
 
     \AxiomC{$X \perp Y \mid Z$}
     \AxiomC{$X \perp Z \mid Y$}
-    \RightLabel{UNION}
+    \RightLabel{Union}
     \BinaryInfC{$X \perp Y,W \mid Z$}
     \DisplayProof
 
     \AxiomC{$X \perp W \mid Y, Z$}
     \AxiomC{$X \perp Z \mid Y$}
-    \RightLabel{CONTRACT}
+    \RightLabel{Contract}
     \BinaryInfC{$X \perp W \mid Y$}
 \end{prooftree}
 
