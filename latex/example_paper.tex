@@ -16,6 +16,7 @@
 \usepackage{sourcecodepro}
 \usepackage{listings}
 \usepackage{amsfonts}
+\usepackage{amssymb}
 \usepackage{tikz-qtree}
 \usepackage{amsthm}
 \usepackage{bm}
@@ -250,13 +251,13 @@ keepaspectratio,
 
 Probabilistic inference is logical framework for reasoning about uncertainty. In this work, we define a denotational and operational semantics for probabilisic inference based on constructive logic, then build a \href{https://github.com/breandan/markovian}{concrete implementation} by translating those inference rules to the Kotlin language.
 
-Let $\Omega$ be a set of events and $\Sigma$ be a set of subsets of $\Omega$. A probability distribution is a function $P: \Sigma \rightarrow \mathbb{R}^{+}$ which satisfies the~\citet{kolmogorov1933grundbegriffe} axioms, in particular:
+Let $E$ be a set of events and $S$ be a set of subsets of $E$. A \textit{probability distribution} is a function $P: S \rightarrow \mathbb{R}^{+}$ which satisfies the~\citet{kolmogorov1933grundbegriffe} axioms, in particular:
 
 \begin{itemize}
     \itemsep-1em
-    \item [(3)] $\forall \sigma \in \Sigma, P(\sigma) \in \mathbb{R}^{+}$. $P(\sigma)$ is called the \textit{probability}.& \\
-    \item [(4)] $P(\Omega) = 1$ & \\
-    \item [(5)] $P(X + Y) = P(X) + P(Y)$, for $X \cap Y = \emptyset$
+    \item [(3)] $P(S = s) \in \mathbb{R}^{+}, \forall s \in S$.& \\
+    \item [(4)] $P(E) = 1$. ($S = $ may be omitted for brevity.)& \\
+    \item [(5)] $P(X + Y) = P(X) + P(Y), \forall X \cap Y = \varnothing$.
 \end{itemize}
 
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
@@ -285,6 +286,14 @@ We can join two distributions to form a \textit{joint distribution}:
 \end{tabular}
 \end{center}
 
+Given a distribution over a set $X$, we can \textit{sample} from it to produce a single element from that set, a \textit{random variable}:
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb{R}^{+}$}
+    \AxiomC{$x \sim P(X)$}
+    \RightLabel{Sample}
+    \BinaryInfC{$\Gamma \vdash x: (X\rightarrow \mathbb{R}^{+}) \leadsto X$}
+\end{prooftree}
 
 %We can assign a probability distribution to a variable, by \textit{sampling} from it. As we increase the sample size, the distribution of values will converge to the true distribution.
 %
@@ -295,8 +304,8 @@ We can join two distributions to form a \textit{joint distribution}:
 The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of the sets $X$ and $Y$, denoted $X \times Y$:
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X): X\rightarrow \mathbb R^{+}$}
-    \AxiomC{$\Gamma \vdash P(Y): Y\rightarrow \mathbb R^{+}$}
+    \AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb R^{+}$}
+    \AxiomC{$\Gamma \vdash P(Y): Y \rightarrow \mathbb R^{+}$}
     \RightLabel{Join}
     \BinaryInfC{$\Gamma \vdash P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
 \end{prooftree}
@@ -312,13 +321,6 @@ Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observatio
     \BinaryInfC{$\Gamma \vdash P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
 \end{prooftree}
 
-To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or sum over all possible conditionals. The resulting distribution is called a \textit{marginal distribution}:
-
-\begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
-    \RightLabel{Margin}
-    \UnaryInfC{$\Gamma \vdash P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
-\end{prooftree}
 
 Given a conditional distribution and its prior, to exchange the order of conditioning, we can use \citet{bayes1763essay} rule:
 
@@ -329,7 +331,7 @@ Given a conditional distribution and its prior, to exchange the order of conditi
     \BinaryInfC{$\Gamma \vdash P(Y \mid X) \propto P(X \mid Y)P(Y)$}
 \end{prooftree}
 
-When a conditional distribution $P(X \mid Y)$ does not depend on its prior Y, $X$ and $Y$ are called \textit{independent}.
+When a conditional distribution $P(X \mid Y)$ does not depend on its prior $Y$, $X$ and $Y$ are called \textit{independent}.
 
 \begin{prooftree}
     \AxiomC{$\Gamma \vdash P(X \mid Y) = P(X)$}
@@ -360,9 +362,45 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a join
 %
 %$$
 
-\section{Probabilistic Graphical Models}
+\section{Operational Semantics}
 
-Probabilistic graphical models~\citep{jordan2003introduction,koller2009probabilistic} (PGMs) are a framework for probabilistic inference on distributions whose conditional dependence structure may be expressed as a graph whose edges capture conditional independence relations between RVs. One type of PGM is a directed graphical model (DGM).
+So far, we have defined the denotational semantics of probabilities. But what about the operational semantics? If we have two distributions, how do we combine them to obtain numerical values? To implement a probabilistic combinator, we need the concept of \textit{convolution}, the sum of a product at each point:
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash g: S^d \rightarrow \mathbb{R}, h: S^d \rightarrow \mathbb R$}
+    \RightLabel{DiscConv}
+    \UnaryInfC{$(g * h)(\mathbf x) = \int_{\mathbb R^d} f(\mathbf y)g(\mathbf{x} - \mathbf{y})d\mathbf{y}$}
+    \DisplayProof
+
+    \AxiomC{$\Gamma \vdash g: S^d \rightarrow \mathbb{Z}, h: S^d \rightarrow \mathbb Z$}
+    \RightLabel{ContConv}
+    \UnaryInfC{$(g * h)(\mathbf x) = \sum_{\mathbb R^d} f(\mathbf y)g(\mathbf{x} - \mathbf{y})d\mathbf{y}$}
+\end{prooftree}
+
+For two independent random variables $X$ and $Y$, their sum can be defined as convolution:
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash P(X), P(Y)$}
+    \AxiomC{$Z = X + Y$}
+    \RightLabel{Conv}
+    \BinaryInfC{$P(Z) = P(X) * P(Y)$}
+\end{prooftree}
+
+Notably, the sum of the distributions is \textit{not} equivalent to the sum of their random variables.
+
+To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or sum over all possible conditionals. The resulting distribution is called a \textit{marginal distribution}:
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
+    \RightLabel{Margin}
+    \UnaryInfC{$\Gamma \vdash P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
+\end{prooftree}
+
+
+
+\pagebreak\section{Probabilistic Graphical Models}
+
+Probabilistic graphical models~\citep{jordan2003introduction,koller2009probabilistic} (PGMs) are a framework for probabilistic inference on distributions whose conditional dependence structure may be expressed as a graph. The graph's edges capture conditional independence relations between RVs. One type of PGM is a directed graphical model (DGM).
 
 If we observe a variable with two latent variables which are not conditionally independent, we call this a \textit{collider}.
 
