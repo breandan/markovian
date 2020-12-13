@@ -257,7 +257,7 @@ Let $E$ be a set of events and $S$ be a set of subsets of $E$. A \textit{probabi
     \itemsep-1em
     \item [(3)] $P(S = s) \in \mathbb{R}^{+}, \forall s \in S$.& \\
     \item [(4)] $P(E) = 1$. ($S = $ may be omitted for brevity.)& \\
-    \item [(5)] $P(X + Y) = P(X) + P(Y), \forall X \cap Y = \varnothing$.
+    \item [(5)] $P(X \cup Y) = P(X) + P(Y), \forall X \cap Y = \varnothing$.
 \end{itemize}
 
 % https://math.stackexchange.com/questions/3573008/kolmogorov-probability-theory-question
@@ -306,7 +306,7 @@ The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of
 \begin{prooftree}
     \AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb R^{+}$}
     \AxiomC{$\Gamma \vdash P(Y): Y \rightarrow \mathbb R^{+}$}
-    \RightLabel{Join}
+    \RightLabel{Joint}
     \BinaryInfC{$\Gamma \vdash P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
 \end{prooftree}
 
@@ -325,35 +325,35 @@ Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observatio
 Given a conditional distribution and its prior, to exchange the order of conditioning, we can use \citet{bayes1763essay} rule:
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X \mid Y)$}
-    \AxiomC{$\Gamma \vdash P(Y)$}
+    \AxiomC{$P(X \mid Y)$}
+    \AxiomC{$P(Y)$}
     \RightLabel{Bayes}
-    \BinaryInfC{$\Gamma \vdash P(Y \mid X) \propto P(X \mid Y)P(Y)$}
+    \BinaryInfC{$P(Y \mid X) \propto P(X \mid Y)P(Y)$}
 \end{prooftree}
 
 When a conditional distribution $P(X \mid Y)$ does not depend on its prior $Y$, $X$ and $Y$ are called \textit{independent}.
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X \mid Y) = P(X)$}
+    \AxiomC{$P(X \mid Y) = P(X)$}
     \RightLabel{Ind}
-    \UnaryInfC{$\Gamma \vdash X \perp Y$}
+    \UnaryInfC{$X \perp Y$}
 \end{prooftree}
 
 
 Equivalently, when two distributions $P(X)$ and $P(Y)$ are multiplied to form a joint distribution $P(X, Y)$, we may conclude that $X$ and $Y$ are independent:
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X, Y) = P(X)P(Y)$}
+    \AxiomC{$P(X, Y) = P(X)P(Y)$}
     \RightLabel{Fact}
-    \UnaryInfC{$\Gamma \vdash X \perp Y$}
+    \UnaryInfC{$X \perp Y$}
 \end{prooftree}
 
 When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a joint distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X,Y \mid Z) = P(X \mid Z)P(Y \mid Z)$}
+    \AxiomC{$P(X,Y \mid Z) = P(X \mid Z)P(Y \mid Z)$}
     \RightLabel{CondInd}
-    \UnaryInfC{$\Gamma \vdash X \perp Y \mid Z$ }
+    \UnaryInfC{$X \perp Y \mid Z$ }
 \end{prooftree}
 
 %To draw a single sample from a distribution $\mathcal{D}$, we can do so as follows:
@@ -364,29 +364,65 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a join
 
 \section{Operational Semantics}
 
-So far, we have defined the denotational semantics of probabilities. But what about the operational semantics? If we have two distributions, how do we combine them to obtain numerical values? To implement a probabilistic combinator, we need the concept of \textit{convolution}, the sum of a product at each point:
+So far, we have defined the denotational semantics of probabilities. But what about the operational semantics?
+
+To sample efficiently, we need to draw a sample from a uniform distribution (PRNG) and push it through some kind of function. But what function should we use to ensure samples converge to a given PDF in the limit? Unfortunately, such function does not exist in closed form for most distributions. We can only describe it indirectly.
+
+% https://en.wikipedia.org/wiki/Inverse_transform_sampling
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash g: S^d \rightarrow \mathbb{R}, h: S^d \rightarrow \mathbb R$}
-    \RightLabel{DiscConv}
-    \UnaryInfC{$(g * h)(\mathbf x) = \int_{\mathbb R^d} f(\mathbf y)g(\mathbf{x} - \mathbf{y})d\mathbf{y}$}
-    \DisplayProof
-
-    \AxiomC{$\Gamma \vdash g: S^d \rightarrow \mathbb{Z}, h: S^d \rightarrow \mathbb Z$}
-    \RightLabel{ContConv}
-    \UnaryInfC{$(g * h)(\mathbf x) = \sum_{\mathbb R^d} f(\mathbf y)g(\mathbf{x} - \mathbf{y})$}
+    \AxiomC{$x \sim P(X)$}
+    \AxiomC{$\texttt{CDF}: x \mapsto \int P(X = x)dx$}
+    \RightLabel{Draw}
+    \BinaryInfC{$x = \texttt{INV(CDF(PRNG()))}$}
 \end{prooftree}
 
-For two independent random variables $X$ and $Y$, their sum can be defined as convolution:
+If we have two distributions, how can we combine them to obtain numerical values? There are various ways to combine probability distributions. For independent random variables, the joint distribution is simply the product of their distributions:
+
+% https://en.wikipedia.org/wiki/Joint_probability_distribution#Joint_distribution_for_independent_variables
 
 \begin{prooftree}
-    \AxiomC{$\Gamma \vdash P(X), P(Y)$}
-    \AxiomC{$Z = X + Y$}
+    \AxiomC{$P(X)$}
+    \AxiomC{$P(Y)$}
+    \RightLabel{Join}
+    \BinaryInfC{$P(X, Y) = P(X)P(Y)$}
+\end{prooftree}
+
+For dependent random variables, we need to know the dependence structure. Suppose we knew they were related by a mathematical formula. All mathematical formulae can be described as compositions of a few elementary operators.
+
+The sum of two distributions is \textit{not} equivalent to the sum of their random variables. For independent random variables $X$ and $Y$, their sum is defined as convolution (\S~\ref{sec:combinators}) on the associated density functions:
+
+% https://en.wikipedia.org/wiki/Convolution_of_probability_distributions#Introduction
+
+\begin{prooftree}
+    \AxiomC{$P(X)$}
+    \AxiomC{$P(Y)$}
     \RightLabel{Conv}
-    \BinaryInfC{$P(Z) = P(X) * P(Y)$}
+    \BinaryInfC{$P(X + Y) = P(X) * P(Y)$}
 \end{prooftree}
 
-Notably, the sum of the distributions is \textit{not} equivalent to the sum of their random variables.
+Specifically, if $x, y$ are drawn from independent Gaussians:
+
+% https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables#Independent_random_variables
+
+\begin{prooftree}
+    \AxiomC{$x \sim \mathcal{N}(\mu_x, \sigma^2_x)$}
+    \AxiomC{$y \sim \mathcal{N}(\mu_y, \sigma^2_y)$}
+    \AxiomC{$z = x + y$}
+    \TrinaryInfC{$z \sim \mathcal{N}(\mu_x + \mu_y, \sigma^2_x + \sigma^2_x)$}
+\end{prooftree}
+
+Likewise, their product can be defined as an integral:
+
+% https://en.wikipedia.org/wiki/Product_distribution#Derivation_for_independent_random_variables
+
+\begin{prooftree}
+    \AxiomC{$x \sim P(X)$}
+    \AxiomC{$y \sim P(Y)$}
+    \AxiomC{$z = xy$}
+    \RightLabel{Conv}
+    \TrinaryInfC{$P(Z = z) = \int P(X = x)P(Y=\frac{z}{x})\frac{1}{|x|}dx$}
+\end{prooftree}
 
 To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or sum over all possible conditionals. The resulting distribution is called a \textit{marginal distribution}:
 
@@ -395,7 +431,6 @@ To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{margina
     \RightLabel{Margin}
     \UnaryInfC{$\Gamma \vdash P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
 \end{prooftree}
-
 
 
 \pagebreak\section{Probabilistic Graphical Models}
@@ -554,6 +589,21 @@ In future work, we will show how to learn a BN from data, compare its performanc
 
 
 \section{Appendix}\label{sec:appendix}
+
+\subsection{Combinators}\label{sec:combinators}
+
+The \textit{convolution} operator $*$ is defined as the sum of a product at each point:
+
+\begin{prooftree}
+    \AxiomC{$\Gamma \vdash g: S^d \rightarrow \mathbb{R}, h: S^d \rightarrow \mathbb R$}
+    \RightLabel{DiscConv}
+    \UnaryInfC{$(g * h)(x) = \int_{\mathbb R^d} f(y)g(x - y)dy$}
+    \DisplayProof
+
+    \AxiomC{$\Gamma \vdash g: S^d \rightarrow \mathbb{Z}, h: S^d \rightarrow \mathbb Z$}
+    \RightLabel{ContConv}
+    \UnaryInfC{$(g * h)(x) = \sum_{\mathbb R^d} f(y)g(x - y)$}
+\end{prooftree}
 
 \subsection{Formal Language}
 
