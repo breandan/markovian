@@ -398,15 +398,16 @@ minimum height=0.11\columnwidth]
 
 \mysection{Abstract}
 
+\vspace{\baselineskip}
+
 \begin{itemize}
 \item Modeling requires lots of pen-and-paper derivation to derive efficient estimators
 \item Once the estimator has been derived, programmer implements the entire model
-\item Developers must reimplement many ad-hoc algorithms for each application
 \item Is it possible to automate probabilistic inference like AD did for deep learning?
 \item Prior work in probabilistic programming focuses heavily on numerical methods
 \end{itemize}
 
-\\
+\vspace{\baselineskip}
 
 %\begin{center}
 %\input{../misc/interactome_adj.tex}
@@ -463,7 +464,7 @@ The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of
 
 \vspace{\baselineskip}
 
-Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional distribution}:
+If we have a joint distribution $P(X, Y)$ and see $Y = y$, this observation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional distribution}:
 
 \vspace{\baselineskip}
 % https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#page=325
@@ -506,7 +507,7 @@ When a conditional distribution $P(X \mid Y)$ does not depend on its prior $Y$, 
 
 \vspace{\baselineskip}
 
-When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a joint distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
+If a joint distribution  $P(X, Y \mid Z)$ can be factored as the product of conditionals $P(X \mid Z)P(Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
 
 \vspace{\baselineskip}
 
@@ -517,6 +518,79 @@ When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a join
 \end{prooftree}
 
 \newpage
+
+\mysection{Operational Semantics}
+
+\vspace{\baselineskip}
+
+To sample efficiently, we need to draw a sample from a uniform distribution (PRNG) and push it through some kind of function. But what function should we use to ensure samples converge to a given PDF in the limit? Unfortunately, such function does not exist in closed form for most distributions. We can only describe it indirectly.
+
+\vspace{\baselineskip}
+
+% https://en.wikipedia.org/wiki/Inverse_transform_sampling
+\begin{prooftree}
+\AxiomC{$x \sim P(X)$}
+\AxiomC{$\texttt{CDF}: x \mapsto \int P(X = x)dx$}
+\RightLabel{Draw}
+\BinaryInfC{$x = \texttt{INV(CDF(PRNG()))}$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+If we have two distributions, how can we combine them to obtain numerical values? There are various ways to combine probability distributions. For independent random variables, the joint distribution is simply the product of their distributions:
+
+\vspace{\baselineskip}
+
+% https://en.wikipedia.org/wiki/Joint_probability_distribution#Joint_distribution_for_independent_variables
+\begin{prooftree}
+\AxiomC{$P(X)$}
+\AxiomC{$P(Y)$}
+\RightLabel{Join}
+\BinaryInfC{$P(X, Y) = P(X)P(Y)$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+For dependent random variables, we need to know the dependence structure. Suppose we knew they were related by a mathematical formula. The sum of two distributions is \textit{not} equivalent to the sum of their random variables. For independent random variables $X$ and $Y$, their sum is defined as convolution.
+
+\vspace{\baselineskip}
+
+% https://en.wikipedia.org/wiki/Convolution_of_probability_distributions#Introduction
+\begin{prooftree}
+\AxiomC{$P(X)$}
+\AxiomC{$P(Y)$}
+\RightLabel{Conv}
+\BinaryInfC{$P(X + Y) = P(X) * P(Y)$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+Likewise, their product can be defined as an integral:
+
+\vspace{\baselineskip}
+
+% https://en.wikipedia.org/wiki/Product_distribution#Derivation_for_independent_random_variables
+\begin{prooftree}
+\AxiomC{$x \sim P(X)$}
+\AxiomC{$y \sim P(Y)$}
+\AxiomC{$z = xy$}
+\RightLabel{Conv}
+\TrinaryInfC{$P(Z = z) = \int P(X = x)P(Y=\frac{z}{x})\frac{1}{|x|}dx$}
+\end{prooftree}
+
+\vspace{1\baselineskip}
+
+To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or sum over all conditionals. The resulting distribution is called a \textit{marginal distribution}:
+
+\vspace{1\baselineskip}
+
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
+\RightLabel{Margin}
+\UnaryInfC{$\Gamma \vdash P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
+\end{prooftree}
+
+\vspace{1\baselineskip}
 
 \mysection{Probabilistic Circuits}
 
@@ -535,7 +609,9 @@ A semiring algebra has two operators, $\oplus$ and $\otimes$, with the usual pro
 \UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
 \end{prooftree}
 
-The sum product network (SPN) is a commutative semiring over univariate distributions~\citep{friesen2016sum}:
+% TODO: talk about conjugacy and  symmetries
+
+The sum product network (SPN) is a commutative semiring over distributions:
 
 \begin{center}
 \begin{tabular}{ccc}
@@ -545,29 +621,29 @@ $PC \rightarrow PC \otimes PC$
 \end{tabular}
 \end{center}
 
-Given a BN, we can compile it to a SPN using the following procedure from Butz (2019):
-
-% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
-
-\begin{algorithm}
-\begin{algorithmic}[1]
-\Procedure{BayesNetToSPN}{$bn$: BN}: SPN
-\State $ac \leftarrow $\Call{VariableEliminate}{$bn$}
-\State $ac \leftarrow $\Call{RedistributeParameters}{$ac$}
-\State $ac \leftarrow $\Call{CompileMarginalized}{$ac$}
-\State \Return{\Call{ReduceCircuit}{$ac$}}
-\EndProcedure\\
-\Procedure{ReduceCircuit}{$ac_0$: AC}: SPN
-\State $ac_1 \leftarrow $ \Call{AddTerminalNodes}{$ac_0$}
-\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
-\If{$ac_0 = ac_1$}
-\State \Return{$ac_0$}
-\Else
-\State \Return{\Call{ReduceCircuit}{$ac_1$}}
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+%Given a BN, we can compile it to a SPN using the following procedure from Butz (2019):
+%
+%% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
+%
+%\begin{algorithm}
+%\begin{algorithmic}[1]
+%\Procedure{BayesNetToSPN}{$bn$: BN}: SPN
+%\State $ac \leftarrow $\Call{VariableEliminate}{$bn$}
+%\State $ac \leftarrow $\Call{RedistributeParameters}{$ac$}
+%\State $ac \leftarrow $\Call{CompileMarginalized}{$ac$}
+%\State \Return{\Call{ReduceCircuit}{$ac$}}
+%\EndProcedure\\
+%\Procedure{ReduceCircuit}{$ac_0$: AC}: SPN
+%\State $ac_1 \leftarrow $ \Call{AddTerminalNodes}{$ac_0$}
+%\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
+%\If{$ac_0 = ac_1$}
+%\State \Return{$ac_0$}
+%\Else
+%\State \Return{\Call{ReduceCircuit}{$ac_1$}}
+%\EndIf
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
 
 \newpage
 
