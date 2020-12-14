@@ -11,3 +11,5 @@ build
 *.blg
 *.bbl
 *.listing
+*.bst
+*.ps

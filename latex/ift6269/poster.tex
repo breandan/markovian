@@ -1,0 +1,671 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% From a template maintained at https://github.com/jamesrobertlloyd/cbl-tikz-poster
+%
+% Code near the top should be fairly standard and not need to be changed
+%  - except for the document class
+% Code lower down is more likely to be customised
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Document class
+%
+% Change this if you want a different size / orientation poster etc
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[landscape,a0b,final,a4resizeable]{a0poster}
+%\documentclass[portrait,a0b,final,a4resizeable]{a0poster}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 'Basic' packages
+%
+% TODO - Almost certainly some are unnecessary - feel free to remove nonstandard
+% packages if you think it is a good idea not to always have them
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{qrcode}
+\usepackage{multicol}
+\usepackage{color}
+\usepackage{shadow}
+\usepackage{morefloats}
+\usepackage{cite}
+\usepackage[pdftex]{graphicx}
+\usepackage{rotating}
+\usepackage{amsmath, amsthm, amssymb, bm}
+\usepackage{array}
+\usepackage{nth}
+\usepackage[square,numbers]{natbib}
+\usepackage{booktabs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% TIKZ packages and common definitions
+%
+% Add extra things as per your tikz needs
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{a0size}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows,chains,matrix,positioning,scopes,calc}
+\tikzstyle{mybox} = [draw=white, rectangle]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% myfig
+%
+% \myfig - replacement for \figure
+% necessary, since in multicol-environment
+% \figure won't work
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\myfig}[3][0]{
+\begin{center}
+    \vspace{1.5cm}
+    \includegraphics[width=#3\hsize,angle=#1]{#2}
+    \nobreak\medskip
+\end{center}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% mycaption
+%
+% \mycaption - replacement for \caption
+% necessary, since in multicol-environment \figure and
+% therefore \caption won't work
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcounter{figure}
+\setcounter{figure}{1}
+\newcommand{\mycaption}[1]{
+\vspace{0.5cm}
+\begin{quote}
+{{\sc Figure} \arabic{figure}: #1}
+\end{quote}
+\vspace{1cm}
+\stepcounter{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Some standard colours
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{camlightblue}{rgb}{0.601 , 0.8, 1}
+\definecolor{camdarkblue}{rgb}{0, 0.203, 0.402}
+\definecolor{camred}{rgb}{1, 0.203, 0}
+\definecolor{camyellow}{rgb}{1, 0.8, 0}
+\definecolor{lightblue}{rgb}{0, 0, 0.80}
+\definecolor{white}{rgb}{1, 1, 1}
+\definecolor{whiteblue}{rgb}{0.80, 0.80, 1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Some look and feel definitions
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength{\columnsep}{0.03\textwidth}
+\setlength{\columnseprule}{0.0018\textwidth}
+\setlength{\parindent}{0.0cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% \mysection - replacement for \section*
+%
+% Puts a pretty box around some text
+% TODO - any other thoughts for what this box should look like
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tikzstyle{mysection} = [rectangle,
+draw=none,
+shade,
+outer color=gray!30,
+inner color=gray!30,
+text width=0.965\columnwidth,
+text centered,
+rounded corners=20pt,
+minimum height=0.11\columnwidth]
+
+\newcommand{\mysection}[1]
+{
+\begin{center}
+    \begin{tikzpicture}
+        \node[mysection] {\sffamily\bfseries\LARGE#1};
+    \end{tikzpicture}
+\end{center}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Set the font
+%
+% TODO - Not sure what a canonical choice is - feel free to modify
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\familydefault}{cmss}
+\sffamily
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Poster environment
+%
+% Centres everything and can be used to define the width of the content
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{poster}{
+\begin{center}
+\begin{minipage}[c]{0.96\textwidth}
+}{
+\end{minipage}
+\end{center}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is probably a good place to put content specific packages and definitions
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\usepackage{microtype}
+%\usepackage{graphicx}
+%\usepackage{subfigure}
+%\usepackage{booktabs} % for professional tables
+%\usepackage{enumitem}
+%
+\usepackage{bussproofs}
+%
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
+%\usepackage{sourcecodepro}
+%\usepackage{listings}
+%\usepackage{amsfonts}
+%\usepackage{amssymb}
+%\usepackage{tikz-qtree}
+%\usepackage{amsthm}
+%\usepackage{bm}
+%\usetikzlibrary{bayesnet}
+%\usetikzlibrary{arrows}
+%\usepackage{caption}
+%\usepackage{subcaption}
+%\usetikzlibrary{backgrounds}
+%
+%\newcommand{\E}{\mathbb{E}}
+%\newcommand{\Var}{\mathrm{Var}}
+%\newcommand{\Cov}{\mathrm{Cov}}
+%
+%\usepackage{mathtools}% superior to amsmath
+%\usepackage{tikz}
+%\tikzset{latent/.append style={minimum size=14pt, inner sep=1pt, node distance=10pt}, every node/.append style={draw,circle, inner sep=1pt}}
+%\makeatletter
+%\newcommand\ccirc[1]{%
+%\mathpalette\@ccirc{#1}%
+%}
+%\newcommand\@ccirc[2]{%
+%\tikz[baseline=(math.base)] \node (math) {$\m@th#1#2$};%
+%}
+%\newcommand\gcirc[1]{%
+%\mathpalette\@gcirc{#1}%
+%}
+%\newcommand\@gcirc[2]{%
+%\tikz[baseline=(math.base)] \node[fill=gray!30] (math) {$\m@th#1#2$};%
+%}
+%\makeatother
+
+\newtheorem{thm}{Theorem}%[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+
+\newtheorem*{theorem*}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem*{definition*}{Definition}
+\newtheorem{definition}[thm]{Definition}%[section]
+\newtheorem{conj}{Conjecture}[section]
+\newtheorem{exmp}{Example}[section]
+\newtheorem{rem}[thm]{Remark}
+
+\theoremstyle{remark}
+%\newtheorem{rem}{Remark}
+\newtheorem{note}{Note}
+\newtheorem{case}{Case}
+
+\newcommand{\eqd}{\overset{\,_{\!d}}{=}}
+\newcommand{\defn}[1]{\emph{#1}}
+
+\newcommand{\Law}{\mathcal{L}}
+
+\def\given{\,|\,}
+
+\def\SGinf{\mathbb{S}_{\infty}}
+
+\newcommand{\NonNegInts}{\mathbb{Z}_+}
+\newcommand{\Nats}{\mathbb{N}}
+\newcommand{\Rationals}{\mathbb{Q}}
+\newcommand{\Reals}{\mathbb{R}}
+
+\newcommand{\as}{\textrm{a.s.}}
+
+\def\[#1\]{\begin{align}#1\end{align}}
+\newcommand{\defas}{:=}
+
+\newcommand{\Normal}{\mathcal{N}}
+\newcommand{\dist}{\ \sim\ }
+
+\newcommand{\kernel}{\kappa}
+\newcommand{\kernelmatrix}{K}
+\newcommand{\scalefactor}{s}
+\newcommand{\lengthscale}{\ell}
+\newcommand{\targets}{T}
+\newcommand{\noise}{\sigma_\targets}
+\newcommand{\pseudopoints}{\eta}
+\newcommand{\inputpoints}{\xi}
+\newcommand{\covhyppar}{\psi}
+\newcommand{\logistic}{\phi}
+
+\newcommand{\CompOrder}{\mathcal{O}}
+\def\graphspace{\mathbf{G}}
+\def\Uniform{\mbox{\rm Uniform}}
+\def\Gaussian{\mbox{\rm Gaussian}}
+\def\Bernoulli{\mbox{\rm Bernoulli}}
+\def\Dirichlet{\mbox{\rm Dirichlet}}
+\def\ie{i.e.,\ }
+\def\eg{e.g.,\ }
+\def\iid{i.i.d.\ }
+\def\simiid{\sim_{\mbox{\tiny iid}}}
+\def\simind{\sim_{\mbox{\tiny ind}}}
+\def\eqdist{\stackrel{\mbox{\tiny d}}{=}}
+\def\ahfunction{\theta}
+\def\AHfunction{\Theta}           % A-H random function
+\def\AHvar{U}                     % A-H uniform variables
+\def\AHvaralt{V}                  % A-H uniform variables - for bipartite data
+\def\larray{W}                    % latent array sampled with A-H
+%\def\latentspace{\mathbf{W}}      % range of entries
+\def\latentspace{\mathcal{W}}      % range of entries
+\def\darray{X}                    % data array
+%\def\dataspace{\mathbf{X}}        % sample space
+\def\dataspace{\mathcal{X}}        % sample space
+\def\cfspace{\mathbf{C}}          % space of continuous functions
+%\def\GP{\mbox{\mathcal{GP}}}
+\def\GP{\mathcal{GP}}
+\def\likelihood{P}
+\def\CovData{C}
+\def\CovDataAlt{D}
+
+\def\newarrow{\mbox{\begin{tikzpicture}
+\useasboundingbox{(-3pt,-4.5pt) rectangle (19pt,1pt)};
+\draw[->] (0,-0.07)--(17pt,-0.07);\end{tikzpicture}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The document environment starts here
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Begin the poster environment - centres things and potentially changes the width
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{poster}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Potentially add some space at the top of the poster
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace{0\baselineskip}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Draw the header as a TIKZ picture
+%
+% Using TIKZ to allow for easy alignment
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{center}
+\begin{tikzpicture}[x=0.5\textwidth]
+% Dummy nodes at edges for spacing
+% TODO - a better way?
+%\node at (+1, 0) {};
+%\node at (-1, 0) {};
+% Set the size of the badges
+\def \badgeheight {0.06\textwidth}
+% Title text
+\node[inner sep=0,text width=0.5\textwidth, font=\Huge] (Title) at (0,0)
+{
+{\sffamily \Huge \textbf{Probabilistic Reasoning, from Graphs to Circuits}}\\
+{\huge\sffamily Breandan Considine}\\
+\vspace{-0.3\baselineskip}
+%{\large\sffamily 1: McGill University, School of Computer Science, 2: Knowledge and Software Technology Lab, 3: Institut Qu\'eb\'ecois d'Intelligence Artificielle}
+};
+
+% Cambridge badge
+\node [mybox] (Cambridge Badge) at (-0.85, 0) {
+\includegraphics[height=\badgeheight]{mcgill.png}
+};
+% CBL badge
+%\node [mybox] (CBL Badge) at (-0.7, 0) {
+%\includegraphics[height=\badgeheight]{mila.png}
+%};
+% Columbia logo
+\node [mybox] (box) at (0.6, 0) {
+\includegraphics[height=\badgeheight]{mila.png}
+};
+\end{tikzpicture}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Spacing between title and main body
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace{1\baselineskip}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Columns environment
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{multicols}{3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Start of content
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\large
+
+\mysection{Abstract}
+
+\begin{itemize}
+\item Modeling requires lots of pen-and-paper derivation to derive efficient estimators
+\item Once the estimator has been derived, programmer implements the entire model
+\item Developers must reimplement many ad-hoc algorithms for each application
+\item Is it possible to automate probabilistic inference like AD did for deep learning?
+\item Prior work in probabilistic programming focuses heavily on numerical methods
+\end{itemize}
+
+\\
+
+%\begin{center}
+%\input{../misc/interactome_adj.tex}
+%\end{center}
+
+\mysection{Denotational Semantics}
+
+\vspace{\baselineskip}
+
+The grammar of probabilistic modeling can be described approximately as follows:
+
+\vspace{\baselineskip}
+
+\begin{center}
+\begin{tabular*}{0.3\textwidth}{l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l}
+$\mathcal{D} \rightarrow \Gaussian$  & $\mathcal{V} \rightarrow \mathcal{V}, \mathcal{V}$      & $\mathcal{S} \rightarrow \mathcal{V} \sim \mathcal{D}$ & \mathcal{P} \rightarrow t \\
+$\mathcal{D} \rightarrow \Bernoulli$ & $\mathcal{P} \rightarrow P(\mathcal{V})$                & $\mathcal{E} \rightarrow \mathcal{V} + \mathcal{V}$    & \mathcal{P} \rightarrow t \\
+$\mathcal{D} \rightarrow \Dirichlet$ & $\mathcal{P} \rightarrow P(\mathcal{V}\mid\mathcal{V})$ & $\mathcal{E} \rightarrow \mathcal{V}\times\mathcal{V}$ & \mathcal{P} \rightarrow t \\
+$\mathcal{V} \rightarrow A \mid \ldots \mid Z$ &  $\mathcal{P} \rightarrow P(\mathcal{E})$ & & \\
+\end{tabular*}
+\end{center}
+
+\vspace{\baselineskip}
+
+Given a distribution over a set $X$, we can \textit{sample} from it to produce a single element from that set, a \textit{random variable}:
+
+\vspace{\baselineskip}
+
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb{R}^{+}$}
+\AxiomC{$x \sim P(X)$}
+\RightLabel{Sample}
+\BinaryInfC{$\Gamma \vdash x: (X\rightarrow \mathbb{R}^{+}) \leadsto X$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+%We can assign a probability distribution to a variable, by \textit{sampling} from it. As we increase the sample size, the distribution of values will converge to the true distribution.
+%
+%$$
+%d \sim \mathcal{D}
+%$$
+
+The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of the sets $X$ and $Y$, denoted $X \times Y$:
+
+\vspace{\baselineskip}
+
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb R^{+}$}
+\AxiomC{$\Gamma \vdash P(Y): Y \rightarrow \mathbb R^{+}$}
+\RightLabel{Joint}
+\BinaryInfC{$\Gamma \vdash P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+Given a joint distribution $P(X, Y)$, if we see an event $y: Y$, this observation is called \textit{conditioning} and the resulting distribution over $X$ is called a \textit{conditional distribution}:
+
+\vspace{\baselineskip}
+% https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#page=325
+
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash P(X, Y): X \times Y\rightarrow\mathbb{R}^+$}
+\AxiomC{$\Gamma \vdash y: Y$}
+\RightLabel{Cond}
+\BinaryInfC{$\Gamma \vdash P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+We can use Bayes' rule to exchange the order of conditioning as follows:
+
+\vspace{\baselineskip}
+
+\begin{prooftree}
+\AxiomC{$P(X \mid Y)$}
+\AxiomC{$P(Y)$}
+\RightLabel{Bayes}
+\BinaryInfC{$P(Y \mid X) \propto P(X \mid Y)P(Y)$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+When a conditional distribution $P(X \mid Y)$ does not depend on its prior $Y$, or equivalently may be factorized, we may conclude that $X$ and $Y$ are independent:
+
+\vspace{\baselineskip}
+
+\begin{prooftree}
+\AxiomC{$P(X \mid Y) = P(X)$}
+\RightLabel{Ind\hspace{100pt}}
+\UnaryInfC{$X \perp Y$}
+\DisplayProof
+\AxiomC{$P(X, Y) = P(X)P(Y)$}
+\RightLabel{Fact}
+\UnaryInfC{$X \perp Y$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+When two conditionals $P(X \mid Z)$, $P(Y \mid Z)$ are multiplied to form a joint distribution $P(X, Y \mid Z)$, $X$ and $Y$ are said to be \textit{conditionally independent given $Z$}:
+
+\vspace{\baselineskip}
+
+\begin{prooftree}
+\AxiomC{$P(X,Y \mid Z) = P(X \mid Z)P(Y \mid Z)$}
+\RightLabel{CondInd}
+\UnaryInfC{$X \perp Y \mid Z$ }
+\end{prooftree}
+
+\newpage
+
+\mysection{Probabilistic Circuits}
+
+\vspace{1\baselineskip}
+
+%By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
+
+A semiring algebra has two operators, $\oplus$ and $\otimes$, with the usual properties. In particular, distributivity holds:
+
+\begin{prooftree}
+\AxiomC{$X \otimes (Y \oplus Z)$}
+\UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
+\DisplayProof
+\AxiomC{$(Y \oplus Z) \otimes X$}
+\RightLabel{Distrib}
+\UnaryInfC{$(X \otimes Y) \oplus (X \otimes Z)$}
+\end{prooftree}
+
+The sum product network (SPN) is a commutative semiring over univariate distributions~\citep{friesen2016sum}:
+
+\begin{center}
+\begin{tabular}{ccc}
+$PC \rightarrow v \sim \mathcal{D}$ &
+$PC \rightarrow PC \oplus PC$ &
+$PC \rightarrow PC \otimes PC$
+\end{tabular}
+\end{center}
+
+Given a BN, we can compile it to a SPN using the following procedure from Butz (2019):
+
+% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{BayesNetToSPN}{$bn$: BN}: SPN
+\State $ac \leftarrow $\Call{VariableEliminate}{$bn$}
+\State $ac \leftarrow $\Call{RedistributeParameters}{$ac$}
+\State $ac \leftarrow $\Call{CompileMarginalized}{$ac$}
+\State \Return{\Call{ReduceCircuit}{$ac$}}
+\EndProcedure\\
+\Procedure{ReduceCircuit}{$ac_0$: AC}: SPN
+\State $ac_1 \leftarrow $ \Call{AddTerminalNodes}{$ac_0$}
+\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
+\If{$ac_0 = ac_1$}
+\State \Return{$ac_0$}
+\Else
+\State \Return{\Call{ReduceCircuit}{$ac_1$}}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+
+\mysection{Latent variables are interpretable}
+
+\vspace{0.5\baselineskip}
+
+%\begin{center}
+%\input{../misc/fig_interactome.tex}
+%\end{center}
+
+\vspace{\baselineskip}
+
+Sorting the adjacency matrix of the protein interactome using the (approximate) MAP values of the $\AHvar_i$ reveals interpretable structure in the data.
+The higher density of edges along the diagonal reveals homophily.
+The block structure in the top left reveals stochastic equivalence.
+These features can also be seen in the MAP $\Theta$.
+
+\vspace{0.5\baselineskip}
+
+\mysection{DSL}
+
+\vspace{\baselineskip}
+
+\begin{center}
+\begin{tabular}{lccl}
+%    \toprule
+\multicolumn{4}{c}{Graph data}\\
+\midrule
+%\addlinespace[2pt]
+%\textcolor{red}{Random function model}
+Random function model & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel)$\\
+Latent class & $\larray_{ij}$ & $=$ & $\Lambda_{\AHvar_i\AHvar_j}\,\textrm{where} \,\AHvar_i \in \{1,\ldots,K\}$\\
+IRM & $\larray_{ij}$ & $=$ & $\Lambda_{\AHvar_i\AHvar_j}\,\textrm{where} \,\AHvar_i \in \{1,\ldots,\infty\}$\\
+Latent distance & $\larray_{ij}$ & $=$ & $-|\AHvar_i - \AHvar_j|$\\
+Eigenmodel &$\larray_{ij}$ & $=$ & $\AHvar_i'\Lambda \AHvar_j$\\
+LFRM & $\larray_{ij}$ & $=$ & $\AHvar_i'\Lambda \AHvar_j\,\textrm{where} \,\AHvar_i \in \{0,1\}^\infty$\\
+ILA & $\larray_{ij}$ & $=$ & $\sum_d \mathbb{I}_{U_{id}}\mathbb{I}_{U_{jd}}\Lambda^{(d)}_{U_{id}U_{jd}}\,\textrm{where} \,\AHvar_i \in \{0,\ldots,\infty\}^\infty$\\
+SMGB & $\AHfunction$ & $\dist$ & $\GP\,(0, \kernel_1 \otimes \kernel_2)$ \\
+%\midrule
+\addlinespace[4pt]
+\multicolumn{4}{c}{Real-valued array data}\\
+\midrule
+%\textcolor{red}{Random function model}
+Random function model & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel)$\\
+Mondrian process based & $\AHfunction$ & = & piece-wise constant random function\\
+PMF & $\larray_{ij}$ & $=$ & $\AHvar_i'V_j$\\
+GPLVM & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel \otimes \delta)$\\
+%Linear relational GP~\cite{Yu2008} & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel_1 \otimes \kernel_2)\,\textrm{where} \,\kernel_i\,\textrm{is linear} $\\
+%\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{\baselineskip}
+
+\mysection{Results}
+
+\vspace{\baselineskip}
+
+\begin{center}
+\begin{tabular}{r | r r r | r r r | r r r}
+\multicolumn{10}{c}{AUC results} \\
+\addlinespace[2pt]
+Data set & \multicolumn{3}{c|}{High school} & \multicolumn{3}{c|}{NIPS} & \multicolumn{3}{c}{Protein} \\
+Latent dim. & 1 & 2 & 3 & 1 & 2 & 3 & 1 & 2 & 3 \\
+\midrule
+PMF                   & 0.747 & 0.792 & 0.792 & 0.729 & 0.789 & 0.820 & 0.787 & 0.810 & 0.841 \\
+Eigenmodel            & 0.742 & 0.806 & 0.806 & 0.789 & 0.818 & 0.845 & 0.805 & 0.866 & 0.882 \\
+GPLVM                 & 0.744 & 0.775 & 0.782 & 0.888 & 0.876 & 0.883 & 0.877 & 0.883 & 0.873 \\
+RFM & \textbf{0.815} & \textbf{0.827} & \textbf{0.820} & \textbf{0.907} & \textbf{0.914} & \textbf{0.919} & \textbf{0.903} & \textbf{0.910} & \textbf{0.912}
+\end{tabular}
+\end{center}
+
+\vspace{30pt}
+
+\begin{tabular}{cc}
+\begin{minipage}[c]{0.8\columnwidth}
+
+Code available at: \url{https://github.com/breandan/markovian} \\
+
+Paper available at: \url{https://brea.ndan.co/public/probcirc.pdf}
+\end{minipage}
+&
+\begin{minipage}[c]{0.2\columnwidth}
+\begin{centering}
+\qrcode[height=2in]{kg.ndan.co}
+\end{centering}
+\end{minipage}
+\end{tabular}
+
+%\small{
+%\bibliographystyle{unsrt}
+%\bibliographystyle{../misc/natbib}
+%\bibliography{../misc/library,../misc/biblio,../misc/bibdesk-porbanz}
+%}
+
+\end{multicols}
+
+\end{poster}
+
+\end{document}
