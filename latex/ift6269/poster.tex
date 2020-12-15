@@ -188,8 +188,136 @@ minimum height=0.11\columnwidth]
 %
 \usepackage{algpseudocode}
 \usepackage{algorithmicx}
-%\usepackage{sourcecodepro}
-%\usepackage{listings}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Highlighting
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{slightgray}{rgb}{0.90, 0.90, 0.90}
+
+\usepackage{soul}
+\makeatletter
+\def\SOUL@hlpreamble{%
+\setul{}{3.0ex}%
+\let\SOUL@stcolor\SOUL@hlcolor%
+\SOUL@stpreamble%
+}
+\makeatother
+
+\newcommand{\inline}[1]{%
+\begingroup%
+\sethlcolor{slightgray}%
+\hl{\ttfamily\small #1}%
+\endgroup
+}
+
+\newcommand{\tinline}[1]{%
+\begingroup%
+\sethlcolor{slightgray}%
+\hl{\ttfamily #1}%
+\endgroup
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Kotlin syntax highlighting
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[skins,breakable,listings]{tcolorbox}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage[table]{xcolor}
+
+\lstdefinelanguage{kotlin}{
+comment=[l]{//},
+commentstyle={\color{gray}\ttfamily},
+emph={delegate, filter, firstOrNull, forEach, it, lazy, mapNotNull, println, repeat, assert, with, head, tail, len, return@},
+numberstyle=\noncopyable,
+emphstyle={\color{olive}},
+identifierstyle=\color{black},
+keywords={abstract, actual, as, as?, break, by, class, companion, continue, data, do, dynamic, else, enum, expect, false, final, for, fun, get, if, import, in, infix, interface, internal, is, null, object, open, operator, override, package, private, public, return, sealed, set, super, suspend, this, throw, true, try, catch, typealias, val, var, vararg, when, where, while, tailrec, reified, Repeat},
+keywordstyle={\color{blue}\bfseries},
+morecomment=[s]{/*}{*/},
+morestring=[b]",
+morestring=[s]{"""*}{*"""},
+ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, Array, Byte, Double, Float, Boolean, Int, Integer, Iterable, Long, Runnable, Short, String, Pair, Gaussian},
+ndkeywordstyle={\color{purple}\bfseries},
+sensitive=true,
+stringstyle={\color{green}\ttfamily},
+literate={`}{{\char0}}1
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Color boxes
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tcbset{
+enhanced jigsaw,
+breakable,
+listing only,
+boxsep=-1pt,
+top=-1pt,
+bottom=-0.5pt,
+right=-0.5pt,
+overlay first={
+\node[black!50] (S) at (frame.south) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.south west) -- (S) -- (frame.south east);
+},
+overlay middle={
+\node[black!50] (S) at (frame.south) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.south west) -- (S) -- (frame.south east);
+\node[black!50] (S) at (frame.north) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.north west) -- (S) -- (frame.north east);
+},
+overlay last={
+\node[black!50] (S) at (frame.north) {\Large\ding{34}};
+\draw[dashed,black!50] (frame.north west) -- (S) -- (frame.north east);
+},
+before={\par\vspace{10pt}},
+after={\par\vspace{\parskip}\noindent}
+}
+
+\newtcblisting{kotlinlisting}[1][]{%
+width=24.5cm,
+left=20pt,
+top=5pt,
+listing options={
+language=kotlin,
+basicstyle=\ttfamily\normalsize,
+%numberstyle=\footnotesize,
+showstringspaces=false,
+tabsize=2,
+breaklines=true,
+numbers=none,
+inputencoding=utf8,
+escapeinside={(*}{*)},
+#1
+},
+underlay unbroken and first={%
+\path[draw=none] (interior.north west) rectangle node[white]{\includegraphics[width=10mm]{kotlin_file.png}} ([xshift=-18mm,yshift=-20mm]interior.north west);
+}
+}
+
+% Imitate syntax error
+\usepackage{ulem}
+\makeatletter
+\def\uwave{\bgroup \markoverwith{\lower7.5\p@\hbox{\sixly \textcolor{red}{\char58}}}\ULon}
+\font\sixly=lasy6 % does not re-load if already loaded, so no memory problem.
+\makeatother
+
+\usepackage{tikz}
+\usepackage[skins,breakable,listings]{tcolorbox}
+\usepackage{pgfplots}
+\usepackage{tikz-qtree}
+\usepackage{graphicx}
+
+\usepackage{inconsolata}
 %\usepackage{amsfonts}
 %\usepackage{amssymb}
 %\usepackage{tikz-qtree}
@@ -378,7 +506,7 @@ minimum height=0.11\columnwidth]
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\vspace{1\baselineskip}
+\vspace{\baselineskip}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -401,10 +529,10 @@ minimum height=0.11\columnwidth]
 \vspace{\baselineskip}
 
 \begin{itemize}
-\item Modeling requires lots of pen-and-paper derivation to derive efficient estimators
-\item Once the estimator has been derived, programmer implements the entire model
-\item Is it possible to automate probabilistic inference like AD did for deep learning?
+\item Probabilistic inference requires a lot of messy pen-and-paper derivation
+\item Once the estimator has been derived, programmer implements an ad-hoc algorithm
 \item Prior work in probabilistic programming focuses heavily on numerical methods
+\item Is it possible to use logical inference to automate probabilistic inference?
 \end{itemize}
 
 \vspace{\baselineskip}
@@ -423,16 +551,16 @@ The grammar of probabilistic modeling can be described approximately as follows:
 
 \begin{center}
 \begin{tabular*}{0.3\textwidth}{l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l}
-$\mathcal{D} \rightarrow \Gaussian$  & $\mathcal{V} \rightarrow \mathcal{V}, \mathcal{V}$      & $\mathcal{S} \rightarrow \mathcal{V} \sim \mathcal{D}$ & \mathcal{P} \rightarrow t \\
-$\mathcal{D} \rightarrow \Bernoulli$ & $\mathcal{P} \rightarrow P(\mathcal{V})$                & $\mathcal{E} \rightarrow \mathcal{V} + \mathcal{V}$    & \mathcal{P} \rightarrow t \\
-$\mathcal{D} \rightarrow \Dirichlet$ & $\mathcal{P} \rightarrow P(\mathcal{V}\mid\mathcal{V})$ & $\mathcal{E} \rightarrow \mathcal{V}\times\mathcal{V}$ & \mathcal{P} \rightarrow t \\
-$\mathcal{V} \rightarrow A \mid \ldots \mid Z$ &  $\mathcal{P} \rightarrow P(\mathcal{E})$ & & \\
+$\mathcal{P} \rightarrow \Gaussian$            & $\mathcal{V} \rightarrow \mathcal{V}, \mathcal{V}$      & $\mathcal{S} \rightarrow \mathcal{V} \sim \mathcal{P}$ & $\mathcal{P} \rightarrow \prod_{i = 1}^n \mathcal{P} \\
+$\mathcal{P} \rightarrow \Bernoulli$           & $\mathcal{P} \rightarrow P(\mathcal{V})$                & $\mathcal{E} \rightarrow \mathcal{V} \pm \mathcal{V}$  & $\mathcal{P} \rightarrow \sum_{i=1}^n \mathcal{P} \\
+$\mathcal{P} \rightarrow \Dirichlet$           & $\mathcal{P} \rightarrow P(\mathcal{V}\mid\mathcal{V})$ & $\mathcal{E} \rightarrow \mathcal{V}\times\mathcal{V}$ & $\mathcal{P} \rightarrow \int \mathcal{P} d\mathcal{V} \\
+$\mathcal{V} \rightarrow A \mid \ldots \mid Z$ & $\mathcal{P} \rightarrow P(\mathcal{E})$                & $\mathcal{E} \rightarrow \mathbb{E}[\mathcal{E}]$      & $\mathcal{P} \rightarrow \mathcal{P} \div \mathcal{P} \\
 \end{tabular*}
 \end{center}
 
 \vspace{\baselineskip}
 
-Given a distribution over a set $X$, we can \textit{sample} from it to produce a single element from that set, a \textit{random variable}:
+Given a distribution over a set $X$, we can \textit{sample} it to produce a \textit{random variable}:
 
 \vspace{\baselineskip}
 
@@ -451,7 +579,7 @@ Given a distribution over a set $X$, we can \textit{sample} from it to produce a
 %d \sim \mathcal{D}
 %$$
 
-The joint distribution $P(X, Y)$ is a distribution over the Cartesian product of the sets $X$ and $Y$, denoted $X \times Y$:
+The joint distribution $P(X, Y)$ is a distribution over the product space $X \times Y$:
 
 \vspace{\baselineskip}
 
@@ -478,26 +606,26 @@ If we have a joint distribution $P(X, Y)$ and see $Y = y$, this observation is c
 
 \vspace{\baselineskip}
 
-We can use Bayes' rule to exchange the order of conditioning as follows:
+We can use Bayes' rule to exchange the order of a conditional distribution as follows:
 
 \vspace{\baselineskip}
 
 \begin{prooftree}
-\AxiomC{$P(X \mid Y)$}
-\AxiomC{$P(Y)$}
+\AxiomC{$\overbrace{P(X \mid Y)}^{\text{Liklihood}}$}
+\AxiomC{$\overbrace{P(Y)}^{\text{Prior}}$}
 \RightLabel{Bayes}
-\BinaryInfC{$P(Y \mid X) \propto P(X \mid Y)P(Y)$}
+\BinaryInfC{$\underbrace{P(Y \mid X) \propto}_{\text{Normalize}} \underbrace{P(X \mid Y)}_{\text{Observe}}\underbrace{P(Y)}_{\text{Sample}}$}
 \end{prooftree}
 
 \vspace{\baselineskip}
 
-When a conditional distribution $P(X \mid Y)$ does not depend on its prior $Y$, or equivalently may be factorized, we may conclude that $X$ and $Y$ are independent:
+When a conditional distribution $P(X \mid Y)$ does not depend on its prior $Y$, or may be factorized into $P(X)P(Y)$, we conclude that $X$ and $Y$ are independent RVs:
 
 \vspace{\baselineskip}
 
 \begin{prooftree}
 \AxiomC{$P(X \mid Y) = P(X)$}
-\RightLabel{Ind\hspace{100pt}}
+\RightLabel{Indep\hspace{100pt}}
 \UnaryInfC{$X \perp Y$}
 \DisplayProof
 \AxiomC{$P(X, Y) = P(X)P(Y)$}
@@ -513,7 +641,7 @@ If a joint distribution  $P(X, Y \mid Z)$ can be factored as the product of cond
 
 \begin{prooftree}
 \AxiomC{$P(X,Y \mid Z) = P(X \mid Z)P(Y \mid Z)$}
-\RightLabel{CondInd}
+\RightLabel{CondIndep}
 \UnaryInfC{$X \perp Y \mid Z$ }
 \end{prooftree}
 
@@ -523,78 +651,71 @@ If a joint distribution  $P(X, Y \mid Z)$ can be factored as the product of cond
 
 \vspace{\baselineskip}
 
-To sample efficiently, we need to draw a sample from a uniform distribution (PRNG) and push it through some kind of function. But what function should we use to ensure samples converge to a given PDF in the limit? Unfortunately, such function does not exist in closed form for most distributions. We can only describe it indirectly.
+%To sample efficiently, we need to draw a sample from a uniform distribution (PRNG) and push it through some kind of function. But what function should we use to ensure samples converge to a given PDF in the limit? Unfortunately, such function does not exist in closed form for most distributions. We can only describe it indirectly.
+%
+%\vspace{\baselineskip}
+%
+%% https://en.wikipedia.org/wiki/Inverse_transform_sampling
+%\begin{prooftree}
+%\AxiomC{$x \sim P(X)$}
+%\AxiomC{$\texttt{CDF}: x \mapsto \int P(X = x)dx$}
+%\RightLabel{Draw}
+%\BinaryInfC{$x = \texttt{INV(CDF(PRNG()))}$}
+%\end{prooftree}
+%
+%\vspace{\baselineskip}
+
+There are various methods for combining probability distributions. For independent RVs, we might use the joint distribution or the convolution of the distributions:
 
 \vspace{\baselineskip}
 
-% https://en.wikipedia.org/wiki/Inverse_transform_sampling
 \begin{prooftree}
-\AxiomC{$x \sim P(X)$}
-\AxiomC{$\texttt{CDF}: x \mapsto \int P(X = x)dx$}
-\RightLabel{Draw}
-\BinaryInfC{$x = \texttt{INV(CDF(PRNG()))}$}
-\end{prooftree}
-
-\vspace{\baselineskip}
-
-If we have two distributions, how can we combine them to obtain numerical values? There are various ways to combine probability distributions. For independent random variables, the joint distribution is simply the product of their distributions:
-
-\vspace{\baselineskip}
-
 % https://en.wikipedia.org/wiki/Joint_probability_distribution#Joint_distribution_for_independent_variables
-\begin{prooftree}
 \AxiomC{$P(X)$}
 \AxiomC{$P(Y)$}
-\RightLabel{Join}
+\RightLabel{Join\hspace{70pt}}
 \BinaryInfC{$P(X, Y) = P(X)P(Y)$}
-\end{prooftree}
-
-\vspace{\baselineskip}
-
-For dependent random variables, we need to know the dependence structure. Suppose we knew they were related by a mathematical formula. The sum of two distributions is \textit{not} equivalent to the sum of their random variables. For independent random variables $X$ and $Y$, their sum is defined as convolution.
-
-\vspace{\baselineskip}
-
+\DisplayProof
 % https://en.wikipedia.org/wiki/Convolution_of_probability_distributions#Introduction
-\begin{prooftree}
 \AxiomC{$P(X)$}
 \AxiomC{$P(Y)$}
-\RightLabel{Conv}
+\RightLabel{Mix}
 \BinaryInfC{$P(X + Y) = P(X) * P(Y)$}
 \end{prooftree}
 
 \vspace{\baselineskip}
 
-Likewise, their product can be defined as an integral:
+For dependent RVs, we need to specify the dependence relation. In general, to combine two arbitrary RVs related by some dyadic function $f$, we need Fubini-Tonelli:
 
 \vspace{\baselineskip}
 
-% https://en.wikipedia.org/wiki/Product_distribution#Derivation_for_independent_random_variables
+% https://terrytao.wordpress.com/2015/10/12/275a-notes-2-product-measures-and-independence/
 \begin{prooftree}
-\AxiomC{$x \sim P(X)$}
-\AxiomC{$y \sim P(Y)$}
-\AxiomC{$z = xy$}
-\RightLabel{Conv}
-\TrinaryInfC{$P(Z = z) = \int P(X = x)P(Y=\frac{z}{x})\frac{1}{|x|}dx$}
+\AxiomC{$x \sim P(X)$, $y \sim P(Y)$}
+\AxiomC{$f: X \times Y \rightarrow Z$}
+\AxiomC{$z = f(x, y)$}
+\TrinaryInfC{$P(Z = z) = \int_{X \times Y} f(x, y)d(x \times y)$}
+\RightLabel{FuTon}
+\UnaryInfC{$\int_{Y}\int_{X} f(x, y)dxdy = \int_{X}\int_{Y} f(x, y)dydx$}
 \end{prooftree}
 
-\vspace{1\baselineskip}
+\vspace{\baselineskip}
 
-To remove a dimension from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or sum over all conditionals. The resulting distribution is called a \textit{marginal distribution}:
+To remove an RV from a joint distribution $P(X, Y)$ we can \textit{marginalize}, or integrate over the conditional. The resulting distribution is called a \textit{marginal distribution}:
 
-\vspace{1\baselineskip}
+\vspace{\baselineskip}
 
 \begin{prooftree}
 \AxiomC{$\Gamma \vdash P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
 \RightLabel{Margin}
-\UnaryInfC{$\Gamma \vdash P(X) \propto \sum_{y \in Y} P(X \mid Y = y)$}
+\UnaryInfC{$\Gamma \vdash P(X) \propto \int_{Y} P(X \mid Y = y)dy$}
 \end{prooftree}
 
-\vspace{1\baselineskip}
+\vspace{\baselineskip}
 
 \mysection{Probabilistic Circuits}
 
-\vspace{1\baselineskip}
+\vspace{\baselineskip}
 
 %By defining some elementary distributions and composing them by means of simple operators, we obtain a rich framework for probabilistic modeling. Recent work~\citep{choi2020probabilistic} has explored tractable models for probabilistic reasoning based on semiring algebras. Semirings are known to have many useful applications in graph theory~\citep{dolan2013fun} and formal languages~\citep{bernady2013efficient}.
 
@@ -647,77 +768,51 @@ $PC \rightarrow PC \otimes PC$
 
 \newpage
 
-\mysection{Latent variables are interpretable}
-
-\vspace{0.5\baselineskip}
-
-%\begin{center}
-%\input{../misc/fig_interactome.tex}
-%\end{center}
-
-\vspace{\baselineskip}
-
-Sorting the adjacency matrix of the protein interactome using the (approximate) MAP values of the $\AHvar_i$ reveals interpretable structure in the data.
-The higher density of edges along the diagonal reveals homophily.
-The block structure in the top left reveals stochastic equivalence.
-These features can also be seen in the MAP $\Theta$.
-
-\vspace{0.5\baselineskip}
-
 \mysection{DSL}
 
 \vspace{\baselineskip}
 
-\begin{center}
-\begin{tabular}{lccl}
-%    \toprule
-\multicolumn{4}{c}{Graph data}\\
-\midrule
-%\addlinespace[2pt]
-%\textcolor{red}{Random function model}
-Random function model & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel)$\\
-Latent class & $\larray_{ij}$ & $=$ & $\Lambda_{\AHvar_i\AHvar_j}\,\textrm{where} \,\AHvar_i \in \{1,\ldots,K\}$\\
-IRM & $\larray_{ij}$ & $=$ & $\Lambda_{\AHvar_i\AHvar_j}\,\textrm{where} \,\AHvar_i \in \{1,\ldots,\infty\}$\\
-Latent distance & $\larray_{ij}$ & $=$ & $-|\AHvar_i - \AHvar_j|$\\
-Eigenmodel &$\larray_{ij}$ & $=$ & $\AHvar_i'\Lambda \AHvar_j$\\
-LFRM & $\larray_{ij}$ & $=$ & $\AHvar_i'\Lambda \AHvar_j\,\textrm{where} \,\AHvar_i \in \{0,1\}^\infty$\\
-ILA & $\larray_{ij}$ & $=$ & $\sum_d \mathbb{I}_{U_{id}}\mathbb{I}_{U_{jd}}\Lambda^{(d)}_{U_{id}U_{jd}}\,\textrm{where} \,\AHvar_i \in \{0,\ldots,\infty\}^\infty$\\
-SMGB & $\AHfunction$ & $\dist$ & $\GP\,(0, \kernel_1 \otimes \kernel_2)$ \\
-%\midrule
-\addlinespace[4pt]
-\multicolumn{4}{c}{Real-valued array data}\\
-\midrule
-%\textcolor{red}{Random function model}
-Random function model & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel)$\\
-Mondrian process based & $\AHfunction$ & = & piece-wise constant random function\\
-PMF & $\larray_{ij}$ & $=$ & $\AHvar_i'V_j$\\
-GPLVM & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel \otimes \delta)$\\
-%Linear relational GP~\cite{Yu2008} & $\AHfunction$ & $\sim$ & $\GP\,(0, \kernel_1 \otimes \kernel_2)\,\textrm{where} \,\kernel_i\,\textrm{is linear} $\\
-%\bottomrule
-\end{tabular}
-\end{center}
+Our DSL implements a probabilistic grammar for Gaussian SPNs.
+
+\null\hspace*{2cm}\begin{minipage}[c]{0.9\columnwidth}
+\centering
+\begin{kotlinlisting}
+val g0 by Gaussian(mu = 0.1,  sigma = 1.0)
+val g1 by Gaussian(mu = 5.0,  sigma = 1.0)
+val g2 by Gaussian(mu = 10.0, sigma = 1.0)
+val g3 by Gaussian(mu = 5.0,  sigma = 2.0)
+val g4 by g0 + g1 + g2
+val g5 by g3 * g4
+compare(g0, g1, g2, g3, g4, g5).show()
+\end{kotlinlisting}
+\end{minipage}
 
 \vspace{\baselineskip}
 
-\mysection{Results}
+The program written above produces the following image when evaluated:
 
 \vspace{\baselineskip}
 
-\begin{center}
-\begin{tabular}{r | r r r | r r r | r r r}
-\multicolumn{10}{c}{AUC results} \\
-\addlinespace[2pt]
-Data set & \multicolumn{3}{c|}{High school} & \multicolumn{3}{c|}{NIPS} & \multicolumn{3}{c}{Protein} \\
-Latent dim. & 1 & 2 & 3 & 1 & 2 & 3 & 1 & 2 & 3 \\
-\midrule
-PMF                   & 0.747 & 0.792 & 0.792 & 0.729 & 0.789 & 0.820 & 0.787 & 0.810 & 0.841 \\
-Eigenmodel            & 0.742 & 0.806 & 0.806 & 0.789 & 0.818 & 0.845 & 0.805 & 0.866 & 0.882 \\
-GPLVM                 & 0.744 & 0.775 & 0.782 & 0.888 & 0.876 & 0.883 & 0.877 & 0.883 & 0.873 \\
-RFM & \textbf{0.815} & \textbf{0.827} & \textbf{0.820} & \textbf{0.907} & \textbf{0.914} & \textbf{0.919} & \textbf{0.903} & \textbf{0.910} & \textbf{0.912}
-\end{tabular}
-\end{center}
+\begin{minipage}[c]{\columnwidth}
+\centering
+\includegraphics[width=0.7\columnwidth]{plot.png}
+\end{minipage}
 
-\vspace{30pt}
+\vspace{\baselineskip}
+
+\mysection{Contributions}
+
+\vspace{\baselineskip}
+
+\begin{itemize}
+  \item Lifts numerical computation graph to the domain of probability monads
+  \item Implements general purpose combinators for probability distributions
+  \item Implements domain-specific reductions for the algebra of random variables
+  \item Allows flexible rewriting to optimize for e.g. speed, numerical stability
+  \item Only lower the computation to numerical values when absolutely required
+\end{itemize}
+
+\vspace{\baselineskip}
 
 \begin{tabular}{cc}
 \begin{minipage}[c]{0.8\columnwidth}
