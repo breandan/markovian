@@ -529,10 +529,12 @@ underlay unbroken and first={%
 \vspace{\baselineskip}
 
 \begin{itemize}
-\item Probabilistic inference requires a lot of messy pen-and-paper derivation
-\item Once the estimator has been derived, programmer implements an ad-hoc algorithm
-\item Prior work in probabilistic programming focuses heavily on numerical methods
-\item Is it possible to use logical inference to automate probabilistic inference?
+\item Classical statistical modeling and inference requires pen-and-paper derivation
+%\item Once the estimator has been derived, programmer implements an ad-hoc algorithm
+%\item Prior work in probabilistic programming focuses heavily on numerical methods
+\item Computers are steadily improving at logical reasoning and symbolic processing
+\item Can we employ computer-aided reasoning to assist with probabilistic modeling?
+\item Can we design an inference system to derive algorithms from first principles?
 \end{itemize}
 
 \vspace{\baselineskip}
@@ -565,10 +567,10 @@ Given a distribution over a set $X$, we can \textit{sample} it to produce a \tex
 \vspace{\baselineskip}
 
 \begin{prooftree}
-\AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb{R}^{+}$}
+\AxiomC{$\Gamma \vdash P(X): X \times \Sigma \rightarrow \mathbb{R}^{+}$}
 \AxiomC{$x \sim P(X)$}
 \RightLabel{Sample}
-\BinaryInfC{$\Gamma \vdash x: (X\rightarrow \mathbb{R}^{+}) \leadsto X$}
+\BinaryInfC{$\Gamma \vdash x: (X \times \Sigma \rightarrow \mathbb{R}^{+}) \leadsto X$}
 \end{prooftree}
 
 \vspace{\baselineskip}
@@ -584,10 +586,10 @@ The joint distribution $P(X, Y)$ is a distribution over the product space $X \ti
 \vspace{\baselineskip}
 
 \begin{prooftree}
-\AxiomC{$\Gamma \vdash P(X): X \rightarrow \mathbb R^{+}$}
-\AxiomC{$\Gamma \vdash P(Y): Y \rightarrow \mathbb R^{+}$}
+\AxiomC{$\Gamma \vdash P(X): X \times \Sigma \rightarrow \mathbb R^{+}$}
+\AxiomC{$\Gamma \vdash P(Y): Y \times \Sigma \rightarrow \mathbb R^{+}$}
 \RightLabel{Joint}
-\BinaryInfC{$\Gamma \vdash P(X, Y): X \times Y \rightarrow \mathbb R^{+}$}
+\BinaryInfC{$\Gamma \vdash P(X, Y): X \times Y \times \Sigma \rightarrow \mathbb R^{+}$}
 \end{prooftree}
 
 \vspace{\baselineskip}
@@ -598,10 +600,10 @@ If we have a joint distribution $P(X, Y)$ and see $Y = y$, this observation is c
 % https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#page=325
 
 \begin{prooftree}
-\AxiomC{$\Gamma \vdash P(X, Y): X \times Y\rightarrow\mathbb{R}^+$}
+\AxiomC{$\Gamma \vdash P(X, Y): X \times Y \times \Sigma \rightarrow\mathbb{R}^+$}
 \AxiomC{$\Gamma \vdash y: Y$}
 \RightLabel{Cond}
-\BinaryInfC{$\Gamma \vdash P(X \mid Y = y): X\rightarrow\mathbb{R}^+$}
+\BinaryInfC{$\Gamma \vdash P(X \mid Y = y): X \times \Sigma \rightarrow\mathbb{R}^+$}
 \end{prooftree}
 
 \vspace{\baselineskip}
@@ -651,21 +653,21 @@ If a joint distribution  $P(X, Y \mid Z)$ can be factored as the product of cond
 
 \vspace{\baselineskip}
 
-%To sample efficiently, we need to draw a sample from a uniform distribution (PRNG) and push it through some kind of function. But what function should we use to ensure samples converge to a given PDF in the limit? Unfortunately, such function does not exist in closed form for most distributions. We can only describe it indirectly.
-%
-%\vspace{\baselineskip}
-%
-%% https://en.wikipedia.org/wiki/Inverse_transform_sampling
-%\begin{prooftree}
-%\AxiomC{$x \sim P(X)$}
-%\AxiomC{$\texttt{CDF}: x \mapsto \int P(X = x)dx$}
-%\RightLabel{Draw}
-%\BinaryInfC{$x = \texttt{INV(CDF(PRNG()))}$}
-%\end{prooftree}
-%
-%\vspace{\baselineskip}
+To sample, we can use the Kolmogorov-Smirnov transform on a uniform PRNG:
 
-There are various methods for combining probability distributions. For independent RVs, we might use the joint distribution or the convolution of the distributions:
+\vspace{\baselineskip}
+
+% https://en.wikipedia.org/wiki/Inverse_transform_sampling
+\begin{prooftree}
+\AxiomC{$x \sim P(X)$}
+\AxiomC{$\texttt{CDF}: x \mapsto \int P(X = x)dx$}
+\RightLabel{Draw}
+\BinaryInfC{$x = \texttt{INV(CDF(PRNG()))}$}
+\end{prooftree}
+
+\vspace{\baselineskip}
+
+There are various ways of combining two probability distributions. For independent RVs, we could combine them using the product or convolution distribution:
 
 \vspace{\baselineskip}
 
@@ -679,13 +681,13 @@ There are various methods for combining probability distributions. For independe
 % https://en.wikipedia.org/wiki/Convolution_of_probability_distributions#Introduction
 \AxiomC{$P(X)$}
 \AxiomC{$P(Y)$}
-\RightLabel{Mix}
+\RightLabel{Conv}
 \BinaryInfC{$P(X + Y) = P(X) * P(Y)$}
 \end{prooftree}
 
 \vspace{\baselineskip}
 
-For dependent RVs, we need to specify the dependence relation. In general, to combine two arbitrary RVs related by some dyadic function $f$, we need Fubini-Tonelli:
+In general, to combine two arbitrary RVs, we need to know their dependence relation. If two variables are related by a dyadic function $f(x, y)$, we can use Fubini-Tonelli:
 
 \vspace{\baselineskip}
 
@@ -706,9 +708,9 @@ To remove an RV from a joint distribution $P(X, Y)$ we can \textit{marginalize},
 \vspace{\baselineskip}
 
 \begin{prooftree}
-\AxiomC{$\Gamma \vdash P(X, Y): X\times Y\rightarrow\mathbb{R}^+$}
+\AxiomC{$\Gamma \vdash P(X, Y): X\times Y \times \Sigma \rightarrow\mathbb{R}^+$}
 \RightLabel{Margin}
-\UnaryInfC{$\Gamma \vdash P(X) \propto \int_{Y} P(X \mid Y = y)dy$}
+\UnaryInfC{$\Gamma \vdash P(X): X \times \Sigma \rightarrow\mathbb{R}^+ \propto \int_{Y} P(X \mid Y = y)dy$}
 \end{prooftree}
 
 \vspace{\baselineskip}
@@ -735,43 +737,66 @@ A semiring algebra has two operators, $\oplus$ and $\otimes$ which are closed un
 
 \vspace{\baselineskip}
 
-% TODO: talk about conjugacy and  symmetries
+% TODO: talk about conjugacy and symmetries
 
-The sum product network (SPN) is a commutative semiring over distributions:
+The sum-product network (SPN) is a commutative semiring on simple distributions:
 
 \vspace{\baselineskip}
 
 \begin{center}
-\begin{tabular}{ccc}
+\begin{tabular*}{0.3\textwidth}{l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l}
 $PC \rightarrow v \sim \mathcal{D}$ &
 $PC \rightarrow PC \oplus PC$ &
 $PC \rightarrow PC \otimes PC$
 \end{tabular}
 \end{center}
 
-%Given a BN, we can compile it to a SPN using the following procedure from Butz (2019):
+\vspace{\baselineskip}
+
+A Bayesian belief network or Bayes network (BN) is an acyclic DGM of the form:
+
+\begin{equation}
+P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i \mid \texttt{parents}(x_i))
+\end{equation}
+
+\vspace{\baselineskip}
+
+Given a BN, we can compile it to an SPN using the procedure from Butz (2019):
 %
 %% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
 %
-%\begin{algorithm}
-%\begin{algorithmic}[1]
-%\Procedure{BayesNetToSPN}{$bn$: BN}: SPN
-%\State $ac \leftarrow $\Call{VariableEliminate}{$bn$}
-%\State $ac \leftarrow $\Call{RedistributeParameters}{$ac$}
-%\State $ac \leftarrow $\Call{CompileMarginalized}{$ac$}
-%\State \Return{\Call{ReduceCircuit}{$ac$}}
-%\EndProcedure\\
-%\Procedure{ReduceCircuit}{$ac_0$: AC}: SPN
-%\State $ac_1 \leftarrow $ \Call{AddTerminalNodes}{$ac_0$}
-%\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
-%\If{$ac_0 = ac_1$}
-%\State \Return{$ac_0$}
-%\Else
-%\State \Return{\Call{ReduceCircuit}{$ac_1$}}
-%\EndIf
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
+
+\vspace{\baselineskip}
+
+\begin{tabular}[t]{@{}ll}
+\begin{minipage}[c]{0.5\columnwidth}
+\begin{algorithm}
+\begin{algorithmic}
+\Procedure{BN2SPN}{$bn$: BN}: SPN
+\State $ac \leftarrow $\Call{VarEliminate}{$bn$}
+\State $ac \leftarrow $\Call{RedistParams}{$ac$}
+\State $ac \leftarrow $\Call{CompileMargin}{$ac$}
+\State \Return{\Call{Reduce}{$ac$}}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{minipage}
+&
+\begin{minipage}[c]{0.5\columnwidth}
+\begin{algorithm}
+\begin{algorithmic}
+\Procedure{Reduce}{$ac_0$: AC}: SPN
+\State $ac_1 \leftarrow $ \Call{AddTerminals}{$ac_0$}
+\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
+\State $\textbf{if } ac_0 = ac_1 \textbf{ then return } ac_0$
+\State $\textbf{else return}$ \Call{Reduce}{$ac_1$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{minipage}
+\end{tabular}
+
+\vspace{\baselineskip}
 
 \newpage
 
@@ -800,8 +825,8 @@ val g0 by Gaussian(0.1,  1.0)
 val g1 by Gaussian(5.0,  1.0)
 val g2 by Gaussian(10.0, 1.0)
 val g3 by Gaussian(5.0,  2.0)
-val g4 by g0 + g1 + g2
-val g5 by g3 * g4
+val f4 by g0 + g1 + g2
+val f5 by g3 * f4
 compare(g0, g1, g2, g3
         g4, g5).show()
 \end{kotlinlisting}
@@ -841,7 +866,7 @@ Bayesian linear regression
 \begin{minipage}[c]{0.5\columnwidth}
 \centering
 \includegraphics[width=\columnwidth]{plot.png}
-Sum product network
+Sum-product network
 \end{minipage}
 \end{tabular}
 
@@ -856,7 +881,7 @@ We plan extend this DSL to support discriminative models and statistical inferen
 \vspace{\baselineskip}
 
 \begin{itemize}
-  \item Lift numerical computation graph into the domain of probability monads
+  \item Lift numerical computation graph into the domain of probability kernels
   \item Implements general-purpose combinators for various probability distributions
   \item Implements domain-specific estimators for the algebra of random variables
   \item Allows flexible algebraic rewriting to optimize for e.g. latency or numerical stability
