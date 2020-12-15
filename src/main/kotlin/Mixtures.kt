@@ -191,6 +191,14 @@ fun main() {
 
   // TODO: test distributivity holds
   compare(g0, g1, g2, g3, g4, g5).display()
+//  val a  by Gaussian("", .0, 9.0)
+//  val b  by Gaussian("", .0, 9.0)
+//  val f1 by a * 2 + b
+//  val f2 by a * 3 + b
+//  val v  by Gaussian("", .5, .5)
+//  val y1 by Gaussian(f1, v)
+//  val y2 by Gaussian(f2, v)
+//  compare(f1, f2, y3, y4).show()
 }
 
 //  P { g1 < g2 }.given()
