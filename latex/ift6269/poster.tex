@@ -755,15 +755,16 @@ $PC \rightarrow PC \otimes PC$
 
 A Bayesian belief network or Bayes network (BN) is an acyclic DGM of the form:
 
-\begin{equation}
+\begin{equation*}
 P(x_1,\ldots,x_D)=\prod_{i=1}^D P(x_i \mid \texttt{parents}(x_i))
-\end{equation}
+\end{equation*}
 
 \vspace{\baselineskip}
 
 Given a BN, we can compile it to an SPN using the procedure from Butz (2019):
-%
-%% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
+
+% https://pgm2020.cs.aau.dk/wp-content/uploads/2020/09/butz20.pdf#page=6
+% Topsort: https://epubs.siam.org/doi/pdf/10.1137/0210049#page=17
 %
 
 \vspace{\baselineskip}
@@ -772,11 +773,11 @@ Given a BN, we can compile it to an SPN using the procedure from Butz (2019):
 \begin{minipage}[c]{0.5\columnwidth}
 \begin{algorithm}
 \begin{algorithmic}
-\Procedure{BN2SPN}{$bn$: BN}: SPN
-\State $ac \leftarrow $\Call{VarEliminate}{$bn$}
-\State $ac \leftarrow $\Call{RedistParams}{$ac$}
-\State $ac \leftarrow $\Call{CompileMargin}{$ac$}
-\State \Return{\Call{Reduce}{$ac$}}
+\Procedure{BN2SPN}{b: BN}: SPN
+\State c $\leftarrow $\Call{VariableEliminate}{b}
+\State s $\leftarrow $\Call{RedistributeParams}{c}
+\State s $\leftarrow $\Call{CompileMarginalized}{s}
+\State \Return{\Call{Reduce}{s}}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -785,11 +786,11 @@ Given a BN, we can compile it to an SPN using the procedure from Butz (2019):
 \begin{minipage}[c]{0.5\columnwidth}
 \begin{algorithm}
 \begin{algorithmic}
-\Procedure{Reduce}{$ac_0$: AC}: SPN
-\State $ac_1 \leftarrow $ \Call{AddTerminals}{$ac_0$}
-\State $ac_1 \leftarrow $ \Call{MergeProducts}{$ac_1$}
-\State $\textbf{if } ac_0 = ac_1 \textbf{ then return } ac_0$
-\State $\textbf{else return}$ \Call{Reduce}{$ac_1$}
+\Procedure{Reduce}{s$_0$: SPN}: SPN
+\State s$_1 \leftarrow$ \Call{AddTerminals}{s$_0$}
+\State s$_1 \leftarrow$ \Call{MergeProducts}{s$_1$}
+\State $\textbf{if } $s$_0 =$ s$_1$ \textbf{ then return } s$_1$
+\State $\textbf{else return }$\Call{Reduce}{s$_1$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
