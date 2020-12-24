@@ -553,10 +553,10 @@ The grammar of probabilistic modeling can be described approximately as follows:
 
 \begin{center}
 \begin{tabular*}{0.3\textwidth}{l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l @{\extracolsep{\fill}} l}
-$\mathcal{P} \rightarrow \Gaussian$            & $\mathcal{V} \rightarrow \mathcal{V}, \mathcal{V}$      & $\mathcal{S} \rightarrow \mathcal{V} \sim \mathcal{P}$ & $\mathcal{P} \rightarrow \prod_{i = 1}^n \mathcal{P} \\
-$\mathcal{P} \rightarrow \Bernoulli$           & $\mathcal{P} \rightarrow P(\mathcal{V})$                & $\mathcal{E} \rightarrow \mathcal{V} \pm \mathcal{V}$  & $\mathcal{P} \rightarrow \sum_{i=1}^n \mathcal{P} \\
-$\mathcal{P} \rightarrow \Dirichlet$           & $\mathcal{P} \rightarrow P(\mathcal{V}\mid\mathcal{V})$ & $\mathcal{E} \rightarrow \mathcal{V}\times\mathcal{V}$ & $\mathcal{P} \rightarrow \int \mathcal{P} d\mathcal{V} \\
-$\mathcal{V} \rightarrow A \mid \ldots \mid Z$ & $\mathcal{P} \rightarrow P(\mathcal{E})$                & $\mathcal{E} \rightarrow \mathbb{E}[\mathcal{E}]$      & $\mathcal{P} \rightarrow \mathcal{P} \div \mathcal{P} \\
+$\mathcal{D} \rightarrow \Gaussian$            & $\mathcal{V} \rightarrow \mathcal{V}, \mathcal{V}$                 & $\mathcal{S} \rightarrow \mathcal{V} \sim \mathcal{P}$ & $\mathcal{P} \rightarrow \prod_{i = 1}^n \mathcal{P} \\
+$\mathcal{D} \rightarrow \Bernoulli$           & $\mathcal{P} \rightarrow \mathcal{P}(\mathcal{V})\mid \mathcal{D}$ & $\mathcal{E} \rightarrow \mathcal{V} \pm \mathcal{V}$  & $\mathcal{P} \rightarrow \sum_{i=1}^n \mathcal{P} \\
+$\mathcal{D} \rightarrow \Dirichlet$           & $\mathcal{P} \rightarrow \mathcal{P}(\mathcal{V}\mid\mathcal{V})$  & $\mathcal{E} \rightarrow \mathcal{V}\times\mathcal{V}$ & $\mathcal{P} \rightarrow \int \mathcal{P} d\mathcal{V} \\
+$\mathcal{V} \rightarrow A \mid \ldots \mid Z$ & $\mathcal{P} \rightarrow \mathcal{P}(\mathcal{E})$                 & $\mathcal{E} \rightarrow \mathbb{E}[\mathcal{E}]$      & $\mathcal{P} \rightarrow \mathcal{P} \div \mathcal{P} \\
 \end{tabular*}
 \end{center}
 
@@ -613,7 +613,7 @@ We can use Bayes' rule to exchange the order of a conditional distribution as fo
 \vspace{\baselineskip}
 
 \begin{prooftree}
-\AxiomC{$\overbrace{P(X \mid Y)}^{\text{Liklihood}}$}
+\AxiomC{$\overbrace{P(X \mid Y)}^{\text{Likelihood}}$}
 \AxiomC{$\overbrace{P(Y)}^{\text{Prior}}$}
 \RightLabel{Bayes}
 \BinaryInfC{$\underbrace{P(Y \mid X) \propto}_{\text{Normalize}} \underbrace{P(X \mid Y)}_{\text{Observe}}\underbrace{P(Y)}_{\text{Sample}}$}
@@ -708,7 +708,7 @@ To remove an RV from a joint distribution $P(X, Y)$ we can \textit{marginalize},
 \vspace{\baselineskip}
 
 \begin{prooftree}
-\AxiomC{$\Gamma \vdash P(X, Y): X\times Y \times \Sigma \rightarrow\mathbb{R}^+$}
+\AxiomC{$\Gamma \vdash P(X, Y): X \times Y \times \Sigma \rightarrow\mathbb{R}^+$}
 \RightLabel{Margin}
 \UnaryInfC{$\Gamma \vdash P(X): X \times \Sigma \rightarrow\mathbb{R}^+ \propto \int_{Y} P(X \mid Y = y)dy$}
 \end{prooftree}
@@ -835,7 +835,7 @@ compare(g0, g1, g2, g3
 
 \vspace{\baselineskip}
 
-We can depict the sequential programs written above as a computational graphs. The topology of this data structure is permutation invariant to instruction reording.
+We can depict the sequential programs written above as computational graphs. The topology of this data structure is permutation invariant to instruction reordering.
 
 \vspace{\baselineskip}
 
