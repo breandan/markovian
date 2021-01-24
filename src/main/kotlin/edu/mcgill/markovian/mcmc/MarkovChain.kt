@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AtomicLongMap
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
+import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.streams.asStream
 import kotlin.system.measureTimeMillis
@@ -12,30 +13,32 @@ fun main() {
   val data =
     "lorem ipsum dolor sit amet, consectetur adipiscing elit. aliquam tempus nisi eu nisl gravida, in pretium tellus cursus. duis facilisis malesuada ligula et interdum. donec ac libero et dui tempus bibendum. donec porttitor mollis accumsan. sed urna turpis, consectetur sit amet gravida vitae, pellentesque in libero. quisque erat lorem, tincidunt eu vestibulum eu, dapibus nec felis. ut eu purus tortor. nulla eros leo, porttitor vel elit eget, tempor blandit metus. proin congue lobortis pretium. nulla eget pellentesque risus. nam ultrices quis tellus ut tincidunt. morbi vestibulum ipsum eu elementum scelerisque. fusce aliquam lobortis urna vel rhoncus. duis ut rhoncus purus, id auctor odio. donec lobortis ac enim in placerat. donec placerat nec lectus a bibendum.".asSequence()
 
+  val mc = data.toMarkovChain(memory = 2)
+  println("Ergodic: " + mc.isErgodic())
+  println("Tokens: " + mc.size)
   measureTimeMillis {
-    val mc = data.toMarkovChain()
-    measureTimeMillis {
-      val sample = mc.sample().take(100).toList()
-      println("Sample: " + sample.joinToString(""))
-      println("Ergodic: " + mc.isErgodic())
-    }.also { println("Sampling time: $it ms") }
-  }.also { println("Total time: $it ms") }
+    val sample = mc.sample().take(100).flatten()
+    println("Sample: " + sample.joinToString(""))
+  }.also { println("Sampling time: $it ms") }
 }
 
-fun <T> Sequence<T>.toMarkovChain() =
-  MarkovChain<T>().also { mc ->
-    asStream().parallel().reduce { prev, curr ->
-      mc.observe(prev to curr)
-      curr
-    }
+fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
+  MarkovChain<List<T>>().also { mc ->
+    chunked(memory).asStream().parallel()
+      .reduce { prev, curr ->
+        mc.observe(prev to curr)
+        curr
+      }
   }
 
-class MarkovChain<T> {
+class MarkovChain<T>(
+  val counts: AtomicLongMap<Pair<T, T>> = AtomicLongMap.create()
+) {
   val keys
     get() = counts.asMap().keys
-      .flatMap { listOf(it.first, it.second) }.distinct()
+      .map { listOf(it.first, it.second) }
+      .flatten().distinct()
   val size get() = keys.size
-  val counts = AtomicLongMap.create<Pair<T, T>>()
 
   fun sample() =
     transitionMatrix().let { it to it.cdfs() }
@@ -47,7 +50,8 @@ class MarkovChain<T> {
           },
           nextFunction = {
             this[cdfs[keys.indexOf(it)].sample()]
-          })
+          }
+        )
       }
 
   fun isErgodic() =
@@ -76,7 +80,7 @@ class MarkovChain<T> {
 
 // Returns the Cartesian product of two sets
 operator fun <T> Set<T>.times(s: Set<T>) =
-  flatMap { l -> s.map { r -> l to r }.toSet() }.toSet()
+  flatMap { ti -> s.map { ti to it }.toSet() }.toSet()
 
 fun Ndarray<Double, D2>.cdfs() =
   (0 until shape[0]).map { this[it].toList().cdf() }
@@ -90,4 +94,5 @@ fun List<Number>.cdf(): CDF = CDF(
 class CDF(val cdf: List<Double>): List<Double> by cdf
 
 fun CDF.sample(rand: Double = Random.nextDouble()) =
-  indices.first { i -> 0 < this[i] - rand }
+  cdf.binarySearch { it.compareTo(rand) }
+    .let { if (it < 0) abs(it) - 1 else it }
