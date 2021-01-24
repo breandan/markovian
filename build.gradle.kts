@@ -46,6 +46,12 @@ dependencies {
   implementation("org.jetbrains.kotlinx.multik:multik-default:$multik_version")
 }
 
+tasks {
+  compileKotlin {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
+  }
+}
+
 application {
   mainClassName = "DSLKt"
 }
