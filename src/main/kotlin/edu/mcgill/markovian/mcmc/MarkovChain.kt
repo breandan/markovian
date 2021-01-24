@@ -4,17 +4,20 @@ import com.google.common.util.concurrent.AtomicLongMap
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
+import java.io.File
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.streams.asStream
 import kotlin.system.measureTimeMillis
 
-fun main() {
-  val data =
-    "lorem ipsum dolor sit amet, consectetur adipiscing elit. aliquam tempus nisi eu nisl gravida, in pretium tellus cursus. duis facilisis malesuada ligula et interdum. donec ac libero et dui tempus bibendum. donec porttitor mollis accumsan. sed urna turpis, consectetur sit amet gravida vitae, pellentesque in libero. quisque erat lorem, tincidunt eu vestibulum eu, dapibus nec felis. ut eu purus tortor. nulla eros leo, porttitor vel elit eget, tempor blandit metus. proin congue lobortis pretium. nulla eget pellentesque risus. nam ultrices quis tellus ut tincidunt. morbi vestibulum ipsum eu elementum scelerisque. fusce aliquam lobortis urna vel rhoncus. duis ut rhoncus purus, id auctor odio. donec lobortis ac enim in placerat. donec placerat nec lectus a bibendum.".asSequence()
+fun main(args: Array<String>) {
+  println("Training data: ${args[0]}")
+  val data = File(args[0]).walkTopDown()
+    .filter { it.extension == "kt" }
+    .joinToString { it.readText() }
+    .take(100000).asSequence()
 
-  val mc = data.toMarkovChain(memory = 2)
-  println("Ergodic: " + mc.isErgodic())
+  val mc = data.toMarkovChain(memory = 3)
   println("Tokens: " + mc.size)
   measureTimeMillis {
     val sample = mc.sample().take(100).flatten()
@@ -31,14 +34,15 @@ fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
       }
   }
 
-class MarkovChain<T>(
-  val counts: AtomicLongMap<Pair<T, T>> = AtomicLongMap.create()
-) {
+class MarkovChain<T>(val maxTokens: Int = 200) {
   val keys
-    get() = counts.asMap().keys
+    get() = counts.asMap().entries.asSequence()
+      .sortedByDescending { it.value }
+      .take(maxTokens).map { it.key }
       .map { listOf(it.first, it.second) }
-      .flatten().distinct()
+      .flatten().distinct().toList()
   val size get() = keys.size
+  val counts = AtomicLongMap.create<Pair<T, T>>()
 
   fun sample() =
     transitionMatrix().let { it to it.cdfs() }
@@ -54,11 +58,10 @@ class MarkovChain<T>(
         )
       }
 
-  fun isErgodic() =
-    transitionMatrix().let { it ->
-      mk.linalg.pow(it + mk.identity(size), size)
-        .all { 0.0 < it }
-    }
+  fun isErgodic() = transitionMatrix().let { it ->
+    mk.linalg.pow(it + mk.identity(size), size)
+      .all { 0.0 < it }
+  }
 
   private operator fun get(index: Int) = keys[index]
 
@@ -73,9 +76,8 @@ class MarkovChain<T>(
   fun observe(pair: Pair<T, T>) =
     counts.incrementAndGet(pair)
 
-  operator fun get(pair: Pair<T, T>) = counts.get(pair)
   operator fun get(i: Int, j: Int) =
-    keys.toList().let { this[it[i] to it[j]] }
+    counts[keys[i] to keys[j]]
 }
 
 // Returns the Cartesian product of two sets

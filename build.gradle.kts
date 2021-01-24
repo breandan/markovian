@@ -50,6 +50,12 @@ tasks {
   compileKotlin {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
   }
+
+  val codeSynth by creating(JavaExec::class) {
+    main = "edu.mcgill.markovian.mcmc.MarkovChainKt"
+    classpath = sourceSets["main"].runtimeClasspath
+    args = listOf(findProperty("train")?.toString() ?: projectDir.path)
+  }
 }
 
 application {

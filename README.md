@@ -11,6 +11,14 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
 * Is there a [formula](https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulae) for propagating uncertainty through elementary functions?
 
+## Usage
+
+The following command will run the code synthesis demo:
+
+```
+./gradlew codeSynth -P train=[PATH_TO_TRAINING_DATA]
+```
+
 ## Example
 
 Suppose we have two Gaussian distributions with known parameters and want to combine them somehow:
