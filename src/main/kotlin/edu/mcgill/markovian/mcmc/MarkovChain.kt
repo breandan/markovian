@@ -13,7 +13,7 @@ import kotlin.system.measureTimeMillis
 fun main(args: Array<String>) {
   println("Training data: ${args[0]}")
   val data = File(args[0]).walkTopDown()
-    .filter { it.extension == "kt" }
+    .filter { it.extension == "py" }
     .joinToString { it.readText() }.asSequence()
 
   val mc = data.toMarkovChain(memory = 3)

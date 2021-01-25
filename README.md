@@ -36,6 +36,22 @@ fun test = projection be
                      }
 ```
 
+```python
+class Detection_instring else class_componse_source)
+           first_list_end]
+
+                           PVOID),
+    exception must in not instarted the commension.
+
+                 tokens = 0
+            error:
+             
+       def __name:  line, untile_path)
+           no blockThreader sys.get_paracter)
+        @rtype:  breated line_filenance',
+            if isinstack if not sequeue_size = node):
+```
+
 ## Example
 
 Suppose we have two Gaussian distributions with known parameters and want to combine them somehow:
