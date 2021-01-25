@@ -19,6 +19,23 @@ The following command will run the code synthesis demo:
 ./gradlew codeSynth -P train=[PATH_TO_TRAINING_DATA]
 ```
 
+This should produce something like the following text:
+
+```kotlin
+fun test = projection be
+       val private fun checkbox(): String {
+                  }
+
+    fun box(): String {
+         as String {
+      return "test org.rust
+       fun String {
+       s
+                       }
+           va     val box(): String {
+                     }
+```
+
 ## Example
 
 Suppose we have two Gaussian distributions with known parameters and want to combine them somehow:
