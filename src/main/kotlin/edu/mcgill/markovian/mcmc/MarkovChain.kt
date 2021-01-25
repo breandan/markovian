@@ -26,22 +26,24 @@ fun main(args: Array<String>) {
 
 fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
   MarkovChain<List<T>>().also { mc ->
-    chunked(memory).asStream().parallel()
+    (0 until memory)
+      .flatMap { drop(it).chunked(memory) }
+      .asSequence().asStream().parallel()
       .reduce { prev, curr ->
         mc.observe(prev to curr)
         curr
       }
   }
 
-class MarkovChain<T>(val maxTokens: Int = 1000) {
-  val keys by lazy {
+class MarkovChain<T>(val maxTokens: Int = 2000) {
+  private val keys by lazy {
     counts.asMap().entries.asSequence()
       .sortedByDescending { it.value }
       .take(maxTokens).map { it.key }
       .map { listOf(it.first, it.second) }
       .flatten().distinct().toList()
   }
-  val size get() = keys.size
+  val size by lazy { keys.size }
   val counts = AtomicLongMap.create<Pair<T, T>>()
 
   fun sample() =
