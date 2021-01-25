@@ -14,13 +14,12 @@ fun main(args: Array<String>) {
   println("Training data: ${args[0]}")
   val data = File(args[0]).walkTopDown()
     .filter { it.extension == "kt" }
-    .joinToString { it.readText() }
-    .take(100000).asSequence()
+    .joinToString { it.readText() }.asSequence()
 
   val mc = data.toMarkovChain(memory = 3)
   println("Tokens: " + mc.size)
   measureTimeMillis {
-    val sample = mc.sample().take(100).flatten()
+    val sample = mc.sample().take(200).flatten()
     println("Sample: " + sample.joinToString(""))
   }.also { println("Sampling time: $it ms") }
 }
@@ -34,13 +33,14 @@ fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
       }
   }
 
-class MarkovChain<T>(val maxTokens: Int = 200) {
-  val keys
-    get() = counts.asMap().entries.asSequence()
+class MarkovChain<T>(val maxTokens: Int = 1000) {
+  val keys by lazy {
+    counts.asMap().entries.asSequence()
       .sortedByDescending { it.value }
       .take(maxTokens).map { it.key }
       .map { listOf(it.first, it.second) }
       .flatten().distinct().toList()
+  }
   val size get() = keys.size
   val counts = AtomicLongMap.create<Pair<T, T>>()
 
