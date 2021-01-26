@@ -47,6 +47,7 @@ class MarkovChain<T>(
   val maxTokens: Int = 2000
 ) {
   val counts = AtomicLongMap.create<Pair<T, T>>()
+
   init {
     sequence.zipWithNext().asStream().parallel()
       .forEach { (tp, tn) ->
@@ -85,7 +86,7 @@ class MarkovChain<T>(
   )
 
   fun isErgodic() =
-    mk.linalg.pow(tm + mk.identity(size), size)
+    mk.linalg.pow(tm, (size - 1) * (size - 1) + 1)
       .all { 0.0 < it }
 
   private operator fun get(index: Int) = keys[index]
