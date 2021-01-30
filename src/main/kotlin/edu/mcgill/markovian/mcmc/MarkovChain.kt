@@ -38,61 +38,62 @@ fun main(args: Array<String>) {
 }
 
 fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
-  MarkovChain((0 until memory)
-    .flatMap { s -> drop(s).chunked(memory) }
-    .asSequence())
+  MarkovChain {
+    (0 until memory)
+      .flatMap { s -> drop(s).chunked(memory) }
+      .asSequence()
+  }
 
 class MarkovChain<T>(
-  sequence: Sequence<T>,
-  val maxTokens: Int = 2000
+  maxTokens: Int = 2000,
+  train: () -> Sequence<T>,
 ) {
-  val counts = AtomicLongMap.create<Pair<T, T>>()
-
-  init {
-    sequence.zipWithNext().asStream().parallel()
-      .forEach { (tp, tn) ->
-        counts.incrementAndGet(tp to tn)
-      }
-  }
-
-  private val keys by lazy {
-    counts.asMap().entries.asSequence()
+  val counter: Counter<T> = Counter(train)
+  private val keys: List<T> =
+    counter.entries.asSequence()
+      // Take top K most frequent tokens
       .sortedByDescending { it.value }
-      .take(maxTokens).map { it.key }
-      .map { listOf(it.first, it.second) }
-      .flatten().distinct().toList()
-  }
-  val size by lazy { keys.size }
-  val tm by lazy { //Transition matrix
+      .take(maxTokens).map { it.key.first }
+      .distinct().toList()
+
+  val size: Int = keys.size
+  val tm: Ndarray<Double, D2> = // Transition matrix
     mk.d2array(size, size) { 0.0 }.also { mt ->
       keys.indices.toSet().let { it * it }
         .forEach { (i, j) ->
           mt[i, j] = this[i, j].toDouble()
         }
     }.let { it / it.sum() }
-  }
-  val cdfs by lazy { // Computes row-wise CDFs
+  val cdfs: List<CDF> = // Computes row-wise CDFs
     (0 until size).map { tm[it].toList().cdf() }
-  }
 
-  fun sample() = generateSequence(
-    seedFunction = {
-      this[mk.math.sumD2(tm, 1)
+  fun sample(
+    seed: () -> T = {
+      keys[mk.math.sumD2(tm, 1)
         .toList().cdf().sample()]
     },
-    nextFunction = {
-      this[cdfs[keys.indexOf(it)].sample()]
+    next: (T) -> T = { it: T ->
+      keys[cdfs[keys.indexOf(it)].sample()]
     }
-  )
+  ) = generateSequence(seed, next)
 
   fun isErgodic() =
     mk.linalg.pow(tm, (size - 1) * (size - 1) + 1)
       .all { 0.0 < it }
 
-  private operator fun get(index: Int) = keys[index]
-
   operator fun get(i: Int, j: Int) =
-    counts[keys[i] to keys[j]]
+    counter[keys[i] to keys[j]] ?: 0
+
+  class Counter<T>(
+    count: () -> Sequence<T>,
+    counts: AtomicLongMap<Pair<T, T>> =
+      AtomicLongMap.create<Pair<T, T>>().also {
+        count().zipWithNext().asStream().parallel()
+          .forEach { (prev, next) ->
+            it.incrementAndGet(prev to next)
+          }
+      }
+  ): Map<Pair<T, T>, Long> by counts.asMap()
 }
 
 // Returns the Cartesian product of two sets
