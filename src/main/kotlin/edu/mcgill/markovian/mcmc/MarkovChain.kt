@@ -40,7 +40,7 @@ fun main(args: Array<String>) {
 fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
   MarkovChain {
     (0 until memory)
-      .flatMap { s -> drop(s).chunked(memory) }
+      .flatMap { drop(it).chunked(memory) }
       .asSequence()
   }
 
@@ -75,13 +75,13 @@ class MarkovChain<T>(
     next: (T) -> T = { it: T ->
       keys[cdfs[keys.indexOf(it)].sample()]
     }
-  ) = generateSequence(seed, next)
+  ): Sequence<T> = generateSequence(seed, next)
 
-  fun isErgodic() =
+  fun isErgodic(): Boolean =
     mk.linalg.pow(tm, (size - 1) * (size - 1) + 1)
       .all { 0.0 < it }
 
-  operator fun get(i: Int, j: Int) =
+  operator fun get(i: Int, j: Int): Long =
     counter[keys[i] to keys[j]] ?: 0
 
   class Counter<T>(
@@ -100,7 +100,7 @@ class MarkovChain<T>(
 operator fun <T> Set<T>.times(s: Set<T>) =
   flatMap { ti -> s.map { ti to it }.toSet() }.toSet()
 
-fun List<Number>.cdf(): CDF = CDF(
+fun List<Number>.cdf() = CDF(
   map { it.toDouble() }.sum()
     .let { sum -> map { i -> i.toDouble() / sum } }
     .runningReduce { acc, d -> d + acc }
