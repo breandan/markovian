@@ -57,7 +57,7 @@ class MarkovChain<T>(
       .distinct().toList()
 
   val size: Int = keys.size
-  val tm: Ndarray<Double, D2> = // Transition matrix
+  val tm: NDArray<Double, D2> = // Transition matrix
     mk.d2array(size, size) { 0.0 }.also { mt ->
       keys.indices.toSet().let { it * it }
         .forEach { (i, j) ->

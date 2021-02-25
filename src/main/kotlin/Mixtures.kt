@@ -2,6 +2,7 @@
 
 import umontreal.ssj.probdist.*
 import kotlin.math.*
+import kotlin.random.Random
 import kotlin.reflect.KProperty
 
 // TODO: https://en.wikipedia.org/wiki/Plate_notation
@@ -28,12 +29,12 @@ class RandomVariable(val distribution: Dist<*>): (Double) -> Double {
   operator fun times(that: RandomVariable): RandomVariable =
     RandomVariable(distribution * that.distribution)
 
+  // https://en.wikipedia.org/wiki/Ratio_distribution
+  operator fun div(that: RandomVariable): RandomVariable = TODO()
+
   infix fun given(that: RandomVariable): Nothing = TODO()
 
   override fun invoke(p1: Double) = distribution(p1)
-
-// https://en.wikipedia.org/wiki/Ratio_distribution
-//  operator fun div(that: RandomVariable): RandomVariable = TODO()
 }
 
 class Gaussian(
@@ -57,7 +58,7 @@ class Gaussian(
 
   override fun times(that: Dist<*>): Dist<*> =
     when(that) {
-      is Gaussian -> this * that
+      is Gaussian -> that * this
       is Mixture<*> -> that * this
       else -> TODO()
     }
@@ -65,7 +66,7 @@ class Gaussian(
   override fun plus(that: Dist<*>): Dist<*> =
     when(that) {
       is Gaussian -> Mixture<Gaussian>(this) + that
-      is Mixture<*> -> that as Mixture<*> + this
+      is Mixture<*> -> that + this
       else -> TODO()
     }
 
@@ -144,28 +145,28 @@ open class Mixture<T: Dist<T>>(
 
   @JvmName("mixPlus")
   operator fun plus(that: T): Mixture<T> =
-    Sum<T>(components = components + that)
+    Sum(components = components + that)
 
   operator fun plus(that: Mixture<T>): Mixture<T> =
-    Mixture<T>(components = components + that.components)
+    Mixture(components = components + that.components)
 
   open operator fun times(that: T): Mixture<T> =
-    Mixture<T>(components = components.map { it * that })
+    Mixture(components = components.map { it * that })
 
   operator fun times(that: Mixture<T>): Mixture<T> =
-    Mixture<T>(components = components.map { it })
+    Mixture(components = components.map { it })
 
   override fun times(that: Dist<*>): Dist<*> =
     when(that) {
       is Gaussian -> this * that as T
-      is Mixture<*> -> this * that as Mixture<T>
+      is Mixture<*> -> this * that
       else -> TODO()
     }
 
   override fun plus(that: Dist<*>): Dist<*> =
     when(that) {
       is Gaussian -> this + that as T
-      is Mixture<*> -> this + that as Mixture<T>
+      is Mixture<*> -> this + that
       else -> TODO()
     }
 
@@ -178,6 +179,12 @@ open class Mixture<T: Dist<T>>(
 const val precision = 0.00000001
 
 fun main() {
+  val g20 = (0..20).map {
+    Gaussian("", Random.nextDouble(0.0, 5.0), Random.nextDouble(1.0, 3.0))
+  }.fold(Mixture<Gaussian>(Gaussian("", 0.1, 1.0))) { acc, gaussian ->
+    if (Random.nextDouble() < 0.5) acc * gaussian else acc + gaussian
+  }
+
   val g0 = Gaussian("", 0.1, 1.0)
   val g1 = Gaussian("", 5.0, 1.0)
   val g2 = Gaussian("", 10.0, 1.0)
@@ -190,7 +197,7 @@ fun main() {
   val g5 = g3 * g4 + g7
 
   // TODO: test distributivity holds
-  compare(g0, g1, g2, g3, g4, g5).display()
+  compare(g20).display()
 //  val a  by Gaussian("", .0, 9.0)
 //  val b  by Gaussian("", .0, 9.0)
 //  val f1 by a * 2 + b

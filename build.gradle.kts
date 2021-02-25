@@ -13,15 +13,15 @@ repositories {
   mavenCentral()
   maven("https://jitpack.io")
   maven("https://oss.sonatype.org/content/repositories/snapshots")
-  maven("https://jetbrains.bintray.com/lets-plot-maven")
-  maven("https://dl.bintray.com/kotlin/kotlin-eap")
   maven("https://jitpack.io")
 
-  maven("https://dl.bintray.com/egor-bogomolov/astminer")
   maven("https://clojars.org/repo")
 
   maven("https://raw.github.com/idsia/crema/mvn-repo/")
-  maven("https://dl.bintray.com/kotlin/kotlin-datascience")
+
+  //TODO: Remove pending https://github.com/JetBrains-Research/astminer/issues/124
+  maven("https://dl.bintray.com/egor-bogomolov/astminer")
+  maven("https://jetbrains.bintray.com/lets-plot-maven")
 }
 
 dependencies {
@@ -42,9 +42,9 @@ dependencies {
   // MPJ (required for Poon's SPN)
   implementation(files("$projectDir/libs/mpj-0.44.jar"))
 
-  val multik_version = "0.0.1-dev-13"
-  implementation("org.jetbrains.kotlinx.multik:multik-api:$multik_version")
-  implementation("org.jetbrains.kotlinx.multik:multik-default:$multik_version")
+  val multik_version = "0.0.1"
+  implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
+  implementation("org.jetbrains.kotlinx:multik-default:$multik_version")
 }
 
 tasks {
