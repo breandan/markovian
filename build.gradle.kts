@@ -1,8 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm") version "1.4.31"
-  id("com.github.ben-manes.versions") version "0.36.0"
+  kotlin("jvm") version "1.5.0-M1"
+  id("com.github.ben-manes.versions") version "0.38.0"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.8.3.248"
 }
 
 group = "com.github.breandan"
@@ -12,7 +13,6 @@ repositories {
   mavenCentral()
   maven("https://jitpack.io")
   maven("https://oss.sonatype.org/content/repositories/snapshots")
-  maven("https://jitpack.io")
 
   maven("https://clojars.org/repo")
 
@@ -28,7 +28,7 @@ dependencies {
 
   implementation("com.github.breandan:kaliningraph:0.1.4")
   implementation("ch.idsia:crema:0.1.5")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
   implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
