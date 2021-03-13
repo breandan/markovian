@@ -100,8 +100,8 @@ class MarkovChain<T>(
 operator fun <T> Set<T>.times(s: Set<T>) =
   flatMap { ti -> s.map { ti to it }.toSet() }.toSet()
 
-fun List<Number>.cdf() = CDF(
-  map { it.toDouble() }.sum()
+fun Collection<Number>.cdf() = CDF(
+  sumOf { it.toDouble() }
     .let { sum -> map { i -> i.toDouble() / sum } }
     .runningReduce { acc, d -> d + acc }
 )
@@ -109,6 +109,7 @@ fun List<Number>.cdf() = CDF(
 class CDF(val cdf: List<Double>): List<Double> by cdf
 
 // Computes KS-transform using binary search
-fun CDF.sample(rand: Double = Random.nextDouble()) =
-  cdf.binarySearch { it.compareTo(rand) }
+fun CDF.sample(random: Random = Random.Default,
+               target: Double = random.nextDouble()) =
+  cdf.binarySearch { it.compareTo(target) }
     .let { if (it < 0) abs(it) - 1 else it }
