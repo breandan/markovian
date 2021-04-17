@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm") version "1.5.0-M1"
+  kotlin("jvm") version "1.5.0-RC"
   id("com.github.ben-manes.versions") version "0.38.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.8.3.248"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.9.0-50"
 }
 
 group = "com.github.breandan"
@@ -32,7 +32,7 @@ dependencies {
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
   implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
-  implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.2.1-alpha2")
+  implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.3.0")
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
   implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
