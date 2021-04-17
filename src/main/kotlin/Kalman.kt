@@ -1,7 +1,7 @@
 import com.analog.lyric.dimple.model.core.FactorGraph
 import com.analog.lyric.dimple.model.variables.RealJoint
 
-fun main(args: Array<String>) {
+fun main() {
   val dt = 1.0
   val gamma = 1.0
   val m = 1.0

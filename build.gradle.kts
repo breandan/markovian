@@ -26,7 +26,7 @@ repositories {
 dependencies {
   implementation(kotlin("stdlib"))
 
-  implementation("com.github.breandan:kaliningraph:0.1.4")
+  implementation("com.github.breandan:kaliningraph:0.1.5")
   implementation("ch.idsia:crema:0.1.5")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
 
