@@ -1,14 +1,10 @@
-import edu.mcgill.kaliningraph.DEFAULT_RANDOM
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExport
-import jetbrains.letsPlot.geom.geom_abline
-import jetbrains.letsPlot.geom.geom_contourf
+import jetbrains.letsPlot.*
 import jetbrains.letsPlot.geom.geom_density
-import jetbrains.letsPlot.ggsize
-import jetbrains.letsPlot.intern.Plot
-import jetbrains.letsPlot.intern.toSpec
-import jetbrains.letsPlot.lets_plot
+import jetbrains.letsPlot.intern.*
 import java.io.File
+import kotlin.random.Random
 
 fun Plot.display() =
     File.createTempFile("test", ".svg").also {
@@ -33,7 +29,7 @@ const val POPCOUNT = 10000
 fun compare(vararg samplers: (Double) -> Double) =
     compare(
         *samplers.map { f ->
-            (1..POPCOUNT).pmap { f(DEFAULT_RANDOM.nextDouble()) }
+            (1..POPCOUNT).pmap { f(Random.Default.nextDouble()) }
         }.toTypedArray()
     )
 

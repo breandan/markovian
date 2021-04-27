@@ -28,7 +28,7 @@ dependencies {
 
   implementation("com.github.breandan:kaliningraph:0.1.6")
   implementation("ch.idsia:crema:0.1.5")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC")
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
   implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")

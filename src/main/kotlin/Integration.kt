@@ -1,4 +1,3 @@
-import edu.mcgill.kaliningraph.DEFAULT_RANDOM
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExport
 import jetbrains.letsPlot.geom.geom_area
@@ -40,7 +39,7 @@ fun main(): Unit = with(util) {
     val norm = eval("f(x_):=$integral - $zero; f(1)").evalDouble().also { println("Norm:$it") }
     val cdf = eval("($integral - $zero) / $norm")
     cdf.also { println("CDF: $it"); it.plot2D("Exact CDF") }
-    measureTimeMillis { compare({ cdf.sample(DEFAULT_RANDOM) }) }
+    measureTimeMillis { compare({ cdf.sample(Random.Default) }) }
         .also { println("Inversion sampling time: $it ms") }
 }
 
@@ -158,6 +157,5 @@ tailrec fun Int.gcd(b: Int): Int =
     else gcd(b - this)
 
 // https://medium.com/@elizarov/the-reason-to-avoid-globalscope-835337445abc
-fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = runBlocking {
-    map { async { f(it) } }.awaitAll()
-}
+fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> =
+  runBlocking { map { async { f(it) } }.awaitAll() }
