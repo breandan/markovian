@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   kotlin("jvm") version "1.5.0"
   id("com.github.ben-manes.versions") version "0.38.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.9.1-16"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-17"
 }
 
 group = "com.github.breandan"
@@ -13,29 +13,23 @@ repositories {
   mavenCentral()
   maven("https://jitpack.io")
   maven("https://oss.sonatype.org/content/repositories/snapshots")
-
-  maven("https://clojars.org/repo")
-
-  maven("https://raw.github.com/idsia/crema/mvn-repo/")
-
-  //TODO: Remove pending https://github.com/JetBrains-Research/astminer/issues/124
-  maven("https://dl.bintray.com/egor-bogomolov/astminer")
-  maven("https://jetbrains.bintray.com/lets-plot-maven")
+//  maven("https://raw.github.com/idsia/crema/mvn-repo/")
 }
 
 dependencies {
+  implementation(platform(kotlin("bom")))
   implementation(kotlin("stdlib"))
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
   implementation("com.github.breandan:kaliningraph:0.1.6")
-  implementation("ch.idsia:crema:0.1.5")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC")
+//  implementation("ch.idsia:crema:0.1.7.a")
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
   implementation("org.matheclipse:matheclipse-core:1.0.0-SNAPSHOT")
-  implementation("org.jetbrains.lets-plot-kotlin:lets-plot-kotlin-api:1.3.0")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-api:2.0.1")
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
-  implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
+//  implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
   implementation("ca.umontreal.iro.simul:ssj:3.3.1")
 
   // MPJ (required for Poon's SPN)

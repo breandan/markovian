@@ -1,7 +1,6 @@
 package edu.mcgill.markovian.mcmc
 
 import edu.mcgill.kaliningraph.*
-import edu.mcgill.kaliningraph.automata.AGF
 import edu.mcgill.kaliningraph.typefamily.IGF
 
 interface IMP: IGF<MarkovProcess, Transition, State> {
