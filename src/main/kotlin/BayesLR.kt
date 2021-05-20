@@ -48,7 +48,7 @@ fun plot(samples: List<Pair<Double, Double>>, points: List<Pair<Double, Double>>
     )
   ) { x = "x"; y = "y" }.let {
     samples.fold(it) { plot, (a, b) ->
-      plot + geom_abline(alpha = .1, slope = a, intercept = b)
-    } + ggsize(500, 250) + geom_point(color = "red", shape = 21, fill = "red", size = 5)
-//    it + geom_point(shape=1)
+      plot + geomABLine(alpha = .1, slope = a, intercept = b)
+    } + ggsize(500, 250) + geomPoint(color = "red", shape = 21, fill = "red", size = 5)
+//    it + geomPoint(shape=1)
   }.display()

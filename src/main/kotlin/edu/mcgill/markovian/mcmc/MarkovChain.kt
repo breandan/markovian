@@ -1,6 +1,7 @@
 package edu.mcgill.markovian.mcmc
 
 import com.google.common.util.concurrent.AtomicLongMap
+import edu.mcgill.markovian.concurrency.*
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
@@ -38,34 +39,50 @@ fun main(args: Array<String>) {
 }
 
 fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
-  MarkovChain {
-    (0 until memory)
+  MarkovChain(
+    train = (0 until memory)
       .flatMap { drop(it).chunked(memory) }
       .asSequence()
-  }
+  )
 
-class MarkovChain<T>(
+open class MarkovChain<T>(
   maxTokens: Int = 2000,
-  train: () -> Sequence<T>,
-) {
+  train: Sequence<T> = sequenceOf(),
   val counter: Counter<T> = Counter(train)
-  private val keys: List<T> =
+) {
+  private val mgr = resettableManager()
+
+  private val keys: List<T> by resettableLazy(mgr) {
     counter.entries.asSequence()
       // Take top K most frequent tokens
       .sortedByDescending { it.value }
       .take(maxTokens).map { it.key.first }
       .distinct().toList()
+  }
 
-  val size: Int = keys.size
-  val tm: NDArray<Double, D2> = // Transition matrix
+  val size: Int by resettableLazy(mgr) { keys.size }
+
+  // Transition matrix
+  val tm: NDArray<Double, D2> by resettableLazy(mgr) {
     mk.d2array(size, size) { 0.0 }.also { mt ->
       keys.indices.toSet().let { it * it }
         .forEach { (i, j) ->
           mt[i, j] = this[i, j].toDouble()
         }
     }.let { it / it.sum() }
-  val cdfs: List<CDF> = // Computes row-wise CDFs
+  }
+
+  // Computes row-wise CDFs
+  val cdfs: List<CDF> by resettableLazy(mgr) {
     (0 until size).map { tm[it].toList().cdf() }
+  }
+
+  operator fun plus(mc: MarkovChain<T>) = apply {
+    mc.counter.counts.asMap().forEach { (k, v) ->
+      counter.counts.addAndGet(k, v)
+    }
+    mgr.reset()
+  }
 
   fun sample(
     seed: () -> T = {
@@ -85,13 +102,12 @@ class MarkovChain<T>(
     counter[keys[i] to keys[j]] ?: 0
 
   class Counter<T>(
-    count: () -> Sequence<T>,
-    counts: AtomicLongMap<Pair<T, T>> =
+    count: Sequence<T> = sequenceOf(),
+    val counts: AtomicLongMap<Pair<T, T>> =
       AtomicLongMap.create<Pair<T, T>>().also {
-        count().zipWithNext().asStream().parallel()
-          .forEach { (prev, next) ->
-            it.incrementAndGet(prev to next)
-          }
+        count.zipWithNext().forEach { (prev, next) ->
+          it.incrementAndGet(prev to next)
+        }
       }
   ): Map<Pair<T, T>, Long> by counts.asMap()
 }
@@ -109,7 +125,9 @@ fun Collection<Number>.cdf() = CDF(
 class CDF(val cdf: List<Double>): List<Double> by cdf
 
 // Computes KS-transform using binary search
-fun CDF.sample(random: Random = Random.Default,
-               target: Double = random.nextDouble()) =
+fun CDF.sample(
+  random: Random = Random.Default,
+  target: Double = random.nextDouble()
+) =
   cdf.binarySearch { it.compareTo(target) }
     .let { if (it < 0) abs(it) - 1 else it }
