@@ -16,11 +16,13 @@ fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
 
 @ExperimentalTime
 fun main() {
-  val a = mk.ndarray(mk[
-    mk[mk[1.0, 2.0, 3.0], mk[4.0, 5.0, 6.0], mk[1.0, 1.0, 1.0]],
-    mk[mk[7.0, 8.0, 9.0], mk[10.0, 11.0, 12.0], mk[2.0,2.0,2.0]],
-    mk[mk[13.0, 14.0, 15.0], mk[16.0, 17.0, 18.0], mk[3.0,3.0,3.0]]
-  ])
+  val a = mk.ndarray(
+    mk[
+      mk[mk[1.0, 2.0, 3.0], mk[4.0, 5.0, 6.0], mk[1.0, 1.0, 1.0]],
+      mk[mk[7.0, 8.0, 9.0], mk[10.0, 11.0, 12.0], mk[2.0, 2.0, 2.0]],
+      mk[mk[13.0, 14.0, 15.0], mk[16.0, 17.0, 18.0], mk[3.0, 3.0, 3.0]]
+    ]
+  )
   println(a.asDNArray().sumOnto())
 }
 
@@ -50,7 +52,7 @@ open class MarkovChain<T>(
       .also { mt ->
         counter.memCounts.asMap().entries.forEach { (k, v) ->
           val idx = k.map { keys.indexOf(it) }.toIntArray()
-          if(idx.size == memory) mt[idx] = v.toDouble()
+          if (idx.size == memory) mt[idx] = v.toDouble()
         }
       }.let { it / it.sum() }
   }
@@ -88,6 +90,7 @@ open class MarkovChain<T>(
         // seems to work? I wonder why we don't need
         // to use multiplication to express conditional
         // probability? Just disintegration?
+        // https://homes.sice.indiana.edu/ccshan/rational/disintegrator.pdf
         idxs.fold(tt) { a, b -> a.view(b).asDNArray() }
           .asDNArray().toList().cdf()
       }
