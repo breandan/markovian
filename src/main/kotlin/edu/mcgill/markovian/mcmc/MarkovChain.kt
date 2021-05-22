@@ -5,38 +5,23 @@ import edu.mcgill.markovian.concurrency.*
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
-import java.io.File
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.*
 
+fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
+  ((0 until dim.d) - dims.toList()).foldIndexed(this) { i, a, b ->
+    if (b in dims) a else mk.math.sum(a, b - i)
+  }
+
 @ExperimentalTime
-fun main(args: Array<String>) {
-  val a = mk.ndarray(mk[mk[mk[1, 2, 3], mk[4, 5, 6]], mk[mk[7, 8, 9], mk[10, 11, 12]]])
-  println(mk.math.cumSum(a, 1))
-//  println("Training data: ${args[0]}")
-//  val mc = measureTimedValue {
-//    val data = File(args[0]).walkTopDown()
-//      .filter { it.extension == "py" }
-//      .joinToString { it.readText() }.asSequence()
-//
-//    data.toMarkovChain()
-//  }.let {
-//    println("Training time: ${it.duration}")
-//    it.value
-//  }
-//
-//  println("Tokens: " + mc.size)
-////  measureTimedValue {
-////    println("Ergodic:" + mc.isErgodic())
-////  }.also { println("Ergodicity time: ${it.duration}") }
-//
-//  measureTimedValue {
-//    mc.sample().take(200).toList()
-//  }.also {
-//    println("Sample: " + it.value.joinToString(""))
-//    println("Sampling time: ${it.duration}")
-//  }
+fun main() {
+  val a = mk.ndarray(mk[
+    mk[mk[1.0, 2.0, 3.0], mk[4.0, 5.0, 6.0], mk[1.0, 1.0, 1.0]],
+    mk[mk[7.0, 8.0, 9.0], mk[10.0, 11.0, 12.0], mk[2.0,2.0,2.0]],
+    mk[mk[13.0, 14.0, 15.0], mk[16.0, 17.0, 18.0], mk[3.0,3.0,3.0]]
+  ])
+  println(a.asDNArray().sumOnto())
 }
 
 fun <T> Sequence<T>.toMarkovChain() = MarkovChain(train = this)
@@ -63,19 +48,16 @@ open class MarkovChain<T>(
   val tt: NDArray<Double, DN> by resettableLazy(mgr) {
     mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
       .also { mt ->
-        keys.indices.toSet().let {
-          val idx = setOf(keys.indices.toList())
-          (1..memory).fold(idx) { a, _ -> a * idx }
-        }.forEach { i ->
-          mt[i.toIntArray()] = this[i].toDouble()
+        counter.memCounts.asMap().entries.forEach { (k, v) ->
+          val idx = k.map { keys.indexOf(it) }.toIntArray()
+          if(idx.size == memory) mt[idx] = v.toDouble()
         }
       }.let { it / it.sum() }
   }
 
   // Computes row-wise CDFs
-  val cdfs: MutableMap<List<Int>, CDF> by resettableLazy(mgr) {
-    mutableMapOf()
-  }
+  val cdfs: MutableMap<List<Int>, CDF> by
+  resettableLazy(mgr) { mutableMapOf() }
 
   fun <T> AtomicLongMap<T>.addAll(that: AtomicLongMap<T>) =
     that.asMap().forEach { (k, v) -> addAndGet(k, v) }
@@ -88,21 +70,37 @@ open class MarkovChain<T>(
 
   fun sample(
     seed: () -> T = {
-      keys[mk.math.cumSum(tt).toList().cdf().sample()]
+      keys[tt.sumOnto().toList().cdf().sample()]
     },
     next: (T) -> T = { it: T ->
       val cdf = cdfs.getOrPut(listOf(keys.indexOf(it))) {
-        mk.math.cumSum(tt, keys.indexOf(it)).toList().cdf()
+        tt.view(keys.indexOf(it))
+          .asDNArray().sumOnto().toList().cdf()
       }
       keys[cdf.sample()]
+    },
+    memSeed: () -> Sequence<T> = {
+      generateSequence(seed, next).take(memory - 1)
+    },
+    memNext: (Sequence<T>) -> (Sequence<T>) = {
+      val idxs = it.map { keys.indexOf(it) }.toList()
+      val cdf = cdfs.getOrPut(idxs) {
+        // seems to work? I wonder why we don't need
+        // to use multiplication to express conditional
+        // probability? Just disintegration?
+        idxs.fold(tt) { a, b -> a.view(b).asDNArray() }
+          .asDNArray().toList().cdf()
+      }
+
+      it.drop(1) + keys[cdf.sample()]
     }
-  ): Sequence<T> = generateSequence(seed, next)
+  ) = generateSequence(memSeed, memNext).map { it.last() }
 
 //  fun isErgodic(): Boolean =
 //    mk.linalg.pow(tt, (size - 1) * (size - 1) + 1)
 //      .all { 0.0 < it }
 
-  operator fun get(i: List<Int>): Long =
+  operator fun get(i: IntArray): Long =
     counter[i.map { keys[it] }] ?: 0
 
   class Counter<T>(
