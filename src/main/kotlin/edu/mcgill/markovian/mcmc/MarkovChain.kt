@@ -8,113 +8,122 @@ import org.jetbrains.kotlinx.multik.ndarray.operations.*
 import java.io.File
 import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.streams.asStream
 import kotlin.time.*
 
 @ExperimentalTime
 fun main(args: Array<String>) {
-  println("Training data: ${args[0]}")
-  val mc = measureTimedValue {
-    val data = File(args[0]).walkTopDown()
-      .filter { it.extension == "py" }
-      .joinToString { it.readText() }.asSequence()
-
-    data.toMarkovChain(memory = 3)
-  }.let {
-    println("Training time: ${it.duration}")
-    it.value
-  }
-
-  println("Tokens: " + mc.size)
+  val a = mk.ndarray(mk[mk[mk[1, 2, 3], mk[4, 5, 6]], mk[mk[7, 8, 9], mk[10, 11, 12]]])
+  println(mk.math.cumSum(a, 1))
+//  println("Training data: ${args[0]}")
+//  val mc = measureTimedValue {
+//    val data = File(args[0]).walkTopDown()
+//      .filter { it.extension == "py" }
+//      .joinToString { it.readText() }.asSequence()
+//
+//    data.toMarkovChain()
+//  }.let {
+//    println("Training time: ${it.duration}")
+//    it.value
+//  }
+//
+//  println("Tokens: " + mc.size)
+////  measureTimedValue {
+////    println("Ergodic:" + mc.isErgodic())
+////  }.also { println("Ergodicity time: ${it.duration}") }
+//
 //  measureTimedValue {
-//    println("Ergodic:" + mc.isErgodic())
-//  }.also { println("Ergodicity time: ${it.duration}") }
-
-  measureTimedValue {
-    mc.sample().take(200).flatten().toList()
-  }.also {
-    println("Sample: " + it.value.joinToString(""))
-    println("Sampling time: ${it.duration}")
-  }
+//    mc.sample().take(200).toList()
+//  }.also {
+//    println("Sample: " + it.value.joinToString(""))
+//    println("Sampling time: ${it.duration}")
+//  }
 }
 
-fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
-  MarkovChain(
-    train = (0 until memory)
-      .flatMap { drop(it).chunked(memory) }
-      .asSequence()
-  )
+fun <T> Sequence<T>.toMarkovChain() = MarkovChain(train = this)
 
 open class MarkovChain<T>(
   maxTokens: Int = 2000,
   train: Sequence<T> = sequenceOf(),
-  val counter: Counter<T> = Counter(train)
+  val memory: Int = 3,
+  val counter: Counter<T> = Counter(train, memory)
 ) {
   private val mgr = resettableManager()
 
   private val keys: List<T> by resettableLazy(mgr) {
-    counter.entries.asSequence()
+    counter.rawCounts.asMap().entries.asSequence()
       // Take top K most frequent tokens
       .sortedByDescending { it.value }
-      .take(maxTokens).map { it.key.first }
+      .take(maxTokens).map { it.key }
       .distinct().toList()
   }
 
   val size: Int by resettableLazy(mgr) { keys.size }
 
-  // Transition matrix
-  val tm: NDArray<Double, D2> by resettableLazy(mgr) {
-    mk.d2array(size, size) { 0.0 }.also { mt ->
-      keys.indices.toSet().let { it * it }
-        .forEach { (i, j) ->
-          mt[i, j] = this[i, j].toDouble()
+  // Transition tensor
+  val tt: NDArray<Double, DN> by resettableLazy(mgr) {
+    mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
+      .also { mt ->
+        keys.indices.toSet().let {
+          val idx = setOf(keys.indices.toList())
+          (1..memory).fold(idx) { a, _ -> a * idx }
+        }.forEach { i ->
+          mt[i.toIntArray()] = this[i].toDouble()
         }
-    }.let { it / it.sum() }
+      }.let { it / it.sum() }
   }
 
   // Computes row-wise CDFs
-  val cdfs: List<CDF> by resettableLazy(mgr) {
-    (0 until size).map { tm[it].toList().cdf() }
+  val cdfs: MutableMap<List<Int>, CDF> by resettableLazy(mgr) {
+    mutableMapOf()
   }
 
+  fun <T> AtomicLongMap<T>.addAll(that: AtomicLongMap<T>) =
+    that.asMap().forEach { (k, v) -> addAndGet(k, v) }
+
   operator fun plus(mc: MarkovChain<T>) = apply {
-    mc.counter.counts.asMap().forEach { (k, v) ->
-      counter.counts.addAndGet(k, v)
-    }
+    counter.rawCounts.addAll(mc.counter.rawCounts)
+    counter.memCounts.addAll(mc.counter.memCounts)
     mgr.reset()
   }
 
   fun sample(
     seed: () -> T = {
-      keys[mk.math.sumD2(tm, 1)
-        .toList().cdf().sample()]
+      keys[mk.math.cumSum(tt).toList().cdf().sample()]
     },
     next: (T) -> T = { it: T ->
-      keys[cdfs[keys.indexOf(it)].sample()]
+      val cdf = cdfs.getOrPut(listOf(keys.indexOf(it))) {
+        mk.math.cumSum(tt, keys.indexOf(it)).toList().cdf()
+      }
+      keys[cdf.sample()]
     }
   ): Sequence<T> = generateSequence(seed, next)
 
-  fun isErgodic(): Boolean =
-    mk.linalg.pow(tm, (size - 1) * (size - 1) + 1)
-      .all { 0.0 < it }
+//  fun isErgodic(): Boolean =
+//    mk.linalg.pow(tt, (size - 1) * (size - 1) + 1)
+//      .all { 0.0 < it }
 
-  operator fun get(i: Int, j: Int): Long =
-    counter[keys[i] to keys[j]] ?: 0
+  operator fun get(i: List<Int>): Long =
+    counter[i.map { keys[it] }] ?: 0
 
   class Counter<T>(
     count: Sequence<T> = sequenceOf(),
-    val counts: AtomicLongMap<Pair<T, T>> =
-      AtomicLongMap.create<Pair<T, T>>().also {
-        count.zipWithNext().forEach { (prev, next) ->
-          it.incrementAndGet(prev to next)
-        }
+    memory: Int,
+    val rawCounts: AtomicLongMap<T> = AtomicLongMap.create(),
+    val memCounts: AtomicLongMap<List<T>> =
+      AtomicLongMap.create<List<T>>().also {
+        (0 until memory)
+          .flatMap { count.drop(it).chunked(memory) }
+          .forEach { buffer ->
+            it.incrementAndGet(buffer)
+            buffer.forEach { rawCounts.incrementAndGet(it) }
+          }
       }
-  ): Map<Pair<T, T>, Long> by counts.asMap()
+  ): Map<List<T>, Long> by memCounts.asMap()
 }
 
 // Returns the Cartesian product of two sets
-operator fun <T> Set<T>.times(s: Set<T>) =
-  flatMap { ti -> s.map { ti to it }.toSet() }.toSet()
+operator fun <T> Set<List<T>>.times(s: Set<List<T>>) =
+  flatMap { ti -> s.map { listOf(ti, it).flatten() }.toSet() }.toSet()
 
 fun Collection<Number>.cdf() = CDF(
   sumOf { it.toDouble() }
@@ -128,6 +137,5 @@ class CDF(val cdf: List<Double>): List<Double> by cdf
 fun CDF.sample(
   random: Random = Random.Default,
   target: Double = random.nextDouble()
-) =
-  cdf.binarySearch { it.compareTo(target) }
-    .let { if (it < 0) abs(it) - 1 else it }
+): Int = cdf.binarySearch { it.compareTo(target) }
+  .let { if (it < 0) abs(it) - 1 else it }
