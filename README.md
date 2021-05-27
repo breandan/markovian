@@ -183,7 +183,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ## Probabilistic Programming
 
-* [Foundations of Probabilistic Programming](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/819623B1B5B33836476618AC0621F0EE/9781108488518AR.pdf/Foundations_of_Probabilistic_Programming.pdf?event-type=FTLA#%5B%7B%22num%22%3A744%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C125%2C604%2C0%5D)
+* [Foundations of Probabilistic Programming](https://doi.org/10.1017/9781108770750)
 * [An Introduction to Probabilistic Programming](https://arxiv.org/pdf/1809.10756.pdf), van de Meent et al. (2018)
 * [Exact Bayesian Inference by Symbolic Disintegration](https://homes.sice.indiana.edu/ccshan/rational/disintegrator.pdf), Shan and Ramsey (2017)
 
