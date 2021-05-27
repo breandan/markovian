@@ -1,104 +1,130 @@
 package edu.mcgill.markovian.mcmc
 
 import com.google.common.util.concurrent.AtomicLongMap
+import edu.mcgill.markovian.concurrency.*
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
-import java.io.File
 import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.streams.asStream
 import kotlin.time.*
 
+fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
+  ((0 until dim.d) - dims.toList()).foldIndexed(this) { i, a, b ->
+    if (b in dims) a else mk.math.sum(a, b - i)
+  }
+
 @ExperimentalTime
-fun main(args: Array<String>) {
-  println("Training data: ${args[0]}")
-  val mc = measureTimedValue {
-    val data = File(args[0]).walkTopDown()
-      .filter { it.extension == "py" }
-      .joinToString { it.readText() }.asSequence()
-
-    data.toMarkovChain(memory = 3)
-  }.let {
-    println("Training time: ${it.duration}")
-    it.value
-  }
-
-  println("Tokens: " + mc.size)
-//  measureTimedValue {
-//    println("Ergodic:" + mc.isErgodic())
-//  }.also { println("Ergodicity time: ${it.duration}") }
-
-  measureTimedValue {
-    mc.sample().take(200).flatten().toList()
-  }.also {
-    println("Sample: " + it.value.joinToString(""))
-    println("Sampling time: ${it.duration}")
-  }
+fun main() {
+  val a = mk.ndarray(
+    mk[
+      mk[mk[1.0, 2.0, 3.0], mk[4.0, 5.0, 6.0], mk[1.0, 1.0, 1.0]],
+      mk[mk[7.0, 8.0, 9.0], mk[10.0, 11.0, 12.0], mk[2.0, 2.0, 2.0]],
+      mk[mk[13.0, 14.0, 15.0], mk[16.0, 17.0, 18.0], mk[3.0, 3.0, 3.0]]
+    ]
+  )
+  println(a.asDNArray().sumOnto())
 }
 
-fun <T> Sequence<T>.toMarkovChain(memory: Int = 1) =
-  MarkovChain {
-    (0 until memory)
-      .flatMap { drop(it).chunked(memory) }
-      .asSequence()
-  }
+fun <T> Sequence<T>.toMarkovChain() = MarkovChain(train = this)
 
-class MarkovChain<T>(
+open class MarkovChain<T>(
   maxTokens: Int = 2000,
-  train: () -> Sequence<T>,
+  train: Sequence<T> = sequenceOf(),
+  val memory: Int = 3,
+  val counter: Counter<T> = Counter(train, memory)
 ) {
-  val counter: Counter<T> = Counter(train)
-  private val keys: List<T> =
-    counter.entries.asSequence()
+  private val mgr = resettableManager()
+
+  private val keys: List<T> by resettableLazy(mgr) {
+    counter.rawCounts.asMap().entries.asSequence()
       // Take top K most frequent tokens
       .sortedByDescending { it.value }
-      .take(maxTokens).map { it.key.first }
+      .take(maxTokens).map { it.key }
       .distinct().toList()
+  }
 
-  val size: Int = keys.size
-  val tm: NDArray<Double, D2> = // Transition matrix
-    mk.d2array(size, size) { 0.0 }.also { mt ->
-      keys.indices.toSet().let { it * it }
-        .forEach { (i, j) ->
-          mt[i, j] = this[i, j].toDouble()
+  val size: Int by resettableLazy(mgr) { keys.size }
+
+  // Transition tensor
+  val tt: NDArray<Double, DN> by resettableLazy(mgr) {
+    mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
+      .also { mt ->
+        counter.memCounts.asMap().entries.forEach { (k, v) ->
+          val idx = k.map { keys.indexOf(it) }.toIntArray()
+          if (idx.size == memory) mt[idx] = v.toDouble()
         }
-    }.let { it / it.sum() }
-  val cdfs: List<CDF> = // Computes row-wise CDFs
-    (0 until size).map { tm[it].toList().cdf() }
+      }.let { it / it.sum() }
+  }
+
+  // Computes row-wise CDFs
+  val cdfs: MutableMap<List<Int>, CDF> by
+  resettableLazy(mgr) { mutableMapOf() }
+
+  fun <T> AtomicLongMap<T>.addAll(that: AtomicLongMap<T>) =
+    that.asMap().forEach { (k, v) -> addAndGet(k, v) }
+
+  operator fun plus(mc: MarkovChain<T>) = apply {
+    counter.rawCounts.addAll(mc.counter.rawCounts)
+    counter.memCounts.addAll(mc.counter.memCounts)
+    mgr.reset()
+  }
 
   fun sample(
     seed: () -> T = {
-      keys[mk.math.sumD2(tm, 1)
-        .toList().cdf().sample()]
+      keys[tt.sumOnto().toList().cdf().sample()]
     },
     next: (T) -> T = { it: T ->
-      keys[cdfs[keys.indexOf(it)].sample()]
+      val cdf = cdfs.getOrPut(listOf(keys.indexOf(it))) {
+        tt.view(keys.indexOf(it))
+          .asDNArray().sumOnto().toList().cdf()
+      }
+      keys[cdf.sample()]
+    },
+    memSeed: () -> Sequence<T> = {
+      generateSequence(seed, next).take(memory - 1)
+    },
+    memNext: (Sequence<T>) -> (Sequence<T>) = {
+      val idxs = it.map { keys.indexOf(it) }.toList()
+      val cdf = cdfs.getOrPut(idxs) {
+        // seems to work? I wonder why we don't need
+        // to use multiplication to express conditional
+        // probability? Just disintegration?
+        // https://homes.sice.indiana.edu/ccshan/rational/disintegrator.pdf
+        idxs.fold(tt) { a, b -> a.view(b).asDNArray() }
+          .asDNArray().toList().cdf()
+      }
+
+      it.drop(1) + keys[cdf.sample()]
     }
-  ): Sequence<T> = generateSequence(seed, next)
+  ) = generateSequence(memSeed, memNext).map { it.last() }
 
-  fun isErgodic(): Boolean =
-    mk.linalg.pow(tm, (size - 1) * (size - 1) + 1)
-      .all { 0.0 < it }
+//  fun isErgodic(): Boolean =
+//    mk.linalg.pow(tt, (size - 1) * (size - 1) + 1)
+//      .all { 0.0 < it }
 
-  operator fun get(i: Int, j: Int): Long =
-    counter[keys[i] to keys[j]] ?: 0
+  operator fun get(i: IntArray): Long =
+    counter[i.map { keys[it] }] ?: 0
 
   class Counter<T>(
-    count: () -> Sequence<T>,
-    counts: AtomicLongMap<Pair<T, T>> =
-      AtomicLongMap.create<Pair<T, T>>().also {
-        count().zipWithNext().asStream().parallel()
-          .forEach { (prev, next) ->
-            it.incrementAndGet(prev to next)
+    count: Sequence<T> = sequenceOf(),
+    memory: Int,
+    val rawCounts: AtomicLongMap<T> = AtomicLongMap.create(),
+    val memCounts: AtomicLongMap<List<T>> =
+      AtomicLongMap.create<List<T>>().also {
+        (0 until memory)
+          .flatMap { count.drop(it).chunked(memory) }
+          .forEach { buffer ->
+            it.incrementAndGet(buffer)
+            buffer.forEach { rawCounts.incrementAndGet(it) }
           }
       }
-  ): Map<Pair<T, T>, Long> by counts.asMap()
+  ): Map<List<T>, Long> by memCounts.asMap()
 }
 
 // Returns the Cartesian product of two sets
-operator fun <T> Set<T>.times(s: Set<T>) =
-  flatMap { ti -> s.map { ti to it }.toSet() }.toSet()
+operator fun <T> Set<List<T>>.times(s: Set<List<T>>) =
+  flatMap { ti -> s.map { listOf(ti, it).flatten() }.toSet() }.toSet()
 
 fun Collection<Number>.cdf() = CDF(
   sumOf { it.toDouble() }
@@ -109,7 +135,8 @@ fun Collection<Number>.cdf() = CDF(
 class CDF(val cdf: List<Double>): List<Double> by cdf
 
 // Computes KS-transform using binary search
-fun CDF.sample(random: Random = Random.Default,
-               target: Double = random.nextDouble()) =
-  cdf.binarySearch { it.compareTo(target) }
-    .let { if (it < 0) abs(it) - 1 else it }
+fun CDF.sample(
+  random: Random = Random.Default,
+  target: Double = random.nextDouble()
+): Int = cdf.binarySearch { it.compareTo(target) }
+  .let { if (it < 0) abs(it) - 1 else it }

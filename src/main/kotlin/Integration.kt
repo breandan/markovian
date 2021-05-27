@@ -1,7 +1,6 @@
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExport
-import jetbrains.letsPlot.geom.geom_area
-import jetbrains.letsPlot.geom.geom_density
+import jetbrains.letsPlot.geom.*
 import jetbrains.letsPlot.ggplot
 import jetbrains.letsPlot.ggsize
 import jetbrains.letsPlot.intern.Plot
@@ -80,7 +79,7 @@ private fun IExpr.plot2D(title: String, norm: Double = 1.0) {
     val ys = listOf(xs.pmap { util.eval("f(x_):=$this; f($it)").evalDouble() / norm })
     val data = (labels.zip(ys) + ("x" to xs)).toMap()
     val geoms =
-        labels.map { geom_area(size = 2.0, color = "dark_green", fill = "light_green") { x = "x"; y = "density" } }
+        labels.map { geomArea(size = 2.0, color = "dark_green", fill = "light_green") { x = "x"; y = "density" } }
     val plot = geoms.foldRight(ggplot(data)) { it, acc -> acc + it } + ggtitle(title)
     plot.display()
 }
