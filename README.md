@@ -1,5 +1,9 @@
 # Markovian
 
+[![Kotlin 1.5.20](https://img.shields.io/badge/Kotlin-1.5.20-blue.svg?style=flat&logo=kotlin)](http://kotlinlang.org)
+[![](https://jitpack.io/v/breandan/markovian.svg)](https://jitpack.io/#breandan/markovian)
+[![CI](https://github.com/breandan/markovian/workflows/CI/badge.svg)](https://github.com/breandan/markovian/actions)
+
 Symbolic integration and probabilistic programming in the spirit of [Church](https://web.stanford.edu/~ngoodman/papers/churchUAI08_rev2.pdf) and [Anglican](https://probprog.github.io/anglican/index.html).
 
 ## Research Questions
@@ -10,10 +14,6 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
 * Is there a [formula](https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulae) for propagating uncertainty through elementary functions?
-
-## Usage
-
-
 
 ## Example
 
