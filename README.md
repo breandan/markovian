@@ -13,44 +13,7 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 
 ## Usage
 
-The following command will run the code synthesis demo:
 
-```
-./gradlew codeSynth -P train=[PATH_TO_TRAINING_DATA]
-```
-
-This should produce something like the following text:
-
-```kotlin
-fun test = projection be
-       val private fun checkbox(): String {
-                  }
-
-    fun box(): String {
-         as String {
-      return "test org.rust
-       fun String {
-       s
-                       }
-           va     val box(): String {
-                     }
-```
-
-```python
-class Detection_instring else class_componse_source)
-           first_list_end]
-
-                           PVOID),
-    exception must in not instarted the commension.
-
-                 tokens = 0
-            error:
-             
-       def __name:  line, untile_path)
-           no blockThreader sys.get_paracter)
-        @rtype:  breated line_filenance',
-            if isinstack if not sequeue_size = node):
-```
 
 ## Example
 
