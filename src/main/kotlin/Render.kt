@@ -1,3 +1,4 @@
+import edu.mcgill.markovian.pmap
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExport
 import jetbrains.letsPlot.*

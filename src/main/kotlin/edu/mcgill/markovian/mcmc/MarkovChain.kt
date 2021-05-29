@@ -31,6 +31,7 @@ fun main() {
     ]
   )
   println(a.asDNArray().disintegrate(mapOf(1 to 1, 2 to 2)))
+  println(a.asDNArray().slice(mapOf(1 to Slice(1, 2, 1), 2 to Slice(2, 3, 1))))
 }
 
 fun <T> Sequence<T>.toMarkovChain(memory: Int = 3) =
@@ -102,8 +103,9 @@ open class MarkovChain<T>(
         // probability? Just disintegration?
         // https://blog.wtf.sg/posts/2021-03-14-smoothing-with-backprop/
         // https://homes.sice.indiana.edu/ccshan/rational/disintegrator.pdf
-        val dimsToIdxs = idxs.indices.zip(idxs).toMap()
-        tt.disintegrate(dimsToIdxs).toList().cdf()
+        val slices = idxs.map { Slice(it, it + 1, 1) }
+        val volume = slices.indices.zip(slices).toMap()
+        tt.slice(volume).toList().cdf()
       }
 
       it.drop(1) + keys[cdf.sample()]
