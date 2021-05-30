@@ -1,5 +1,9 @@
 # Markovian
 
+[![Kotlin 1.5.20](https://img.shields.io/badge/Kotlin-1.5.20-blue.svg?style=flat&logo=kotlin)](http://kotlinlang.org)
+[![](https://jitpack.io/v/breandan/markovian.svg)](https://jitpack.io/#breandan/markovian)
+[![CI](https://github.com/breandan/markovian/workflows/CI/badge.svg)](https://github.com/breandan/markovian/actions)
+
 Symbolic integration and probabilistic programming in the spirit of [Church](https://web.stanford.edu/~ngoodman/papers/churchUAI08_rev2.pdf) and [Anglican](https://probprog.github.io/anglican/index.html).
 
 ## Research Questions
@@ -10,47 +14,6 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
 * Is there a [formula](https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulae) for propagating uncertainty through elementary functions?
-
-## Usage
-
-The following command will run the code synthesis demo:
-
-```
-./gradlew codeSynth -P train=[PATH_TO_TRAINING_DATA]
-```
-
-This should produce something like the following text:
-
-```kotlin
-fun test = projection be
-       val private fun checkbox(): String {
-                  }
-
-    fun box(): String {
-         as String {
-      return "test org.rust
-       fun String {
-       s
-                       }
-           va     val box(): String {
-                     }
-```
-
-```python
-class Detection_instring else class_componse_source)
-           first_list_end]
-
-                           PVOID),
-    exception must in not instarted the commension.
-
-                 tokens = 0
-            error:
-             
-       def __name:  line, untile_path)
-           no blockThreader sys.get_paracter)
-        @rtype:  breated line_filenance',
-            if isinstack if not sequeue_size = node):
-```
 
 ## Example
 

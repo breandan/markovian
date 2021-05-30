@@ -10,9 +10,16 @@ import kotlin.random.Random
 import kotlin.time.*
 
 fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
-  ((0 until dim.d) - dims.toList()).foldIndexed(this) { i, a, b ->
-    if (b in dims) a else mk.math.sum(a, b - i)
-  }
+  (0 until dim.d).fold(this to 0) { (t, r), b ->
+    if (b in dims) t to r + 1
+    else mk.math.sum<Double, DN, DN>(t, r) to r
+  }.first
+
+fun NDArray<Double, DN>.disintegrate(dimToIdx: Map<Int, Int>) =
+  (0 until dim.d).fold(this to 0) { (t, r), b ->
+    if (b in dimToIdx) t.view(dimToIdx[b]!!, r).asDNArray() to r
+    else t to r + 1
+  }.first
 
 @ExperimentalTime
 fun main() {
@@ -23,10 +30,12 @@ fun main() {
       mk[mk[13.0, 14.0, 15.0], mk[16.0, 17.0, 18.0], mk[3.0, 3.0, 3.0]]
     ]
   )
-  println(a.asDNArray().sumOnto())
+  println(a.asDNArray().disintegrate(mapOf(1 to 1, 2 to 2)))
+  println(a.asDNArray().slice(mapOf(1 to Slice(1, 2, 1), 2 to Slice(2, 3, 1))))
 }
 
-fun <T> Sequence<T>.toMarkovChain() = MarkovChain(train = this)
+fun <T> Sequence<T>.toMarkovChain(memory: Int = 3) =
+  MarkovChain(train = this, memory = memory)
 
 open class MarkovChain<T>(
   maxTokens: Int = 2000,
@@ -50,10 +59,12 @@ open class MarkovChain<T>(
   val tt: NDArray<Double, DN> by resettableLazy(mgr) {
     mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
       .also { mt ->
-        counter.memCounts.asMap().entries.forEach { (k, v) ->
-          val idx = k.map { keys.indexOf(it) }.toIntArray()
-          if (idx.size == memory) mt[idx] = v.toDouble()
-        }
+        counter.memCounts.asMap().entries
+          .filter { it.key.all { it in keys } }
+          .forEach { (k, v) ->
+            val idx = k.map { keys.indexOf(it) }.toIntArray()
+            if (idx.size == memory) mt[idx] = v.toDouble()
+          }
       }.let { it / it.sum() }
   }
 
@@ -90,9 +101,11 @@ open class MarkovChain<T>(
         // seems to work? I wonder why we don't need
         // to use multiplication to express conditional
         // probability? Just disintegration?
+        // https://blog.wtf.sg/posts/2021-03-14-smoothing-with-backprop/
         // https://homes.sice.indiana.edu/ccshan/rational/disintegrator.pdf
-        idxs.fold(tt) { a, b -> a.view(b).asDNArray() }
-          .asDNArray().toList().cdf()
+        val slices = idxs.map { Slice(it, it + 1, 1) }
+        val volume = slices.indices.zip(slices).toMap()
+        tt.slice(volume).toList().cdf()
       }
 
       it.drop(1) + keys[cdf.sample()]
