@@ -27,7 +27,11 @@ dependencies {
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
 //  implementation("org.matheclipse:matheclipse-core:2.0.0-SNAPSHOT")
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
-  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-api:2.0.1")
+
+  implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
+  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.0.3")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.0")
+
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
 //  implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
