@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   kotlin("jvm") version "1.5.20-M1"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-49"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-53"
 }
 
 group = "com.github.breandan"
@@ -26,6 +26,7 @@ dependencies {
 
 //    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
 //  implementation("org.matheclipse:matheclipse-core:2.0.0-SNAPSHOT")
+//  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-api:2.0.1")
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
