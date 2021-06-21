@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm") version "1.5.20-M1"
+  kotlin("jvm") version "1.5.20-RC"
   id("com.github.ben-manes.versions") version "0.39.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-53"
 }
@@ -29,8 +29,8 @@ dependencies {
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
 
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
-  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.0.3")
-  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.0")
+  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.0.4")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.1")
 
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
