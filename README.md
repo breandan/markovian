@@ -68,6 +68,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [The Harmonic Logarithms and the Binomial Formula](https://core.ac.uk/download/pdf/82415331.pdf), Roman (1993)
 * [A New Distribution on the Simplex with Auto-Encoding Applications](https://papers.nips.cc/paper/9520-a-new-distribution-on-the-simplex-with-auto-encoding-applications.pdf), Stirn et al. (2019)
 * [Closed Form Integration of Artificial Neural Networks](https://escholarship.org/content/qt0wz7n7nm/qt0wz7n7nm.pdf#page=5), Gottschling (1999)
+* [Families of infinitely divisible distributions closed under mixing and convolution](https://projecteuclid.org/download/pdf_1/euclid.aoms/1177692717), Keilson & Steutel (1972)
 
 ## Algebraic Methods
 
