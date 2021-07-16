@@ -135,10 +135,6 @@ open class MarkovChain<T>(
   ): Map<List<T>, Long> by memCounts.asMap()
 }
 
-// Returns the Cartesian product of two sets
-operator fun <T> Set<List<T>>.times(s: Set<List<T>>) =
-  flatMap { ti -> s.map { listOf(ti, it).flatten() }.toSet() }.toSet()
-
 fun Collection<Number>.cdf() = CDF(
   sumOf { it.toDouble() }
     .let { sum -> map { i -> i.toDouble() / sum } }
