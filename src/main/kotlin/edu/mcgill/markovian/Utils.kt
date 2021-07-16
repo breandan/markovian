@@ -1,6 +1,7 @@
 package edu.mcgill.markovian
 
 import kotlinx.coroutines.*
+import kotlin.math.pow
 import kotlin.random.Random
 
 // Generates a rational number in (0, 1). Approximates nextDouble() as n -> \infty
@@ -17,3 +18,6 @@ tailrec fun Int.gcd(b: Int): Int =
 // https://medium.com/@elizarov/the-reason-to-avoid-globalscope-835337445abc
 fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> =
   runBlocking { map { async { f(it) } }.awaitAll() }
+
+fun List<Double>.variance() =
+  average().let { mean -> map { (it - mean).pow(2) } }.average()
