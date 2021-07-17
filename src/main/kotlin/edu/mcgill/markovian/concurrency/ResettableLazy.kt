@@ -47,5 +47,3 @@ fun <P> resettableLazy(
   manager: ResettableLazyManager,
   init: () -> P
 ): ResettableLazy<P> = ResettableLazy(manager, init)
-
-fun resettableManager(): ResettableLazyManager = ResettableLazyManager()
