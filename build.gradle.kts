@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm") version "1.5.20-RC"
+  kotlin("jvm") version "1.5.20"
   id("com.github.ben-manes.versions") version "0.39.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-53"
 }
