@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm") version "1.5.20"
+  kotlin("jvm") version "1.5.21"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-53"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-133"
 }
 
 group = "com.github.breandan"
@@ -19,7 +19,7 @@ repositories {
 dependencies {
   implementation(platform(kotlin("bom")))
   implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
 
   implementation("com.github.breandan:kaliningraph:0.1.7")
 //  implementation("ch.idsia:crema:0.1.7.a")
