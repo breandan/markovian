@@ -39,7 +39,7 @@ class MarkovChainTest {
           1 to 1,
           2 to 2
         )
-      ),
+      ).toList(),
       a.asDNArray().slice(
         mapOf(
         //D                  I         I+1
