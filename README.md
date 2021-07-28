@@ -110,6 +110,8 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ## Fast Sampling/Inference
 
+* [Efficient Parallel Random Sampling – Vectorized,
+Cache-Efficient, and Online](https://arxiv.org/pdf/1610.05141.pdf), Sanders et al. (2019)
 * [Augur: Data-Parallel Probabilistic Modeling](https://papers.nips.cc/paper/2014/file/cf9a242b70f45317ffd281241fa66502-Paper.pdf), Tristan et al. (2014)
 * [A Differential Approach to Inference in Bayesian Networks](https://arxiv.org/pdf/1301.3847.pdf), Darwiche (2000)
 * [Scaling Exact Inference for Discrete Probabilistic Programs](https://arxiv.org/pdf/2005.09089.pdf), Holtzen et al. (2020)
