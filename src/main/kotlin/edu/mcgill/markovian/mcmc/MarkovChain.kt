@@ -61,7 +61,6 @@ open class MarkovChain<T>(
 
   private val dictionary: Bijection<T> by resettableLazy(mgr) {
     counter.rawCounts.getFrequentItems(ErrorType.NO_FALSE_POSITIVES)
-      .also { println("raw:" + it.size) }
       // Is taking maxTokens-most frequent unigrams always the right choice?
       .take(maxUniques).map { it.item }.let { Bijection(it) }
   }
@@ -83,7 +82,6 @@ open class MarkovChain<T>(
     mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
       .also { mt: NDArray<Double, DN> ->
         counter.memCounts.getFrequentItems(ErrorType.NO_FALSE_POSITIVES)
-          .also { println("mem:" + it.size) }
           .map { it.item to it.estimate.toInt() }
           .filter { (item, _) -> item.all { it in dictionary } }
           .forEach { (item, count) ->

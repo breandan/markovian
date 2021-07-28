@@ -32,6 +32,8 @@ dependencies {
   implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.0.4")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.1")
 
+//  https://arxiv.org/pdf/1908.10693.pdf
+//  implementation("com.datadoghq:sketches-java:0.7.0")
   implementation("org.apache.datasketches:datasketches-java:2.0.0")
 
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")

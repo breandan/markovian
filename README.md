@@ -131,8 +131,10 @@ Cache-Efficient, and Online](https://arxiv.org/pdf/1610.05141.pdf), Sanders et a
 ## Sketching
 
 * [Mergeable summaries](https://www.cs.utah.edu/~jeffp/papers/merge-summ.pdf), Agarwal et al. (2012)
+* [Optimal Quantile Approximation in Streams](https://arxiv.org/pdf/1603.05346.pdf), Karnin et al. (2019)
+* [Fast Concurrent Data Sketches](https://dl.acm.org/doi/pdf/10.1145/3332466.3374512), Rinberg et al. (2020)
 * [Data-Independent Space Partitionings for Summaries](http://www.compsciscience.org/shekelyan/papers/preprint_pods21.pdf), Cormode et al. (2021)
-* [Summingbird: a framework for integrating batch and online MapReduce computations](https://dl.acm.org/doi/abs/10.14778/2733004.2733016), Boykin et al. (2014)
+* [Small Summaries for Big Data](http://dimacs.rutgers.edu/~graham/ssbd.html), Cormode & Yi (2021)
 
 ## Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
 
@@ -161,14 +163,24 @@ Cache-Efficient, and Online](https://arxiv.org/pdf/1610.05141.pdf), Sanders et a
 
 ## Software
 
-* [Apache DataSketches: A software library of stochastic streaming algorithms](https://datasketches.apache.org/), Rhodes et al. (2021) [[source code](https://github.com/apache/datasketches-java)]
-* [SPFlow: An easy and extensible library for deep probabilistic learning using SPNs](https://arxiv.org/pdf/1901.03704.pdf), Molina et al. (2019) [[source code](https://github.com/SPFlow/SPFlow)]
+### Sketching libraries
+
+* [Apache DataSketches: A library of stochastic streaming algorithms](https://datasketches.apache.org/), Rhodes et al. (2021) [[source code](https://github.com/apache/datasketches-java)]
+* [DDSketch: A Fast and Fully-Mergeable Quantile Sketch](https://arxiv.org/pdf/1908.10693.pdf), Masson et al. (2019) [[source code](https://github.com/DataDog/sketches-java)]
+* [Summingbird: a framework for integrating batch and online MapReduce computations](https://dl.acm.org/doi/abs/10.14778/2733004.2733016), Boykin et al. (2014) [[source code](https://github.com/twitter/summingbird)]
+* [Computing Extremely Accurate Quantiles Using t-Digests](https://github.com/tdunning/t-digest/blob/main/docs/t-digest-paper/histo.pdf), Dunning and Ertl (2019) [[source code](https://github.com/tdunning/t-digest)]
+
+### Probabilistic programming libraries
+
+* [SPFlow: A library for deep probabilistic learning using SPNs](https://arxiv.org/pdf/1901.03704.pdf), Molina et al. (2019) [[source code](https://github.com/SPFlow/SPFlow)]
 * [Dimple: Java and Matlab libraries for probabilistic inference](https://s3.amazonaws.com/files.dimple.probprog.org/DimpleUserManual_v0.07_Java_API.pdf#section.4), Barber et al. (2016) [[source code](https://github.com/analog-garage/dimple/tree/master/solvers/java/src/main/java/com/analog/lyric/dimple/solvers/sumproduct)]
 * [Chimple: a Probabilistic Programming Java API](https://s3.amazonaws.com/files.dimple.probprog.org/Chimple_User_Documentation.pdf#%5B%7B%22num%22%3A6%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C93.6%2C344.7%2C0%5D), Hershey et al. (2016) [[source code](https://github.com/analog-garage/chimple/tree/master/java/src/main/java/com/analog/lyric/chimple)]
 * [CREMA: A Java Library for Credal Network Inference](https://pgm2020.cs.aau.dk/wp-content/uploads/2020/09/huber20.pdf), Huber et al. (2020) [[source code](https://github.com/IDSIA/crema)]
 * [CREDICI: A Java Library for Causal Inference by Credal Networks](https://pgm2020.cs.aau.dk/wp-content/uploads/2020/09/cabanas20a.pdf), Cabañas et al. (2020) [[source code](https://github.com/IDSIA/credici)]
-* [Computing Extremely Accurate Quantiles Using t-Digests](https://github.com/tdunning/t-digest/blob/main/docs/t-digest-paper/histo.pdf), Dunning and Ertl (2019) [[source code](https://github.com/tdunning/t-digest)]
 * [JavaBayes: Bayesian networks in Java](https://people.montefiore.uliege.be/lwh/javabayes/javabayes-manual-0.346.pdf), Cozman (2001) [[source code](https://github.com/joeschweitzer/javabayes)]
 * [Theano-PyMC](https://pymc-devs.medium.com/the-future-of-pymc3-or-theano-is-dead-long-live-theano-d8005f8a0e9b), Willard (2020) [[source code](https://github.com/pymc-devs/Theano-PyMC)]
 * [MonteCarloMeasurements.jl: Nonlinear Propagation of Arbitrary Multivariate Distributions by means of Method Overloading](https://arxiv.org/pdf/2001.07625.pdf), Carlson (2020) [[source code](https://github.com/baggepinnen/MonteCarloMeasurements.jl)]
-* [Part-of-Speech Tagging in Kotlin](https://www.mariakhalusova.com/posts/2021-03-08-pos-tagging-with-hmm/), Khalusova (2021) [[source code](https://www.mariakhalusova.com/posts/2021-03-08-pos-tagging-with-hmm/)]
+
+### NLP libraries
+
+* [Part-of-Speech Tagging in Kotlin](https://www.mariakhalusova.com/posts/2021-03-08-pos-tagging-with-hmm/), Khalusova (2021) [[source code](https://github.com/MKhalusova/pos-tagging/)]
