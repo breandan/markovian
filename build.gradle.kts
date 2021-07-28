@@ -32,6 +32,8 @@ dependencies {
   implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.0.4")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.1")
 
+  implementation("org.apache.datasketches:datasketches-java:2.0.0")
+
   implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
 //  implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")

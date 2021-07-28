@@ -1,14 +1,14 @@
 package edu.mcgill.markovian.mcmc
 
 import com.google.common.util.concurrent.AtomicLongMap
-import edu.mcgill.kaliningraph.circuits.b
+import edu.mcgill.markovian.*
 import edu.mcgill.markovian.concurrency.*
+import org.apache.datasketches.frequencies.*
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
 import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.time.ExperimentalTime
 
 /**
  * Marginalizes/sums out all dimensions not contained in [dims],
@@ -48,10 +48,11 @@ class Bijection<T>(
   operator fun contains(value: Int) = value in rmap
 }
 
+val maxUniques: Int = 2000
+
 // TODO: Support continuous state spaces?
 // https://www.colorado.edu/amath/sites/default/files/attached-files/2_28_2018.pdf
 open class MarkovChain<T>(
-  val maxTokens: Int = 2000,
   train: Sequence<T> = sequenceOf(),
   val memory: Int = 3,
   val counter: Counter<T> = Counter(train, memory)
@@ -59,11 +60,10 @@ open class MarkovChain<T>(
   private val mgr = ResettableLazyManager()
 
   private val dictionary: Bijection<T> by resettableLazy(mgr) {
-    counter.rawCounts.asMap().entries.asSequence()
-      // Take top K most frequent tokens
-      .sortedByDescending { it.value }
-      .take(maxTokens).map { it.key }
-      .distinct().toList().let { Bijection(it) }
+    counter.rawCounts.getFrequentItems(ErrorType.NO_FALSE_POSITIVES)
+      .also { println("raw:" + it.size) }
+      // Is taking maxTokens-most frequent unigrams always the right choice?
+      .take(maxUniques).map { it.item }.let { Bijection(it) }
   }
 
   val size: Int by resettableLazy(mgr) { dictionary.size }
@@ -82,11 +82,13 @@ open class MarkovChain<T>(
   val tt: NDArray<Double, DN> by resettableLazy(mgr) {
     mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
       .also { mt: NDArray<Double, DN> ->
-        counter.memCounts.asMap().entries
-          .filter { it.key.all { it in dictionary } }
-          .forEach { (k, v) ->
-            val idx = k.map { dictionary[it] }.toIntArray()
-            if (idx.size == memory) mt[idx] = v.toDouble()
+        counter.memCounts.getFrequentItems(ErrorType.NO_FALSE_POSITIVES)
+          .also { println("mem:" + it.size) }
+          .map { it.item to it.estimate.toInt() }
+          .filter { (item, _) -> item.all { it in dictionary } }
+          .forEach { (item, count) ->
+            val idx = item.map { dictionary[it] }.toIntArray()
+            if (idx.size == memory) mt[idx] = count.toDouble()
           }
       }.let { it / it.sum() } // Normalize across all entries in tensor
     // TODO: May be possible to precompute fiber/slice PMFs via tensor renormalization?
@@ -99,11 +101,12 @@ open class MarkovChain<T>(
   // Maps the coordinates of a transition tensor fiber to a memoized distribution
   val dists: MutableMap<List<Int>, Dist> by resettableLazy(mgr) { mutableMapOf() }
 
+  // https://www.cs.utah.edu/~jeffp/papers/merge-summ.pdf
   operator fun plus(mc: MarkovChain<T>) = apply {
     fun <T> AtomicLongMap<T>.addAll(that: AtomicLongMap<T>) =
       that.asMap().forEach { (k, v) -> addAndGet(k, v) }
-    counter.rawCounts.addAll(mc.counter.rawCounts)
-    counter.memCounts.addAll(mc.counter.memCounts)
+    counter.rawCounts.merge(mc.counter.rawCounts)
+    counter.memCounts.merge(mc.counter.memCounts)
     mgr.reset()
   }
 
@@ -137,25 +140,27 @@ open class MarkovChain<T>(
   ) = generateSequence(memSeed, memNext).map { it.last() }
 
   /**
-   * Treats each subsequence of length [memory] as a single
-   * token and counts the number of time it occurs in the sequence.
+   * Treats each subsequence of length [memory] as a single token
+   * and counts the number of time it occurs in the sequence using
+   * the Count-min sketch implemented by [ItemsSketch].
    */
   class Counter<T>(
     count: Sequence<T> = sequenceOf(),
     memory: Int,
     // Counts raw instances of T
-    val rawCounts: AtomicLongMap<T> = AtomicLongMap.create(),
+    val rawCounts: ItemsSketch<T> = ItemsSketch(pow2(log2(maxUniques) + 5)),
+    val memUniques: Int = pow2(log2(memory * maxUniques) + 2),
     // Counts unique subsequences of Ts up length memory
-    val memCounts: AtomicLongMap<List<T>> =
-      AtomicLongMap.create<List<T>>().also { memMap ->
+    val memCounts: ItemsSketch<List<T>> =
+      ItemsSketch<List<T>>(memUniques).also { memMap ->
         (0 until memory)
           .flatMap { count.drop(it).chunked(memory) }
           .forEach { buffer: List<T> ->
-            memMap.incrementAndGet(buffer)
-            buffer.forEach { rawCounts.incrementAndGet(it) }
+            memMap.update(buffer)
+            buffer.forEach { rawCounts.update(it) }
           }
-      }
-  ) : Map<List<T>, Long> by memCounts.asMap()
+      },
+  )
 }
 
 class Dist(

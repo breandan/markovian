@@ -21,3 +21,6 @@ fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> =
 
 fun List<Double>.variance() =
   average().let { mean -> map { (it - mean).pow(2) } }.average()
+
+fun log2(b: Int) = 32 - Integer.numberOfLeadingZeros(b - 1)
+fun pow2(p: Int) = 2.0.pow(p.toDouble()).toInt()

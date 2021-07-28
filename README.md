@@ -126,7 +126,13 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 * [Frugal Streaming for Estimating Quantiles: One (or two) memory suffices](https://arxiv.org/pdf/1407.1121.pdf), Ma et al. (2014)
 * [Smooth estimates of multiple quantiles in dynamically varying data streams](https://doi.org/10.1007/s10044-019-00794-3), Hammer and Yazidi (2019)
 
-### Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
+## Sketching
+
+* [Mergeable summaries](https://www.cs.utah.edu/~jeffp/papers/merge-summ.pdf), Agarwal et al. (2012)
+* [Data-Independent Space Partitionings for Summaries](http://www.compsciscience.org/shekelyan/papers/preprint_pods21.pdf), Cormode et al. (2021)
+* [Summingbird: a framework for integrating batch and online MapReduce computations](https://dl.acm.org/doi/abs/10.14778/2733004.2733016), Boykin et al. (2014)
+
+## Probabilistic Circuits (e.g. ACs, SPNs, PSDDs, et al.)
 
 * [On the Relationship between Sum-Product Networks and Bayesian Networks](http://proceedings.mlr.press/v37/zhaoc15.pdf), Zhao et al. (2015) [[supplementary material](https://hanzhaoml.github.io/papers/ICML2015/SPN-supplementary.pdf)]
 * [Probabilistic Circuits: A Unifying Framework for Tractable Probabilistic Models](http://starai.cs.ucla.edu/papers/ProbCirc20.pdf), Choi et al. (2020)
@@ -153,6 +159,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ## Software
 
+* [Apache DataSketches: A software library of stochastic streaming algorithms](https://datasketches.apache.org/), Rhodes et al. (2021) [[source code](https://github.com/apache/datasketches-java)]
 * [SPFlow: An easy and extensible library for deep probabilistic learning using SPNs](https://arxiv.org/pdf/1901.03704.pdf), Molina et al. (2019) [[source code](https://github.com/SPFlow/SPFlow)]
 * [Dimple: Java and Matlab libraries for probabilistic inference](https://s3.amazonaws.com/files.dimple.probprog.org/DimpleUserManual_v0.07_Java_API.pdf#section.4), Barber et al. (2016) [[source code](https://github.com/analog-garage/dimple/tree/master/solvers/java/src/main/java/com/analog/lyric/dimple/solvers/sumproduct)]
 * [Chimple: a Probabilistic Programming Java API](https://s3.amazonaws.com/files.dimple.probprog.org/Chimple_User_Documentation.pdf#%5B%7B%22num%22%3A6%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C93.6%2C344.7%2C0%5D), Hershey et al. (2016) [[source code](https://github.com/analog-garage/chimple/tree/master/java/src/main/java/com/analog/lyric/chimple)]
