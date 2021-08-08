@@ -1,5 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+
 plugins {
   kotlin("jvm") version "1.5.30-M1"
   id("com.github.ben-manes.versions") version "0.39.0"
@@ -43,19 +46,28 @@ dependencies {
 
   // MPJ (required for Poon's SPN)
   implementation(files("$projectDir/libs/mpj-0.44.jar"))
-  implementation("junit:junit:4.13.1")
 
   val multik_version = "0.0.1"
   implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
   implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
 //  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")
 
-  val ejmlVersion = "0.41"
-  api("org.ejml:ejml-kotlin:$ejmlVersion")
-  api("org.ejml:ejml-all:$ejmlVersion")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.8.0-M1")
 }
 
 tasks {
+  test {
+    useJUnitPlatform()
+    testLogging {
+      events = setOf(FAILED, PASSED, SKIPPED, STANDARD_OUT)
+      exceptionFormat = FULL
+      showExceptions = true
+      showCauses = true
+      showStackTraces = true
+      showStandardStreams = true
+    }
+  }
+
   withType<KotlinCompile> {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
   }

@@ -156,8 +156,7 @@ Cache-Efficient, and Online](https://arxiv.org/pdf/1610.05141.pdf), Sanders et a
 
 ## Tensor Methods
 
-* [Tensor Train Spectral Method for Learning of
-Hidden Markov Models](https://www.researchgate.net/profile/Ivan-Oseledets/publication/326980338_Tensor_Train_Spectral_Method_for_Learning_of_Hidden_Markov_Models_HMM/links/5bbb03c592851c7fde33b5b5/Tensor-Train-Spectral-Method-for-Learning-of-Hidden-Markov-Models-HMM.pdf), Kuznetsov & Oseledets (2019)
+* [Tensor Train Spectral Method for Learning of Hidden Markov Models](https://www.researchgate.net/profile/Ivan-Oseledets/publication/326980338_Tensor_Train_Spectral_Method_for_Learning_of_Hidden_Markov_Models_HMM/links/5bbb03c592851c7fde33b5b5/Tensor-Train-Spectral-Method-for-Learning-of-Hidden-Markov-Models-HMM.pdf), Kuznetsov & Oseledets (2019)
 * [Tensor Balancing on Statistical Manifold](https://arxiv.org/pdf/1702.08142.pdf), Sugiyama et al. (2018)
 * [Dynamic Multidimensional Histograms](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.92.1201&rep=rep1&type=pdf), Thaper et al. (2002)
 
