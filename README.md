@@ -4,7 +4,7 @@
 [![](https://jitpack.io/v/breandan/markovian.svg)](https://jitpack.io/#breandan/markovian)
 [![CI](https://github.com/breandan/markovian/workflows/CI/badge.svg)](https://github.com/breandan/markovian/actions)
 
-Symbolic integration and probabilistic programming in the spirit of [Church](https://web.stanford.edu/~ngoodman/papers/churchUAI08_rev2.pdf) and [Anglican](https://probprog.github.io/anglican/index.html).
+Automatic integration and probabilistic programming in the spirit of [Church](https://web.stanford.edu/~ngoodman/papers/churchUAI08_rev2.pdf) and [Anglican](https://probprog.github.io/anglican/index.html).
 
 ## Research Questions
 
@@ -14,6 +14,36 @@ Symbolic integration and probabilistic programming in the spirit of [Church](htt
 * Is there a tractable inversion sampling procedure for higher dimensional quantiles?
 * Is there a way to perform inference on Bayesian networks [using backprop](https://arxiv.org/pdf/1301.3847.pdf)?
 * Is there a [formula](https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulae) for propagating uncertainty through elementary functions?
+
+## Summary
+
+The way we teach probability in school is too abstract. First we learn about probability distributions. Where did these distributions come from? How did they arise? To gain a better understanding of probabilistic reasoning, we should start from first principles with an application firmly in mind, and build up our intuition through simple programming exercises.
+
+Why does probability exist? Probability exists because we have imperfect information about the world. Whether due to inaccessibility, poor visibility or measurement error, our sensing instruments are only capable of gathering a blurry representation of their environment. We are thus permanently stranded in a state of uncertainty about the world around us. Nevertheless, we would like to reconstruct and reason about possible realities to make informed decisions.
+
+Most computers are by contrast, deterministic and fully observable. How could we use a deterministic machine to simulate a stochastic one? We must first have a source of *noise*. This may come from a the outside world through a special input device called a random number generator (RNG), or lacking one, from an artificial or *pseudo*-RNG (PRNG). A good PRNG will be indistinguishable from an RNG to any observer who does not know its internal state, and whose internal state cannot be easily guessed by observing the outputs. Many [suitable](https://en.wikipedia.org/wiki/Rule_30) [candidates](https://en.wikipedia.org/wiki/Linear_congruential_generator) have been proposed.
+
+What is a probability distribution? A probability distribution is a set of elements, accompanied by the relative frequency which they occur. Suppose we have a foreign language which we do not understand. How could we learn it? First, we might read some text and gather various statistics, such as the alphabet size and how many times each symbol occurs. We could summarize this information in a data structure called a *histogram*. There are [many useful algorithms](https://en.wikipedia.org/wiki/Streaming_algorithm) for computing these summaries efficiently, exactly or approximately.
+
+Now, suppose we want to sample from our probabilistic model. To do so, we could take our histogram and for each symbol, compute a running sum up to its index, called a cumulative distribution function (CDF). We draw a sample from our PRNG to get a number uniformly between 0 and 1 in increments of 1/|alphabet|, then select the symbol whose running sum is closest to that number. Voila! We have obtained a sample.
+
+In order to sample longer sequences, we might want to incorporate some context, such as pairs of adjacent characters. To do so, we could build a two dimensional histogram, sample the first symbol from the "marginal" distribution P(T₁=t₁), and the second from the "conditional" distribution P(T₂=t₂|T₁=t₁), the probability of the second character being t₂ given the preceding character was t₁. This data structure is called a Markov or transition matrix.
+
+P(T₁=t₁,T₂=t₂) = P(T₁=t₁)P(T₂=t₂|T₁=t₁)
+```
+   a  b  c …
+  _________
+a| 1  2  1 
+b| 2  3  1
+c| 1  2  3 
+⋮          / n
+```
+
+More generally, we might have triples or n-tuples of contiguous symbols. To represent longer contexts, we could record their probabilities into a multidimensional array or *transition tensor*, representing the probability of observing a subsequence t₁t₂...tₙ. This tensor is a probability distribution whose conditionals "slice" or disintegrate the tensor along a dimension, producing n-1 dimensional hyperplane, the conditional probability of observing a certain symbol in a certain slot:
+
+P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(tₙ|tₙ₋₁)P(tₙ₋₁|tₙ₋₂)…P(t₂|t₁)P(t₁)
+
+Where the tensor rank n is given by the context length, T₁...ₙ are random variables and t₁...ₙ are their concrete instantiations. This tensor is a hypercube with shape |alphabet|ⁿ. Each entry identifies a unique subsequence of n symbols, and the probability of its occurrence. Note the exponential size of this model - as n grows larger, this will become intractable to store. How could we fix this?
 
 ## Example
 
@@ -43,7 +73,7 @@ Now we do not need to sample from the parents, but can discard them and sample d
 * A distribution is called [infinitely divisible](https://en.wikipedia.org/wiki/Infinite_divisibility_(probability)) if it can be expressed as the sum of an arbitrary number of IID RVs.
 * Gaussian distributions form a [monoid](https://izbicki.me/blog/gausian-distributions-are-monoids).
 
-We can use these algebraic properties to signficantly simplify certain mixture distributions.
+We can use these algebraic properties to significantly simplify certain mixture distributions.
 
 See [notebook](notebooks/combinator_exploration.ipynb) for further implementation details.
 
@@ -64,7 +94,7 @@ See [notebook](notebooks/combinator_exploration.ipynb) for further implementatio
 
 ## Closure
 
-* [A Class of Probability Distributions that is Closed with Respect to Addition as Well as Multiplication of Independent Random Variables](https://link.springer.com/content/pdf/10.1007/s10959-013-0523-y.pdf)
+* [A Class of Probability Distributions that is Closed with Respect to Addition as Well as Multiplication of Independent Random Variables](https://link.springer.com/content/pdf/10.1007/s10959-013-0523-y.pdf), Bondesson (2015)
 * [The Harmonic Logarithms and the Binomial Formula](https://core.ac.uk/download/pdf/82415331.pdf), Roman (1993)
 * [A New Distribution on the Simplex with Auto-Encoding Applications](https://papers.nips.cc/paper/9520-a-new-distribution-on-the-simplex-with-auto-encoding-applications.pdf), Stirn et al. (2019)
 * [Closed Form Integration of Artificial Neural Networks](https://escholarship.org/content/qt0wz7n7nm/qt0wz7n7nm.pdf#page=5), Gottschling (1999)
