@@ -19,7 +19,7 @@ Automatic integration and probabilistic programming in the spirit of [Church](ht
 
 The way we teach probability in school is too abstract. First we learn about probability distributions. Where did these distributions come from? How did they arise? To gain a better understanding of probabilistic reasoning, we should start from first principles with an application firmly in mind, and build up our intuition through simple programming exercises.
 
-Why does probability exist? Probability exists because we have imperfect information about the world. Whether due to inaccessibility, poor visibility or measurement error, our sensing instruments are only capable of gathering a blurry representation of their environment. We are thus permanently stranded in a state of uncertainty about the world around us. Nevertheless, we would like to reconstruct and reason about possible realities to make informed decisions.
+Why does probability exist? Probability exists because we have imperfect information about the world. Whether due to inaccessibility, poor visibility, measurement error or [other sources](https://en.wikipedia.org/wiki/Uncertainty_quantification#Sources_of_uncertainty), our sensing instruments are only capable of gathering a blurry representation of their environment. We are thus permanently stranded in a state of uncertainty about the world around us. Nevertheless, we would like to reconstruct and reason about possible realities to make informed decisions.
 
 Most computers are by contrast, deterministic and fully observable. How could we use a deterministic machine to simulate a stochastic one? We must first have a source of *noise*. This may come from a the outside world through a special input device called a random number generator (RNG), or lacking one, from an artificial or *pseudo*-RNG (PRNG). A good PRNG will be indistinguishable from an RNG to any observer who does not know its internal state, and whose internal state cannot be easily guessed by observing the outputs. Many [suitable](https://en.wikipedia.org/wiki/Rule_30) [candidates](https://en.wikipedia.org/wiki/Linear_congruential_generator) have been proposed.
 
@@ -29,21 +29,23 @@ Now, suppose we want to sample from our probabilistic model. To do so, we could 
 
 In order to sample longer sequences, we might want to incorporate some context, such as pairs of adjacent characters. To do so, we could build a two dimensional histogram, sample the first symbol from the "marginal" distribution P(T₁=t₁), and the second from the "conditional" distribution P(T₂=t₂|T₁=t₁), the probability of the second character being t₂ given the preceding character was t₁. This data structure is called a Markov or transition matrix.
 
-P(T₁=t₁,T₂=t₂) = P(T₁=t₁)P(T₂=t₂|T₁=t₁)
+P(T₁=t₁,T₂=t₂) = P(T₂=t₂|T₁=t₁)P(T₁=t₁)
 ```
    a  b  c …
-  _________
+ ._________
 a| 1  2  1 
 b| 2  3  1
 c| 1  2  3 
-⋮          / n
+⋮          / Σ
 ```
 
-More generally, we might have triples or n-tuples of contiguous symbols. To represent longer contexts, we could record their probabilities into a multidimensional array or *transition tensor*, representing the probability of observing a subsequence t₁t₂...tₙ. This tensor is a probability distribution whose conditionals "slice" or disintegrate the tensor along a dimension, producing n-1 dimensional hyperplane, the conditional probability of observing a certain symbol in a certain slot:
+More generally, we might have triples or n-tuples of contiguous symbols. To represent longer contexts, we could record their probabilities into a multidimensional array or *transition tensor*, representing the probability of observing a subsequence t₁t₂...tₙ. This tensor is a probability distribution whose conditionals "slice" or disintegrate the tensor along a dimension, producing an n-1 dimensional hyperplane, the conditional probability of observing a given symbol in a given slot:
 
-P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(tₙ|tₙ₋₁)P(tₙ₋₁|tₙ₋₂)…P(t₂|t₁)P(t₁)
+P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(Tₙ=tₙ|Tₙ₋₁=tₙ₋₁)P(Tₙ₋₁=tₙ₋₁|Tₙ₋₂=tₙ₋₂)…P(T₂=t₂|t₁)P(T₁=t₁),
 
-Where the tensor rank n is given by the context length, T₁...ₙ are random variables and t₁...ₙ are their concrete instantiations. This tensor is a hypercube with shape |alphabet|ⁿ. Each entry identifies a unique subsequence of n symbols, and the probability of its occurrence. Note the exponential size of this model - as n grows larger, this will become intractable to store. How could we fix this?
+where the tensor rank n is given by the context length, T₁...ₙ are random variables and t₁...ₙ are their concrete instantiations. This tensor is a hypercube with shape |alphabet|ⁿ - Each entry identifies a unique subsequence of n symbols, and the probability of observing them in the same context. Note the exponential state space of this model - as n grows larger, this will quickly require a large amount of space to represent. More importantly, we need too much data to approximate all entries of this tensor. How could we do better?
+
+<!--Instead, we need a more efficient algorithm. What if we didn't care about estimating the exact transition probability, only approximating it. How could we do that? There is a model, called a Hidden Markov Model, which allows us to model the observable states without requiring as much space or computation.-->
 
 ## Example
 

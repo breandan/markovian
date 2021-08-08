@@ -46,7 +46,8 @@ dependencies {
 
   val multik_version = "0.0.1"
   implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
-  implementation("org.jetbrains.kotlinx:multik-default:$multik_version")
+  implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
+//  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")
 }
 
 tasks {

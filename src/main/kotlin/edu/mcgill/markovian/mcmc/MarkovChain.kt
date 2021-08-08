@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AtomicLongMap
 import edu.mcgill.markovian.*
 import edu.mcgill.markovian.concurrency.*
 import org.apache.datasketches.frequencies.*
+import org.apache.datasketches.frequencies.ErrorType.NO_FALSE_POSITIVES
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
@@ -60,7 +61,7 @@ open class MarkovChain<T>(
   private val mgr = ResettableLazyManager()
 
   private val dictionary: Bijection<T> by resettableLazy(mgr) {
-    counter.rawCounts.getFrequentItems(ErrorType.NO_FALSE_POSITIVES)
+    counter.rawCounts.getFrequentItems(NO_FALSE_POSITIVES)
       // Is taking maxTokens-most frequent unigrams always the right choice?
       .take(maxUniques).map { it.item }.let { Bijection(it) }
   }
@@ -81,7 +82,7 @@ open class MarkovChain<T>(
   val tt: NDArray<Double, DN> by resettableLazy(mgr) {
     mk.dnarray<Double, DN>(IntArray(memory) { size }) { 0.0 }
       .also { mt: NDArray<Double, DN> ->
-        counter.memCounts.getFrequentItems(ErrorType.NO_FALSE_POSITIVES)
+        counter.memCounts.getFrequentItems(NO_FALSE_POSITIVES)
           .map { it.item to it.estimate.toInt() }
           .filter { (item, _) -> item.all { it in dictionary } }
           .forEach { (item, count) ->
