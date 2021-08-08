@@ -24,3 +24,11 @@ fun List<Double>.variance() =
 
 fun log2(b: Int) = 32 - Integer.numberOfLeadingZeros(b - 1)
 fun pow2(p: Int) = 2.0.pow(p.toDouble()).toInt()
+
+fun <T> List<T>.allMasks(): List<List<T?>> =
+  indices.map { it.toString(2) }.map { bitMask ->
+    mapIndexed { i, t ->
+      // null represents unknown/unconditioned values
+      if(bitMask.length <= i || bitMask[i] == '1') null else t
+    }
+  }

@@ -43,11 +43,16 @@ dependencies {
 
   // MPJ (required for Poon's SPN)
   implementation(files("$projectDir/libs/mpj-0.44.jar"))
+  implementation("junit:junit:4.13.1")
 
   val multik_version = "0.0.1"
   implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
   implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
 //  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")
+
+  val ejmlVersion = "0.41"
+  api("org.ejml:ejml-kotlin:$ejmlVersion")
+  api("org.ejml:ejml-all:$ejmlVersion")
 }
 
 tasks {

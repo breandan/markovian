@@ -1,6 +1,5 @@
 package edu.mcgill.markovian.mcmc
 
-import com.google.common.util.concurrent.AtomicLongMap
 import edu.mcgill.markovian.*
 import edu.mcgill.markovian.concurrency.*
 import org.apache.datasketches.frequencies.*
@@ -8,6 +7,7 @@ import org.apache.datasketches.frequencies.ErrorType.NO_FALSE_POSITIVES
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.*
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -22,10 +22,10 @@ fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
   }.first
 
 /**
- * Each entry in [dimToIdx] defines a unique N-1 dimensional hyperplane,
- * which, when intersected, produce a rank-(N-dimToIdx.size) tensor.
+ * Each entry in [dimToIdx] represents a unique N-1 dimensional hyperplane,
+ * which intersect to form a rank-(N-dimToIdx.size) tensor.
  */
-fun NDArray<Double, DN>.disintegrate(dimToIdx: Map<Int, Int>) =
+fun NDArray<Double, DN>.disintegrate(dimToIdx: Map<Int, Int>): NDArray<Double, DN> =
   // TODO: Is this really disintegration or something else?
   // http://www.stat.yale.edu/~jtc5/papers/ConditioningAsDisintegration.pdf
   // https://en.wikipedia.org/wiki/Disintegration_theorem
@@ -49,6 +49,7 @@ class Bijection<T>(
   operator fun contains(value: Int) = value in rmap
 }
 
+// Maximum number of unique Ts
 val maxUniques: Int = 2000
 
 // TODO: Support continuous state spaces?
@@ -72,7 +73,7 @@ open class MarkovChain<T>(
    * Transition tensor representing the probability of observing
    * a subsequence t₁t₂...tₙ, i.e.:
    *
-   * P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(tₙ|tₙ₋₁)P(tₙ₋₁|tₙ₋₂)…P(t₂|t₁)
+   * P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(Tₙ=tₙ|Tₙ₋₁=tₙ₋₁, Tₙ₋₂=tₙ₋₂, …,T₁=t₁)
    *
    * Where the tensor rank n=[memory], T₁...ₙ are random variables
    * and t₁...ₙ are their concrete instantiations. This tensor is
@@ -100,18 +101,23 @@ open class MarkovChain<T>(
   // Maps the coordinates of a transition tensor fiber to a memoized distribution
   val dists: MutableMap<List<Int>, Dist> by resettableLazy(mgr) { mutableMapOf() }
 
+  operator fun get(vararg variables: T?): Double =
+    get(*variables.mapIndexed { i, t -> i to t }.toTypedArray())
+
+  operator fun get(vararg variables: Pair<Int, T?>): Double =
+    variables.toMap().let { map -> (0 until memory).map { map[it] } }.let {
+      counter.nrmCounts.getEstimate(it).toDouble() / counter.total.toDouble()
+    }
+
   // https://www.cs.utah.edu/~jeffp/papers/merge-summ.pdf
   operator fun plus(mc: MarkovChain<T>) = apply {
-    fun <T> AtomicLongMap<T>.addAll(that: AtomicLongMap<T>) =
-      that.asMap().forEach { (k, v) -> addAndGet(k, v) }
-    counter.rawCounts.merge(mc.counter.rawCounts)
     counter.memCounts.merge(mc.counter.memCounts)
     mgr.reset()
   }
 
   fun sample(
     seed: () -> T = {
-      dictionary[Dist(tt.sumOnto().toList()).sample()]
+      dictionary[Dist(tt.sumOnto().toList(), normConst=counter.total.toDouble()).sample()]
     },
     next: (T) -> T = { it: T ->
       val dist = Dist(tt.view(dictionary[it]).asDNArray().sumOnto().toList())
@@ -139,34 +145,50 @@ open class MarkovChain<T>(
   ) = generateSequence(memSeed, memNext).map { it.last() }
 
   /**
-   * Treats each subsequence of length [memory] as a single token
-   * and counts the number of time it occurs in the sequence using
+   * Treats each subsequence of length-[memory] as a single token
+   * and counts how many times it occurs in the sequence using
    * the Count-min sketch implemented by [ItemsSketch].
    */
   class Counter<T>(
-    count: Sequence<T> = sequenceOf(),
+    toCount: Sequence<T> = sequenceOf(),
     memory: Int,
-    // Counts raw instances of T
-    val rawCounts: ItemsSketch<T> = ItemsSketch(pow2(log2(maxUniques) + 5)),
+    val total: AtomicInteger = AtomicInteger(0),
+    val rawUniques: Int = pow2(log2(maxUniques) + 5),
+    val nrmUniques: Int = pow2(log2(memory * maxUniques) + 8),
     val memUniques: Int = pow2(log2(memory * maxUniques) + 2),
+    // Counts unique instances of T
+    val rawCounts: ItemsSketch<T> = ItemsSketch(rawUniques),
+    /**
+     * Precomputes the normalizing constants for all multivariate
+     * marginals of a length-[memory] sequence, e.g. for the
+     * sequence 'abc' we need to increment the normalizing
+     * constants for all of the following eight marginals:
+     *
+     *  P[a * *] += 1    P[a b *] += 1    P[a b c] += 1
+     *  P[* b *] += 1    P[* b c] += 1    P[* * *] += 1
+     *  P[* * c] += 1    P[a * c] += 1
+     *
+     *  In general, requires O(2ⁿ) ops for a length-n sequence.
+     */
+    val nrmCounts: ItemsSketch<List<T?>> = ItemsSketch(nrmUniques),
     // Counts unique subsequences of Ts up length memory
     val memCounts: ItemsSketch<List<T>> =
       ItemsSketch<List<T>>(memUniques).also { memMap ->
-        (0 until memory)
-          .flatMap { count.drop(it).chunked(memory) }
-          .forEach { buffer: List<T> ->
-            memMap.update(buffer)
-            buffer.forEach { rawCounts.update(it) }
-          }
-      },
+        toCount.windowed(memory, 1).forEach { buffer: List<T> ->
+          total.incrementAndGet()
+          buffer.let { memMap.update(it) }
+          buffer.forEach { rawCounts.update(it) }
+          buffer.allMasks().forEach { nrmCounts.update(it) }
+        }
+      }
   )
 }
 
 class Dist(
   counts: Collection<Number>,
-  val sum: Double = counts.sumOf { it.toDouble() },
+  val normConst: Double = counts.sumOf { it.toDouble() },
   // https://en.wikipedia.org/wiki/Probability_mass_function
-  val pmf: List<Double> = counts.map { i -> i.toDouble() / sum },
+  val pmf: List<Double> = counts.map { i -> i.toDouble() / normConst },
   // https://en.wikipedia.org/wiki/Cumulative_distribution_function
   val cdf: List<Double> = pmf.runningReduce { acc, d -> d + acc }
 ) {

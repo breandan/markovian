@@ -41,7 +41,7 @@ c| 1  2  3
 
 More generally, we might have triples or n-tuples of contiguous symbols. To represent longer contexts, we could record their probabilities into a multidimensional array or *transition tensor*, representing the probability of observing a subsequence t₁t₂...tₙ. This tensor is a probability distribution whose conditionals "slice" or disintegrate the tensor along a dimension, producing an n-1 dimensional hyperplane, the conditional probability of observing a given symbol in a given slot:
 
-P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(Tₙ=tₙ|Tₙ₋₁=tₙ₋₁)P(Tₙ₋₁=tₙ₋₁|Tₙ₋₂=tₙ₋₂)…P(T₂=t₂|t₁)P(T₁=t₁),
+P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(Tₙ=tₙ|Tₙ₋₁=tₙ₋₁, Tₙ₋₂=tₙ₋₂, …,T₁=t₁),
 
 where the tensor rank n is given by the context length, T₁...ₙ are random variables and t₁...ₙ are their concrete instantiations. This tensor is a hypercube with shape |alphabet|ⁿ - Each entry identifies a unique subsequence of n symbols, and the probability of observing them in the same context. Note the exponential state space of this model - as n grows larger, this will quickly require a large amount of space to represent. More importantly, we need too much data to approximate all entries of this tensor. How could we do better?
 
@@ -153,6 +153,13 @@ Cache-Efficient, and Online](https://arxiv.org/pdf/1610.05141.pdf), Sanders et a
 * [Fast and accurate parallel quantile computation](https://discovery.ucl.ac.uk/id/eprint/1482128/1/Luu_thesis.pdf#page=12), Luu (2016)
 * [Fast Random Integer Generation in an Interval](https://arxiv.org/pdf/1805.10941.pdf), Lemire (2018)
 * [Fast Evaluation of Transcendental Functions](https://www.researchgate.net/profile/Ekaterina_Karatsuba/publication/246166981_Fast_evaluation_of_transcendental_functions/links/0deec528ab5b45f8bc000000/Fast-evaluation-of-transcendental-functions.pdf), Karatsuba (1991)
+
+## Tensor Methods
+
+* [Tensor Train Spectral Method for Learning of
+Hidden Markov Models](https://www.researchgate.net/profile/Ivan-Oseledets/publication/326980338_Tensor_Train_Spectral_Method_for_Learning_of_Hidden_Markov_Models_HMM/links/5bbb03c592851c7fde33b5b5/Tensor-Train-Spectral-Method-for-Learning-of-Hidden-Markov-Models-HMM.pdf), Kuznetsov & Oseledets (2019)
+* [Tensor Balancing on Statistical Manifold](https://arxiv.org/pdf/1702.08142.pdf), Sugiyama et al. (2018)
+* [Dynamic Multidimensional Histograms](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.92.1201&rep=rep1&type=pdf), Thaper et al. (2002)
 
 ## Online Estimation
 

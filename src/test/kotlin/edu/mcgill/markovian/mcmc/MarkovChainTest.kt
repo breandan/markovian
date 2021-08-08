@@ -15,6 +15,24 @@ class MarkovChainTest {
   }
 
   @Test
+  fun testScoring() {
+    @Suppress("LocalVariableName")
+    val P = List(100) { ('a'..'d').random() }
+      .asSequence().toMarkovChain(memory = 2)
+    // P(T₁=a,T₂=*)
+    val p1 = P[1 to 'a'].testIsProbability()
+    // P(T₁=a,T₂=b)
+    val p2 = P['a', 'b'].testIsProbability()
+    // P(T₁=a,T₂=*)
+    val p3 = P['a', null].testIsProbability()
+
+    Assert.assertEquals(p1, p3)
+  }
+
+  fun Double.testIsProbability(): Double =
+    also { Assert.assertTrue(let { 0 < it && it < 1 }) }
+
+  @Test
   fun testNumerical() {
     // TODO: why does it converge?
     List(100) { Random.nextDouble() }.asSequence()
