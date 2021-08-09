@@ -115,12 +115,15 @@ open class MarkovChain<T>(
     mgr.reset()
   }
 
+  /**
+   * TODO: construct [Dist] using precomputed normalization constants [Counter.nrmCounts]
+   */
   fun sample(
     seed: () -> T = {
-      dictionary[Dist(tt.sumOnto().toList(), normConst=counter.total.toDouble()).sample()]
+      dictionary[Dist(tt.sumOnto().toList(), /*normConst=counter.total.toDouble()*/).sample()]
     },
     next: (T) -> T = { it: T ->
-      val dist = Dist(tt.view(dictionary[it]).asDNArray().sumOnto().toList())
+      val dist = Dist(tt.view(dictionary[it], /*normConst=TODO*/).asDNArray().sumOnto().toList())
       dictionary[dist.sample()]
     },
     memSeed: () -> Sequence<T> = {
@@ -137,7 +140,7 @@ open class MarkovChain<T>(
         // Intersect conditional slices to produce a 1D count fiber
         val intersection = tt.disintegrate(slices).toList()
         // Turns 1D count fiber into a probability vector
-        Dist(intersection)
+        Dist(intersection, /*normConst=TODO*/)
       }
 
       curr.drop(1) + dictionary[dist.sample()]
