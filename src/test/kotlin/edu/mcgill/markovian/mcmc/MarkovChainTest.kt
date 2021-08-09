@@ -3,7 +3,7 @@ package edu.mcgill.markovian.mcmc
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.toList
-import org.junit.*
+import org.junit.jupiter.api.*
 import kotlin.random.Random
 
 class MarkovChainTest {
@@ -22,15 +22,15 @@ class MarkovChainTest {
     // P(T₁=a,T₂=*)
     val p1 = P[1 to 'a'].testIsProbability().also { println("p1 = $it") }
     // P(T₁=a,T₂=b)
-    val p2 = P['a', 'b'].testIsProbability().also { println("p1 = $it") }
+    val p2 = P['a', 'b'].testIsProbability().also { println("p2 = $it") }
     // P(T₁=a,T₂=*)
-    val p3 = P['a', null].testIsProbability().also { println("p1 = $it") }
+    val p3 = P['a', null].testIsProbability().also { println("p3 = $it") }
 
-    Assert.assertEquals(p1, p3)
+    Assertions.assertEquals(p1, p3)
   }
 
   fun Double.testIsProbability(): Double =
-    also { Assert.assertTrue(let { 0 < it && it < 1 }) }
+    also { Assertions.assertTrue(let { 0 < it && it < 1 }) }
 
   @Test
   fun testNumerical() {
@@ -50,7 +50,7 @@ class MarkovChainTest {
       ]
     )
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
       a.asDNArray().disintegrate(
         mapOf(
         //D    I
