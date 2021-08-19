@@ -4,9 +4,9 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
-  kotlin("jvm") version "1.5.30-M1"
+  kotlin("jvm") version "1.5.30-RC"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-146"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-203"
 }
 
 group = "com.github.breandan"
@@ -32,8 +32,8 @@ dependencies {
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
 
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
-  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.0.4")
-  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.1")
+  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.1.0")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2")
 
 //  https://arxiv.org/pdf/1908.10693.pdf
 //  implementation("com.datadoghq:sketches-java:0.7.0")
