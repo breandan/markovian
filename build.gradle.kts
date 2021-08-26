@@ -4,9 +4,9 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
-  kotlin("jvm") version "1.5.30-RC"
+  kotlin("jvm") version "1.5.30"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-203"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-216"
 }
 
 group = "com.github.breandan"
