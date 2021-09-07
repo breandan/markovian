@@ -1,5 +1,6 @@
 package edu.mcgill.markovian.mcmc
 
+import com.github.benmanes.caffeine.cache.*
 import edu.mcgill.markovian.*
 import edu.mcgill.markovian.concurrency.*
 import org.apache.datasketches.frequencies.*
@@ -26,8 +27,8 @@ fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
  * which intersect to form a rank-(N-dimToIdx.size) tensor.
  */
 fun NDArray<Double, DN>.disintegrate(dimToIdx: Map<Int, Int>): NDArray<Double, DN> =
-  // TODO: Is this really disintegration or something else?
-  // http://www.stat.yale.edu/~jtc5/papers/ConditioningAsDisintegration.pdf
+// TODO: Is this really disintegration or something else?
+// http://www.stat.yale.edu/~jtc5/papers/ConditioningAsDisintegration.pdf
   // https://en.wikipedia.org/wiki/Disintegration_theorem
   (0 until dim.d).fold(this to 0) { (t, r), b ->
     if (b in dimToIdx) t.view(dimToIdx[b]!!, r).asDNArray() to r
@@ -98,8 +99,10 @@ open class MarkovChain<T>(
     // https://en.wikipedia.org/wiki/Copula_(probability_theory)
   }
 
+  // TODO: mergeable cache?
   // Maps the coordinates of a transition tensor fiber to a memoized distribution
-  val dists: MutableMap<List<Int>, Dist> by resettableLazy(mgr) { mutableMapOf() }
+  val dists: Cache<List<Int>, Dist> =
+    Caffeine.newBuilder().maximumSize(10_000).build()
 
   operator fun get(vararg variables: T?): Double =
     get(*variables.mapIndexed { i, t -> i to t }.toTypedArray())
@@ -140,7 +143,7 @@ open class MarkovChain<T>(
     },
     memNext: (Sequence<T>) -> (Sequence<T>) = { ts ->
       val idxs = ts.map { dictionary[it] }.toList()
-      val dist = dists.getOrPut(idxs) {
+      val dist = dists.get(idxs) {
         // seems to work? I wonder why we don't need to use multiplication
         // to express conditional probability? Just disintegration?
         // https://blog.wtf.sg/posts/2021-03-14-smoothing-with-backprop
@@ -149,10 +152,11 @@ open class MarkovChain<T>(
         // Intersect conditional slices to produce a 1D count fiber
         val intersection = tt.disintegrate(slices).toList()
         // Turns 1D count fiber into a probability vector
-        val normConst = counter.nrmCounts.getEstimate(ts.toList() + null).toDouble()
-        val pmfSum = intersection.sum()
-        println("normConst: $normConst pmfSum: $pmfSum")
-        Dist(intersection, /*normConst=TODO*/)
+        val normConst = counter.nrmCounts.getEstimate(ts.toList() + null).toDouble() /
+          counter.total.toDouble()
+        // val pmfSum = intersection.sum()
+        // println("normConst: $normConst pmfSum: $pmfSum total: ${counter.total.toDouble()}")
+        Dist(intersection, normConst=normConst)
 //        Dist(intersection)
       }
 
@@ -203,6 +207,7 @@ open class MarkovChain<T>(
     operator fun plus(other: Counter<T>) =
       Counter(
         memory = minOf(memory, other.memory),
+        total = AtomicInteger(total.toInt() + other.total.toInt()),
         rawCounts = rawCounts.merge(other.rawCounts),
         nrmCounts = nrmCounts.merge(other.nrmCounts),
         memCounts = memCounts.merge(other.memCounts)
