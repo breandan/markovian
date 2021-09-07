@@ -118,17 +118,28 @@ open class MarkovChain<T>(
    */
   fun sample(
     seed: () -> T = {
-      dictionary[Dist(tt.sumOnto().toList(), /*normConst=counter.total.toDouble()*/).sample()]
+      dictionary[Dist(tt.sumOnto().toList(), normConst=counter.total.toDouble()).sample()]
     },
-    next: (T) -> T = { it: T ->
-      val dist = Dist(tt.view(dictionary[it], /*normConst=TODO*/).asDNArray().sumOnto().toList())
-      dictionary[dist.sample()]
+    next: (T) -> T = { t: T ->
+      val pmf = tt.view(dictionary[t]).asDNArray().sumOnto().toList()
+      // P(Tₙ | Tₙ₋₁ = t) := P([t, *, *, ...])
+      // val conditional = List(memory) { if(it == 0) t else null }
+      // Precompute normalization constant Σ(Tₙ | Tₙ₋₁) in norm sketch
+      // val nrmConst = counter.nrmCounts.getEstimate(conditional).toDouble()
+      dictionary[Dist(pmf/*, normConst = TODO()*/).sample()]
     },
     memSeed: () -> Sequence<T> = {
+      // TODO: Seed the chain properly:
+      //  P(Tₙ) -> P(Tₙ | Tₙ₋₁)
+      //  P(Tₙ | Tₙ₋₁ = t) -> P(Tₙ | Tₙ₋₁, Tₙ₋₂)
+      //  P(Tₙ | Tₙ₋₁, Tₙ₋₂) -> P(Tₙ | Tₙ₋₁, Tₙ₋₂, Tₙ₋₃)
+      //  ...
+      //  P(Tₙ | Tₙ₋₁, Tₙ₋₂, Tₙ₋₃, ..., T_{n-[memory-1]})
+      // Currently implementation: P(Tₙ) x [memory]
       generateSequence(seed, next).take(memory - 1)
     },
-    memNext: (Sequence<T>) -> (Sequence<T>) = { curr ->
-      val idxs = curr.map { dictionary[it] }.toList()
+    memNext: (Sequence<T>) -> (Sequence<T>) = { ts ->
+      val idxs = ts.map { dictionary[it] }.toList()
       val dist = dists.getOrPut(idxs) {
         // seems to work? I wonder why we don't need to use multiplication
         // to express conditional probability? Just disintegration?
@@ -138,10 +149,14 @@ open class MarkovChain<T>(
         // Intersect conditional slices to produce a 1D count fiber
         val intersection = tt.disintegrate(slices).toList()
         // Turns 1D count fiber into a probability vector
+        val normConst = counter.nrmCounts.getEstimate(ts.toList() + null).toDouble()
+        val pmfSum = intersection.sum()
+        println("normConst: $normConst pmfSum: $pmfSum")
         Dist(intersection, /*normConst=TODO*/)
+//        Dist(intersection)
       }
 
-      curr.drop(1) + dictionary[dist.sample()]
+      ts.drop(1) + dictionary[dist.sample()]
     }
   ) = generateSequence(memSeed, memNext).map { it.last() }
 
@@ -172,17 +187,19 @@ open class MarkovChain<T>(
      *  In general, requires O(2ⁿ) ops for a length-n sequence.
      */
     val nrmCounts: ItemsSketch<List<T?>> = ItemsSketch(nrmUniques),
-    // Counts unique subsequences of Ts up length memory
-    val memCounts: ItemsSketch<List<T>> =
-      ItemsSketch<List<T>>(memUniques).also { memMap ->
-        toCount.windowed(memory, 1).forEach { buffer: List<T> ->
-          total.incrementAndGet()
-          buffer.let { memMap.update(it) }
-          buffer.forEach { rawCounts.update(it) }
-          buffer.allMasks().forEach { nrmCounts.update(it) }
-        }
-      }
+    // Counts unique subsequences of Ts up to length memory
+    val memCounts: ItemsSketch<List<T>> = ItemsSketch<List<T>>(memUniques)
   ) {
+    // Walks [toCount] counting Hamming subspaces of sequences up to length [memory]
+    init {
+      toCount.windowed(memory, 1).forEach { buffer: List<T> ->
+        total.incrementAndGet()
+        buffer.let { memCounts.update(it) }
+        buffer.forEach { rawCounts.update(it) }
+        buffer.allMasks().forEach { nrmCounts.update(it) }
+      }
+    }
+
     operator fun plus(other: Counter<T>) =
       Counter(
         memory = minOf(memory, other.memory),
@@ -201,18 +218,16 @@ class Dist(
   // https://en.wikipedia.org/wiki/Cumulative_distribution_function
   val cdf: List<Double> = pmf.runningReduce { acc, d -> d + acc }
 ) {
-
   private val U = DoubleArray(pmf.size) // Probability table
   private val K = IntArray(pmf.size) { it } // Alias table
 
-//  https://en.wikipedia.org/wiki/Alias_method#Table_generation
+  //  https://en.wikipedia.org/wiki/Alias_method#Table_generation
   init {
     assert(pmf.isNotEmpty())
     val n = pmf.size
 
-    val underfull = ArrayList<Int>()
-    val overfull = ArrayList<Int>()
-    for ((i, prob) in pmf.withIndex()) {
+    val (underfull, overfull) = ArrayList<Int>() to ArrayList<Int>()
+    pmf.forEachIndexed { i, prob ->
       U[i] = n * prob
       (if (U[i] < 1.0f) underfull else overfull).add(i)
     }
@@ -230,8 +245,8 @@ class Dist(
 
   // Computes KS-transform using binary search
   fun bsSample(
-    random: Random = Random.Default,
-    target: Double = random.nextDouble()
+    rng: Random = Random.Default,
+    target: Double = rng.nextDouble()
   ): Int = cdf.binarySearch { it.compareTo(target) }
     .let { if (it < 0) abs(it) - 1 else it }
 
