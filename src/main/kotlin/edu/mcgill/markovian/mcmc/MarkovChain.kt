@@ -163,8 +163,8 @@ open class MarkovChain<T>(
     val rawCounts: ItemsSketch<T> = ItemsSketch(rawUniques),
     /**
      * Precomputes the normalizing constants for all multivariate
-     * marginals of a length-[memory] sequence, e.g. for the
-     * sequence 'abc' we need to increment the normalizing
+     * marginals of a length-[memory] sequence, e.g., for the
+     * sequence 'abc', we need to increment the normalizing
      * constants for all of the following eight marginals:
      *
      *  P[a * *] += 1    P[a b *] += 1    P[a b c] += 1
@@ -195,10 +195,42 @@ class Dist(
   // https://en.wikipedia.org/wiki/Cumulative_distribution_function
   val cdf: List<Double> = pmf.runningReduce { acc, d -> d + acc }
 ) {
+
+  private val U = DoubleArray(pmf.size) // Probability table
+  private val K = IntArray(pmf.size) { it } // Alias table
+
+//  https://en.wikipedia.org/wiki/Alias_method#Table_generation
+  init {
+    assert(pmf.isNotEmpty())
+    val n = pmf.size
+
+    val underfull = ArrayList<Int>()
+    val overfull = ArrayList<Int>()
+    for ((i, prob) in pmf.withIndex()) {
+      U[i] = n * prob
+      (if (U[i] < 1.0f) underfull else overfull).add(i)
+    }
+
+    while (underfull.isNotEmpty() && overfull.isNotEmpty()) {
+      val (under, over) = underfull.removeLast() to overfull.removeLast()
+      K[under] = over
+      U[over] = (U[over] + U[under]) - 1.0f
+      (if (U[over] < 1.0f) underfull else overfull).add(over)
+    }
+  }
+
+  // Default sampler
+  fun sample() = aliasSample()
+
   // Computes KS-transform using binary search
-  fun sample(
+  fun bsSample(
     random: Random = Random.Default,
     target: Double = random.nextDouble()
   ): Int = cdf.binarySearch { it.compareTo(target) }
     .let { if (it < 0) abs(it) - 1 else it }
+
+  fun aliasSample(
+    rng: Random = Random.Default,
+    i: Int = rng.nextInt(K.size)
+  ): Int = if (rng.nextDouble() < U[i]) i else K[i]
 }

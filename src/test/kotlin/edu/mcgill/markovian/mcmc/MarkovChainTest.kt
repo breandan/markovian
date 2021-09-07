@@ -30,7 +30,7 @@ class MarkovChainTest {
   }
 
   fun Double.testIsProbability(): Double =
-    also { Assertions.assertTrue(let { 0 < it && it < 1 }) }
+    also { Assertions.assertTrue(this in 0.0..1.0, "Expected, actual: $this") }
 
   @Test
   fun testNumerical() {
