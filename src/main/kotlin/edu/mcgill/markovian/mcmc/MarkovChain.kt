@@ -110,10 +110,8 @@ open class MarkovChain<T>(
     }
 
   // https://www.cs.utah.edu/~jeffp/papers/merge-summ.pdf
-  operator fun plus(mc: MarkovChain<T>) = apply {
-    counter.memCounts.merge(mc.counter.memCounts)
-    mgr.reset()
-  }
+  operator fun plus(mc: MarkovChain<T>) =
+    MarkovChain<T>(memory = memory, counter = counter + mc.counter)
 
   /**
    * TODO: construct [Dist] using precomputed normalization constants [Counter.nrmCounts]
@@ -154,7 +152,7 @@ open class MarkovChain<T>(
    */
   class Counter<T>(
     toCount: Sequence<T> = sequenceOf(),
-    memory: Int,
+    val memory: Int,
     val total: AtomicInteger = AtomicInteger(0),
     val rawUniques: Int = pow2(log2(maxUniques) + 5),
     val nrmUniques: Int = pow2(log2(memory * maxUniques) + 8),
@@ -184,7 +182,15 @@ open class MarkovChain<T>(
           buffer.allMasks().forEach { nrmCounts.update(it) }
         }
       }
-  )
+  ) {
+    operator fun plus(other: Counter<T>) =
+      Counter(
+        memory = minOf(memory, other.memory),
+        rawCounts = rawCounts.merge(other.rawCounts),
+        nrmCounts = nrmCounts.merge(other.nrmCounts),
+        memCounts = memCounts.merge(other.memCounts)
+      )
+  }
 }
 
 class Dist(
