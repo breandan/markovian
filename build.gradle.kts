@@ -19,6 +19,12 @@ repositories {
 //  maven("https://raw.github.com/idsia/crema/mvn-repo/")
 }
 
+java.toolchain {
+  languageVersion.set(JavaLanguageVersion.of(15))
+  vendor.set(JvmVendorSpec.ADOPTOPENJDK)
+  implementation.set(JvmImplementation.J9)
+}
+
 dependencies {
   implementation(platform(kotlin("bom")))
   implementation(kotlin("stdlib"))
@@ -43,7 +49,7 @@ dependencies {
 
   implementation("org.apache.datasketches:datasketches-java:2.0.0")
 
-  implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
+//  implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
 //  implementation("com.github.TUK-CPS:jAADD:-SNAPSHOT")
   implementation("ca.umontreal.iro.simul:ssj:3.3.1")
@@ -72,7 +78,7 @@ tasks {
     }
   }
 
-  withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
+  compileKotlin {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_15.toString()
   }
 }
