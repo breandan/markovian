@@ -4,6 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
+  `maven-publish`
   kotlin("jvm") version "1.5.30"
   id("com.github.ben-manes.versions") version "0.39.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-216"
@@ -80,5 +81,35 @@ tasks {
 
   compileKotlin {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_15.toString()
+  }
+}
+
+publishing {
+  publications.create<MavenPublication>("default") {
+    from(components["java"])
+
+    pom {
+      name.set("Markovian")
+      description.set("A Kotlin DSL for probabilistic programming")
+      url.set("https://github.com/breandan/markovian")
+      licenses {
+        license {
+          name.set("The Apache Software License, Version 1.0")
+          url.set("http://www.apache.org/licenses/LICENSE-3.0.txt")
+          distribution.set("repo")
+        }
+      }
+      developers {
+        developer {
+          id.set("Breandan Considine")
+          name.set("Breandan Considine")
+          email.set("bre@ndan.co")
+          organization.set("McGill University")
+        }
+      }
+      scm {
+        url.set("https://github.com/breandan/markovian")
+      }
+    }
   }
 }
