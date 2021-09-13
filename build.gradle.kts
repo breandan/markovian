@@ -29,7 +29,7 @@ java.toolchain {
 dependencies {
   implementation(platform(kotlin("bom")))
   implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
   implementation("com.github.breandan:kaliningraph:0.1.7")
 //  implementation("ch.idsia:crema:0.1.7.a")
@@ -63,7 +63,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
 //  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")
 
-  testImplementation("org.junit.jupiter:junit-jupiter:5.8.0-M1")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
 }
 
 tasks {
