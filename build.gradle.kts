@@ -5,7 +5,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
   `maven-publish`
-  kotlin("jvm") version "1.5.30"
+  kotlin("jvm") version "1.6.20-dev-1404"
   id("com.github.ben-manes.versions") version "0.39.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-216"
 }
@@ -31,10 +31,10 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
-  implementation("com.github.breandan:kaliningraph:0.1.7")
+  implementation("ai.hypergraph:kaliningraph:0.1.8")
 //  implementation("ch.idsia:crema:0.1.7.a")
 
-//    implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
+//  implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
 //  implementation("org.matheclipse:matheclipse-core:2.0.0-SNAPSHOT")
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
 

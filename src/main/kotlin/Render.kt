@@ -1,4 +1,4 @@
-import edu.mcgill.kaliningraph.browserCmd
+import ai.hypergraph.kaliningraph.browserCmd
 import edu.mcgill.markovian.pmap
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExportPortable
