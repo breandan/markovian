@@ -46,7 +46,7 @@ dependencies {
 //  implementation("com.datadoghq:sketches-java:0.7.0")
 
   // Cache PMF/CDF lookups for common queries
-  implementation("com.github.ben-manes.caffeine:caffeine:3.0.3")
+  implementation("com.github.ben-manes.caffeine:caffeine:3.0.4")
 
   implementation("org.apache.datasketches:datasketches-java:2.0.0")
 
