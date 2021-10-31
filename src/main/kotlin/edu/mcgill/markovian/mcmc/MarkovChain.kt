@@ -173,9 +173,9 @@ open class MarkovChain<T>(
     toCount: Sequence<T> = sequenceOf(),
     val memory: Int,
     val total: AtomicInteger = AtomicInteger(0),
-    val rawUniques: Int = pow2(log2(maxUniques) + 5),
-    val nrmUniques: Int = pow2(log2(memory * maxUniques) + 8),
-    val memUniques: Int = pow2(log2(memory * maxUniques) + 2),
+    val rawUniques: Int = 2.pow(log2(maxUniques) + 5),
+    val nrmUniques: Int = 2.pow(log2(memory * maxUniques) + 8),
+    val memUniques: Int = 2.pow(log2(memory * maxUniques) + 2),
     // Counts unique instances of T
     val rawCounts: ItemsSketch<T> = ItemsSketch(rawUniques),
     /**

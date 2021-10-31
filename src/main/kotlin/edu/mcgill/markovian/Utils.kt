@@ -23,7 +23,7 @@ fun List<Double>.variance() =
   average().let { mean -> map { (it - mean).pow(2) } }.average()
 
 fun log2(b: Int) = 32 - Integer.numberOfLeadingZeros(b - 1)
-fun pow2(p: Int) = 2.0.pow(p.toDouble()).toInt()
+fun Int.pow(p: Int) = toDouble().pow(p.toDouble()).toInt()
 
 // All vertices of a Hamming space
 // https://en.wikipedia.org/wiki/Hamming_space

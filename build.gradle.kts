@@ -7,7 +7,7 @@ plugins {
   `maven-publish`
   kotlin("jvm") version "1.6.20-dev-1404"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.0-216"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.3-26"
 }
 
 group = "com.github.breandan"
@@ -39,7 +39,7 @@ dependencies {
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
 
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
-  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.1.0")
+  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.2.0")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2")
 
 //  https://arxiv.org/pdf/1908.10693.pdf
@@ -48,7 +48,7 @@ dependencies {
   // Cache PMF/CDF lookups for common queries
   implementation("com.github.ben-manes.caffeine:caffeine:3.0.4")
 
-  implementation("org.apache.datasketches:datasketches-java:2.0.0")
+  implementation("org.apache.datasketches:datasketches-java:3.0.0")
 
 //  implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
@@ -58,12 +58,12 @@ dependencies {
   // MPJ (required for Poon's SPN)
   implementation(files("$projectDir/libs/mpj-0.44.jar"))
 
-  val multik_version = "0.0.1"
+  val multik_version = "0.1.0"
   implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
   implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
 //  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")
 
-  testImplementation("org.junit.jupiter:junit-jupiter:5.8.0")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 
 tasks {
