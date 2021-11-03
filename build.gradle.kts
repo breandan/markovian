@@ -5,7 +5,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
   `maven-publish`
-  kotlin("jvm") version "1.6.20-dev-1404"
+  kotlin("jvm") version "1.6.20-dev-4660"
   id("com.github.ben-manes.versions") version "0.39.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.10.3-26"
 }
