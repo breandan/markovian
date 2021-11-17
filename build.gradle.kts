@@ -1,13 +1,11 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
   `maven-publish`
-  kotlin("jvm") version "1.6.20-dev-4660"
+  kotlin("jvm") version "1.6.0"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.3-26"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.10.3-36"
 }
 
 group = "com.github.breandan"
@@ -20,11 +18,11 @@ repositories {
 //  maven("https://raw.github.com/idsia/crema/mvn-repo/")
 }
 
-java.toolchain {
-  languageVersion.set(JavaLanguageVersion.of(15))
-  vendor.set(JvmVendorSpec.ADOPTOPENJDK)
-  implementation.set(JvmImplementation.J9)
-}
+//java.toolchain {
+//  languageVersion.set(JavaLanguageVersion.of(15))
+//  vendor.set(JvmVendorSpec.ADOPTOPENJDK)
+//  implementation.set(JvmImplementation.J9)
+//}
 
 dependencies {
   implementation(platform(kotlin("bom")))
@@ -40,7 +38,7 @@ dependencies {
 
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
   implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.2.0")
-  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.1.0")
 
 //  https://arxiv.org/pdf/1908.10693.pdf
 //  implementation("com.datadoghq:sketches-java:0.7.0")
@@ -58,7 +56,8 @@ dependencies {
   // MPJ (required for Poon's SPN)
   implementation(files("$projectDir/libs/mpj-0.44.jar"))
 
-  val multik_version = "0.1.0"
+//  val multik_version = "0.0.1"
+  val multik_version = "0.1.1" // tests fail
   implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
   implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
 //  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")

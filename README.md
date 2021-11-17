@@ -1,6 +1,6 @@
 # Markovian
 
-[![Kotlin 1.5.20](https://img.shields.io/badge/Kotlin-1.5.20-blue.svg?style=flat&logo=kotlin)](http://kotlinlang.org)
+[![Kotlin 1.6.0](https://img.shields.io/badge/Kotlin-1.5.20-blue.svg?style=flat&logo=kotlin)](http://kotlinlang.org)
 [![](https://jitpack.io/v/breandan/markovian.svg)](https://jitpack.io/#breandan/markovian)
 [![CI](https://github.com/breandan/markovian/workflows/CI/badge.svg)](https://github.com/breandan/markovian/actions)
 
