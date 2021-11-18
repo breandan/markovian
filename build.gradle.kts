@@ -6,6 +6,7 @@ plugins {
   kotlin("jvm") version "1.6.0"
   id("com.github.ben-manes.versions") version "0.39.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.10.3-36"
+  id("com.google.devtools.ksp") version "1.6.0-1.0.1"
 }
 
 group = "com.github.breandan"
