@@ -26,7 +26,6 @@ repositories {
 //}
 
 dependencies {
-  implementation(platform(kotlin("bom")))
   implementation(kotlin("stdlib"))
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 

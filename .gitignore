@@ -13,3 +13,4 @@ build
 *.listing
 *.bst
 *.ps
+*.DS_Store
