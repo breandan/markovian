@@ -72,7 +72,7 @@ However, we can do even better! Since the prefixes `*b` and `*c` occur exactly o
 (a,2)       (b,6)          (c,2)         (a,2)  (b,6)    (c,2)
   │     ┌─────┼─────┐     ┌──┴──┐          │   ┌──┼──┐   ┌─┴─┐  
 (b,2) (c,2) (b,3) (a,1) (b,1) (c,1)        b   c  b  a   b   c   
-	                                       └─┬─┘  │  └───┼───┘
+                                           └─┬─┘  │  └───┼───┘
 	                                         2    3      1
 ```
 
