@@ -63,7 +63,7 @@ c│ 0  1  1               (cb,1),(cc,1)]         else    -> 0
 
 ```
 
-However, we can do even better! Since the prefixes `*b` and `*c` occur exactly once, we could store the transition counts as a prefix tree of pairs, whose first entry records the prefix and second records its frequency. Like before, we could compress this into a DAG to deduplicate equal-frequency branches. This might be depicted as follows:
+However, we can do even better! Since the prefixes `*b` and `*c` occur more than once, we could store the transition counts as a prefix tree of pairs, whose first entry records the prefix and second records its frequency. Like before, we could compress this into a DAG to deduplicate leaves with equal-frequency. This might be depicted as follows:
 
 ```
          Prefix Tree                          Prefix DAG
@@ -76,7 +76,15 @@ However, we can do even better! Since the prefixes `*b` and `*c` occur exactly o
                                              2    3      1
 ```
 
-Space complexity, while important, is less of a concern. More importantly, we need too much data to approximate all entries of this object. Even if we had a very efficient sparse representation, we would need a large number of samples to approximate the distribution. How could we do better in terms of sample efficiency? What if we didn't care about estimating the exact transition probability, only approximating it. How could we achieve that? One way could be to use something called a sketch-based summary.
+So far, we have considered exact methods. Furthermore, none of these data structures are concurrent and using them in parallel scenarios is highly nontrivial. What if we didn't care about estimating the exact transition probability, only approximating it. How could we achieve that? Perhaps by using a probabilistic data structure, we could reduce the spatial complexity even further. By designing the datastructure carefully, we could even make this massively parallelizable.
+
+One way could be to use something called an approximate counting algorithm, or [sketch-based summary](https://www.sketchingbigdata.org/). Sketches are datastructures for approximately computing some statistic based on the counting Bloom filter. Without going into details, sketching algorithms are used to estimate some statistic over large number of items, allows us to smoothly trade off error-tolerance for space-efficiency. Even with a very low error tolerance, we can obtain dramatic reduction in space complexity.
+
+Space complexity, though important, is only part of the picture. Often the limiting factor in many data structures is the maximum speedup of parallelization. While lock-free versions of some tries and dictionaries are available, they are *extremely* difficult to implement and reason about. A much simpler approach would be to decompose the problem recursively into many disjoint subsets, summarize each one, and recombine the summaries (1) in any order (2) quickly and (3) with low error. This property is known as *mergability*. Mathematically, if the summary statistic forms a structure called a *monoid*, it can be made stupidly parallelizable.
+
+What about sample complexity? In many cases, we are not constrained by space or time, but samples. In many higher dimensional settings, even if we had an optimally-efficient sparse encoding, obtaining a faithful approximation would require more data than we could plausibly obtain. How could we do better in terms of sample efficiency? We need two things: (1) inductive priors and (2) learnable parameters. This is where additional structure, such as groups, rings and their cousins come in handy. 
+
+Neural networks are a bit like a mergable summary which deconstruct their inputs and recombine them in specific ways. For images, we have the special Euclidean group, SE(2). There are many other groups which are interesting to consider in various domains. If we can build these invariants into our models, we can recover latent structure with far, far fewer samples than would be required using a naive encoding scheme. For our purposes, we are particularly interested in semiring algebras, which are a specific kind of algebra that summarize many useful properties about graphs such as longest, shortest and widest paths.
 
 TODO.
 <!--There is a model, called a Hidden Markov Model, which allows us to model the observable states without requiring as much space or computation.-->
