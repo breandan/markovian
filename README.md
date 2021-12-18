@@ -73,7 +73,7 @@ However, we can do even better! Since the prefixes `*b` and `*c` occur exactly o
   │     ┌─────┼─────┐     ┌──┴──┐          │   ┌──┼──┐   ┌─┴─┐  
 (b,2) (c,2) (b,3) (a,1) (b,1) (c,1)        b   c  b  a   b   c   
                                            └─┬─┘  │  └───┼───┘
-	                                         2    3      1
+                                             2    3      1
 ```
 
 Space complexity, while important, is less of a concern. More importantly, we need too much data to approximate all entries of this object. Even if we had a very efficient sparse representation, we would need a large number of samples to approximate the distribution. How could we do better in terms of sample efficiency? What if we didn't care about estimating the exact transition probability, only approximating it. How could we achieve that? One way could be to use something called a sketch-based summary.
