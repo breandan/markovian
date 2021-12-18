@@ -3,10 +3,10 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
   `maven-publish`
-  kotlin("jvm") version "1.6.0"
+  kotlin("jvm") version "1.6.10"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.10.3-36"
-  id("com.google.devtools.ksp") version "1.6.0-1.0.1"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-40"
+  id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 }
 
 group = "com.github.breandan"
@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC3")
 
   implementation("ai.hypergraph:kaliningraph:0.1.8")
 //  implementation("ch.idsia:crema:0.1.7.a")
@@ -37,14 +37,14 @@ dependencies {
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
 
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
-  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.2.0")
-  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.1.0")
+  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.2.1")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.1.1")
 
 //  https://arxiv.org/pdf/1908.10693.pdf
 //  implementation("com.datadoghq:sketches-java:0.7.0")
 
   // Cache PMF/CDF lookups for common queries
-  implementation("com.github.ben-manes.caffeine:caffeine:3.0.4")
+  implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
 
   implementation("org.apache.datasketches:datasketches-java:3.0.0")
 
@@ -56,15 +56,13 @@ dependencies {
   // MPJ (required for Poon's SPN)
   implementation(files("$projectDir/libs/mpj-0.44.jar"))
 
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.1")
-
-  val multik_version = "0.0.1"
+  val multik_version = "0.1.1"
 //  val multik_version = "0.1.1" // tests fail
   implementation("org.jetbrains.kotlinx:multik-api:$multik_version")
   implementation("org.jetbrains.kotlinx:multik-jvm:$multik_version")
 //  implementation("org.jetbrains.kotlinx:multik-native:$multik_version")
 
-  testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
 
 tasks {
