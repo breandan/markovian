@@ -25,27 +25,61 @@ Most computers are by contrast, deterministic and fully observable. How could we
 
 What is a probability distribution? A probability distribution is a set of elements, accompanied by the relative frequency which they occur. Suppose we have a foreign language which we do not understand. How could we learn it? First, we might read some text and gather various statistics, such as the alphabet size and how many times each symbol occurs. We could summarize this information in a data structure called a *histogram*. There are [many useful algorithms](https://en.wikipedia.org/wiki/Streaming_algorithm) for computing these summaries efficiently, exactly or approximately.
 
-Now, suppose we want to sample from our probabilistic model. To do so, we could take our histogram and for each symbol, compute a running sum up to its index, called a cumulative distribution function (CDF). We draw a sample from our PRNG to get a number uniformly between 0 and 1 in increments of 1/|alphabet|, then select the symbol whose running sum is closest to that number. Voila! We have obtained a sample.
+Now, suppose we want to sample from our probabilistic model. To do so, we could take our histogram and for each symbol, compute a running sum up to its histogram index, called a *cumulative distribution function* (CDF). We draw a sample from our PRNG to get a number uniformly between 0 and 1 in increments of 1/|alphabet|, then select the symbol whose CDF is closest to that number and voila! we have obtained a sample.
 
-In order to sample longer sequences, we might want to incorporate some context, such as pairs of adjacent characters. To do so, we could build a two dimensional histogram, sample the first symbol from the "marginal" distribution P(T₁=t₁), and the second from the "conditional" distribution P(T₂=t₂|T₁=t₁), the probability of the second character being t₂ given the preceding character was t₁. This data structure is called a Markov or transition matrix.
+In order to sample longer sequences, we might want to incorporate some context, such as pairs of adjacent characters. To do so, we could build a two-dimensional histogram, sample the first symbol from the "marginal" distribution P(T₁=t₁), and the second from the "conditional" distribution P(T₂=t₂|T₁=t₁), the probability of the second character being t₂ given the preceding character was t₁. This data structure is called a Markov or transition matrix.
 
 P(T₁=t₁,T₂=t₂) = P(T₂=t₂|T₁=t₁)P(T₁=t₁)
 ```
+String: aabcbbbbccba…
+        1   2   3   4   5   6   7   8   9   10  …
+Window: ab, bc, cb, bb, bb, bb, bc, cc, ab, ba, …
+Counts: 2 , 2 , 1 , 3 , 3 , 3 , 2 , 1 , 2 , 1 , …
+Transition matrix at index=10:
    a  b  c …
- ._________
-a| 1  2  1 
-b| 2  3  1
-c| 1  2  3 
-⋮          / Σ
+ ┌─────────
+a│ 0  2  0
+b│ 1  3  2
+c│ 0  1  1
+⋮          / 10
 ```
 
-More generally, we might have triples or n-tuples of contiguous symbols. To represent longer contexts, we could record their probabilities into a multidimensional array or *transition tensor*, representing the probability of observing a subsequence t₁t₂...tₙ. This tensor is a probability distribution whose conditionals "slice" or disintegrate the tensor along a dimension, producing an n-1 dimensional hyperplane, the conditional probability of observing a given symbol in a given slot:
+More generally, we might have longer windows containing triples or n-tuples of contiguous symbols. To represent longer contexts, we could record their probabilities into a multidimensional array or *transition tensor*, representing the probability of a subsequence t₁t₂...tₙ. This tensor is a probability distribution whose conditionals "slice" or disintegrate the tensor along a dimension, producing an n-1 dimensional hyperplane, the conditional probability of observing a given symbol in a given slot:
 
 P(T₁=t₁,T₂=t₂,…,Tₙ=tₙ) = P(Tₙ=tₙ|Tₙ₋₁=tₙ₋₁, Tₙ₋₂=tₙ₋₂, …,T₁=t₁),
 
-where the tensor rank n is given by the context length, T₁...ₙ are random variables and t₁...ₙ are their concrete instantiations. This tensor is a hypercube with shape |alphabet|ⁿ - Each entry identifies a unique subsequence of n symbols, and the probability of observing them in the same context. Note the exponential state space of this model - as n grows larger, this will quickly require a large amount of space to represent. More importantly, we need too much data to approximate all entries of this tensor. How could we do better?
+where the tensor rank n is given by the context length, T₁...ₙ are random variables and t₁...ₙ are their concrete instantiations. This tensor is a hypercube with shape |alphabet|ⁿ - Each entry identifies a unique subsequence of n symbols, and the probability of observing them in the same context. Note the exponential state space of this model - as n grows larger, this will quickly require a very large amount of space to represent.
 
-<!--Instead, we need a more efficient algorithm. What if we didn't care about estimating the exact transition probability, only approximating it. How could we do that? There is a model, called a Hidden Markov Model, which allows us to model the observable states without requiring as much space or computation.-->
+The first improvement we could make is to sparsify the tensor, i.e., only record its nonzero entries in some sort of list-based data structure, or sparse dictionary. Suppose in the previous example where n=2, we only stored nonzero entries as a list of pairs of bigrams to their frequency. By doing so, we could reduce the space consumption by 1/3. We could further reduce the space by only storing duplicate frequencies once. This would improve the space consumption by a small factor for multimodal distributions.
+
+```
+  Matrix               Sparse List           Bidirectional Map 
+  
+   a  b  c …                                                   
+ ┌─────────                                    (ba,cb) <-> 1   
+a│ 0  2  0       [(ab,2),                      (ab,bc) <-> 2   
+b│ 1  3  2        (ba,1),(bb,3),(bc,2)         (bb,cc) <-> 3   
+c│ 0  1  1               (cb,1),(cc,1)]         else    -> 0   
+
+```
+
+However, we can do even better! Since the prefixes `*b` and `*c` occur exactly once, we could store the transition counts as a prefix tree of pairs, whose first entry records the prefix and second records its frequency. Like before, we could compress this into a DAG to deduplicate equal-frequency branches. This might be depicted as follows:
+
+```
+         Prefix Tree                          Prefix DAG
+            (*,10)                              (*,10)
+  ┌───────────┼──────────────┐             ┌──────┼────────┐
+(a,2)       (b,6)          (c,2)         (a,2)  (b,6)    (c,2)
+  │     ┌─────┼─────┐     ┌──┴──┐          │   ┌──┼──┐   ┌─┴─┐  
+(b,2) (c,2) (b,3) (a,1) (b,1) (c,1)        b   c  b  a   b   c   
+	                                       └─┬─┘  │  └───┼───┘
+	                                         2    3      1
+```
+
+Space complexity, while important, is less of a concern. More importantly, we need too much data to approximate all entries of this object. Even if we had a very efficient sparse representation, we would need a large number of samples to approximate the distribution. How could we do better in terms of sample efficiency? What if we didn't care about estimating the exact transition probability, only approximating it. How could we achieve that? One way could be to use something called a sketch-based summary.
+
+TODO.
+<!--There is a model, called a Hidden Markov Model, which allows us to model the observable states without requiring as much space or computation.-->
 
 ## Example
 
