@@ -89,9 +89,9 @@ open class MarkovChain<T>(
           .filter { (item, _) -> item.all { it in dictionary } }
           .forEach { (item, count) ->
             val idx = item.map { dictionary[it] }.toIntArray()
-            if (idx.size == memory) mt[idx] = count.toDouble()
+            if (idx.size == memory) mt.asDNArray()[idx] = count.toDouble()
           }
-      }.let { it / it.sum() } // Normalize across all entries in tensor
+      }.let { it / it.sum() }.asDNArray() // Normalize across all entries in tensor
     // TODO: May be possible to precompute fiber/slice PMFs via tensor renormalization?
     // https://mathoverflow.net/questions/393427/generalization-of-sinkhorn-s-theorem-to-stochastic-tensors
     // https://arxiv.org/pdf/1702.08142.pdf
