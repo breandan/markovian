@@ -31,14 +31,14 @@ In order to sample longer sequences, we might want to incorporate some context, 
 
 P(T₁=t₁,T₂=t₂) = P(T₂=t₂|T₁=t₁)P(T₁=t₁)
 ```
-String: aabcbbbbccba…
+String: abcbbbbccba…
         1   2   3   4   5   6   7   8   9   10  …
-Window: ab, bc, cb, bb, bb, bb, bc, cc, ab, ba, …
-Counts: 2 , 2 , 1 , 3 , 3 , 3 , 2 , 1 , 2 , 1 , …
+Window: ab, bc, cb, bb, bb, bb, bc, cc, cb, ba, …
+Counts: 1 , 2 , 2 , 3 , 3 , 3 , 2 , 1 , 2 , 1 , …
 Transition matrix at index=10:
    a  b  c …
  ┌─────────
-a│ 0  2  0
+a│ 0  1  0
 b│ 1  3  2
 c│ 0  1  1
 ⋮          / 10
@@ -56,31 +56,45 @@ The first improvement we could make is to sparsify the tensor, i.e., only record
   Matrix               Sparse List           Bidirectional Map 
   
    a  b  c …                                                   
- ┌─────────                                    (ba,cb) <-> 1   
-a│ 0  2  0       [(ab,2),                      (ab,bc) <-> 2   
-b│ 1  3  2        (ba,1),(bb,3),(bc,2)         (bb,cc) <-> 3   
-c│ 0  1  1               (cb,1),(cc,1)]         else    -> 0   
+ ┌─────────                                  (ab,ba,cc) <-> 1   
+a│ 0  1  0       [(ab,1),                       (bc,cb) <-> 2   
+b│ 1  3  2        (ba,1),(bb,3),(bc,2)             (bb) <-> 3   
+c│ 0  2  1               (cb,2),(cc,1)]            else  -> 0   
 
 ```
 
 However, we can do even better! Since the prefixes `*b` and `*c` occur more than once, we could store the transition counts as a prefix tree of pairs, whose first entry records the prefix and second records its frequency. Like before, we could compress this into a DAG to deduplicate leaves with equal-frequency. This might be depicted as follows:
 
 ```
-         Prefix Tree                          Prefix DAG
-            (*,10)                              (*,10)
-  ┌───────────┼──────────────┐             ┌──────┼────────┐
-(a,2)       (b,6)          (c,2)         (a,2)  (b,6)    (c,2)
-  │     ┌─────┼─────┐     ┌──┴──┐          │   ┌──┼──┐   ┌─┴─┐  
-(b,2) (c,2) (b,3) (a,1) (b,1) (c,1)        b   c  b  a   b   c   
-                                           └─┬─┘  │  └───┼───┘
-                                             2    3      1
+          Prefix Tree                         Prefix DAG
+             (*,10)                              (*,10)
+  ┌────────────┼───────────────┐          ┌────────┼────────────┐
+(a,1)        (b,6)           (c,3)        a──┐  6──b   ┌────────c
+  │      ┌─────┼─────┐      ┌──┴──┐       │  │  ┌──┼───│──┐   ┌─┴─┐  
+(b,1)  (a,1) (b,3) (c,2)  (b,2) (c,1)     b  │  a  b   │  c   b   c   
+                                          │  ├──│──│───│──│───│───┘
+                                          └──┼──┘  └─┬─┘  └─┬─┘  
+                                             1       3      2  
 ```
 
-So far, we have considered exact methods. Furthermore, none of these data structures are concurrent and using them in parallel scenarios is highly nontrivial. What if we didn't care about estimating the exact transition probability, only approximating it. How could we achieve that? Perhaps by using a probabilistic data structure, we could reduce the spatial complexity even further. By designing the datastructure carefully, we could even make this massively parallelizable.
+Space complexity, however important, is only part of the picture. Often the limiting factor in many data structures is the [maximum speedup of parallelization](https://en.wikipedia.org/wiki/Amdahl%27s_law). While concurrent tries and dictionaries are available, they are nontrivial to implement and have suboptimal scaling properties. A much more trivially scalable approach would be to recursively decompose the data into many disjoint subsets, summarize each one, and recombine the summaries. By designing the summary carefully, this process can be made [embarrassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_parallel). 
 
-One approach would be to use an approximate counting algorithm, or [sketch-based summary](https://www.sketchingbigdata.org/). Sketches are probabilistic datastructures for approximately computing some statistic efficiently. Without going into the details, sketching algorithms can be used to compute a summary statistic over a very large number of items, and which can smoothly trade off error-bounds for space-efficiency. Even with a very low error tolerance, we can often obtain dramatic reduction in space complexity.
+Mathematically, the structure we are looking for is something called a *monoid*. If the summary of interest can be computed in any order it is called a *commutative monoid*. Many summaries naturally exhibit this property: sum, min, max, top-k and various probability distributions. Summaries which can be decomposed and recombined in this fashion are embarrassingly parallelizable.
 
-Space complexity, however important, is only part of the picture. Often the limiting factor in many data structures is the maximum speedup of parallelization. While lock-free versions of some tries and dictionaries are available, they are *extremely* difficult to implement and reason about. A much simpler approach would be to decompose the problem recursively into many disjoint subsets, summarize each one, and recombine the summaries. If this statistic can be computed (1) in any order and (2) with low error it is called *mergable*. Mathematically, this structure is called a *monoid* and can be made stupidly parallelizable.
+```
+                             abcbbbbccba ────────────────────────────────────────────┐
+              ┌───────────────────┴───────────────┐                                  │
+            abcbbb                              bbccba                               │
+            (*,5)              +                (*,5)              =               (*,10)                  
+  ┌───────────┼───────────┐               ┌───────┴────────┐            ┌────────────┼───────────────┐     
+(a,1)       (b,3)       (c,1)  +        (b,3)            (c,2)     =  (a,1)        (b,6)           (c,3)   
+  │        ┌──┴──┐        │         ┌─────┼─────┐       ┌──┴──┐         │      ┌─────┼─────┐      ┌──┴──┐  
+(b,1)    (b,2) (c,1)    (b,1)  +  (a,1) (b,1) (c,1)   (b,1) (c,1)  =  (b,1)  (a,1) (b,3) (c,2)  (b,2) (c,1)
+```
+
+So far, we have considered exact methods. What if we didn't care about estimating the exact transition probability, but only approximating it. How could we achieve that? Perhaps by using a probabilistic data structure, we could reduce the complexity even further.
+
+One approach would be to use an approximate counting algorithm, or [sketch-based summary](https://www.sketchingbigdata.org/). Sketches are probabilistic datastructures for approximately computing some statistic efficiently. Without going into the details, sketching algorithms are designed to smoothly trade off error-bounds for space-efficiency and can be used to compute a summary statistic over a very large number of items. Even with a very low error tolerance, we can often obtain dramatic reduction in space complexity.
 
 What about sample complexity? In many cases, we are not constrained by space or time, but samples. In many high-dimensional settings, even if we had an optimally-efficient sparse encoding, obtaining a faithful approximation to the true distribution would require more data than we could plausibly obtain. How could we do better in terms of sample efficiency? We need two things: (1) inductive priors and (2) learnable parameters. This is where algebraic structure, like groups, rings and their cousins come in handy. 
 
