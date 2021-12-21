@@ -29,7 +29,7 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC3")
 
-  implementation("ai.hypergraph:kaliningraph:0.1.8")
+  api("ai.hypergraph:kaliningraph:0.1.9")
 //  implementation("ch.idsia:crema:0.1.7.a")
 
 //  implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")

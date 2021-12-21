@@ -1,6 +1,8 @@
 package edu.mcgill.markovian.mcmc
 
-import ai.hypergraph.kaliningraph.*
+import ai.hypergraph.kaliningraph.typefamily.Edge
+import ai.hypergraph.kaliningraph.typefamily.Graph
+import ai.hypergraph.kaliningraph.typefamily.Vertex
 
 class MarkovProcess(states: Set<State>):
   Graph<MarkovProcess, Transition, State>(states)
