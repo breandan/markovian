@@ -1,16 +1,26 @@
 package edu.mcgill.markovian.mcmc
 
-import ai.hypergraph.kaliningraph.typefamily.Edge
-import ai.hypergraph.kaliningraph.typefamily.Graph
-import ai.hypergraph.kaliningraph.typefamily.Vertex
+import ai.hypergraph.kaliningraph.types.Edge
+import ai.hypergraph.kaliningraph.types.Graph
+import ai.hypergraph.kaliningraph.types.IGF
+import ai.hypergraph.kaliningraph.types.Vertex
+
+interface MPFamily: IGF<MarkovProcess, Transition, State> {
+  override val E: (s: State, t: State) -> Transition
+    get() = { s, t -> Transition(s, t) }
+  override val G: (vertices: Set<State>) -> MarkovProcess
+    get() = { vertices: Set<State> -> MarkovProcess(vertices) }
+  override val V: (old: State, edgeMap: (State) -> Set<Transition>) -> State
+    get() = { old: State, edgeMap: (State) -> Set<Transition> -> State(old.id, edgeMap ) }
+}
 
 class MarkovProcess(states: Set<State>):
-  Graph<MarkovProcess, Transition, State>(states)
+  MPFamily, Graph<MarkovProcess, Transition, State>(states)
 
 class Transition(source: State, target: State):
-  Edge<MarkovProcess, Transition, State>(source, target)
+  MPFamily, Edge<MarkovProcess, Transition, State>(source, target)
 
 class State(
   id: String,
   override val edgeMap: (State) -> Set<Transition>
-): Vertex<MarkovProcess, Transition, State>(id)
+): MPFamily, Vertex<MarkovProcess, Transition, State>(id)
