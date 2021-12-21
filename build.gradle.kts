@@ -5,7 +5,7 @@ plugins {
   `maven-publish`
   kotlin("jvm") version "1.6.10"
   id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-40"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-41"
   id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 }
 
