@@ -4,8 +4,8 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 plugins {
   `maven-publish`
   kotlin("jvm") version "1.6.10"
-  id("com.github.ben-manes.versions") version "0.39.0"
-  id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-40"
+  id("com.github.ben-manes.versions") version "0.41.0"
+  id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-55"
   id("com.google.devtools.ksp") version "1.6.10-1.0.2"
 }
 
@@ -27,9 +27,9 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC3")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
 
-  implementation("ai.hypergraph:kaliningraph:0.1.8")
+  implementation("ai.hypergraph:kaliningraph:0.1.9")
 //  implementation("ch.idsia:crema:0.1.7.a")
 
 //  implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
@@ -46,7 +46,7 @@ dependencies {
   // Cache PMF/CDF lookups for common queries
   implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
 
-  implementation("org.apache.datasketches:datasketches-java:3.0.0")
+  implementation("org.apache.datasketches:datasketches-java:3.1.0")
 
 //  implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 
