@@ -27,9 +27,9 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-RC3")
 
-  implementation("ai.hypergraph:kaliningraph:0.1.9")
+  implementation("ai.hypergraph:kaliningraph:0.1.8")
 //  implementation("ch.idsia:crema:0.1.7.a")
 
 //  implementation("com.github.axkr:symja_kotlin:-0164fc62ff-1")
@@ -46,7 +46,7 @@ dependencies {
   // Cache PMF/CDF lookups for common queries
   implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
 
-  implementation("org.apache.datasketches:datasketches-java:3.1.0")
+  implementation("org.apache.datasketches:datasketches-java:3.0.0")
 
 //  implementation("com.github.analog-garage:dimple:master-SNAPSHOT")
 

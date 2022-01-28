@@ -1,10 +1,12 @@
-import ai.hypergraph.kaliningraph.browserCmd
+import ai.hypergraph.kaliningraph.visualization.browserCmd
 import edu.mcgill.markovian.pmap
 import jetbrains.datalore.base.geometry.DoubleVector
 import jetbrains.datalore.plot.PlotSvgExportPortable
-import jetbrains.letsPlot.*
 import jetbrains.letsPlot.geom.geomDensity
-import jetbrains.letsPlot.intern.*
+import jetbrains.letsPlot.ggsize
+import jetbrains.letsPlot.intern.Plot
+import jetbrains.letsPlot.intern.toSpec
+import jetbrains.letsPlot.letsPlot
 import java.io.File
 import kotlin.random.Random
 
@@ -13,9 +15,7 @@ fun Plot.display() =
     val plotSize = DoubleVector(1000.0, 500.0)
     val plot = PlotSvgExportPortable.buildSvgImageFromRawSpecs( this@display.toSpec(), plotSize)
     it.writeText(plot)
-  }.also {
-    ProcessBuilder(browserCmd, it.path).start()
-  }
+  }.also { ProcessBuilder(browserCmd, it.path).start() }
 
 const val POPCOUNT = 10000
 

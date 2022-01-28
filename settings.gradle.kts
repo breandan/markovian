@@ -4,3 +4,5 @@ pluginManagement.repositories {
   mavenCentral()
   gradlePluginPortal()
 }
+
+includeBuild("kaliningraph")
