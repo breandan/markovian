@@ -37,7 +37,7 @@ dependencies {
 //  implementation("org.matheclipse:matheclipse-gpl:2.0.0-SNAPSHOT")
 
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3") // TODO: why?
-  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.2.1")
+  implementation("org.jetbrains.lets-plot:lets-plot-jfx:2.3.0-rc2")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.1.1")
 
 //  https://arxiv.org/pdf/1908.10693.pdf
