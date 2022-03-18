@@ -1,3 +1,4 @@
+import ai.hypergraph.kaliningraph.types.*
 import jetbrains.datalore.base.values.Color
 import jetbrains.letsPlot.*
 import jetbrains.letsPlot.geom.*
@@ -27,7 +28,7 @@ fun main() {
 
 //  plot(ts, points)
 
-  val compare = (0..10000).map { a.nextDouble() to b.nextDouble() }
+  val compare = (0..10000).map { a.nextDouble() cc b.nextDouble() }
   val (at, bt) = compare.unzip()
 
   val yt = compare.map { (a, b) ->
@@ -38,7 +39,7 @@ fun main() {
   compare(at, bt, yt).display()
 }
 
-fun plot(samples: List<Pair<Double, Double>>, points: List<Pair<Double, Double>>) =
+fun plot(samples: List<V2<Double>>, points: List<V2<Double>>) =
   ggplot(
     mapOf(
       "a" to samples.unzip().first,

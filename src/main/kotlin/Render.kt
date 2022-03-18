@@ -29,9 +29,7 @@ fun compare(vararg samplers: (Double) -> Double): Plot =
 fun compare(vararg samples: List<Double>): Plot =
   letsPlot(
     mapOf<String, Any>(
-      "x" to samples.fold(listOf<Double>()) { acc, function ->
-        acc + function
-      },
+      "x" to samples.fold(listOf<Double>()) { acc, function -> acc + function },
       "" to samples.mapIndexed { i, s -> List(s.size) { "PDF$i" } }.flatten()
     )
   ).let {

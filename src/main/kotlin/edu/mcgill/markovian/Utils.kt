@@ -1,12 +1,13 @@
 package edu.mcgill.markovian
 
+import ai.hypergraph.kaliningraph.types.cc
 import kotlinx.coroutines.*
 import kotlin.math.pow
 import kotlin.random.Random
 
 // Generates a rational number in (0, 1). Approximates nextDouble() as n -> \infty
 tailrec fun Random.nextRational(n: Int = 100): String {
-  val (j, i) = nextInt(3, n).let { it to nextInt(1, it - 1) }
+  val (j, i) = nextInt(3, n).let { it cc nextInt(1, it - 1) }
   return if (1 < i.gcd(j)) nextRational(n) else "$i/$j"
 }
 
