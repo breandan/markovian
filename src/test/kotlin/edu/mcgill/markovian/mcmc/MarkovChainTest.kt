@@ -21,7 +21,7 @@ class MarkovChainTest {
     val P = List(100) { ('a'..'d').random() }
       .asSequence().toMarkovChain(memory = 2)
     // P(T₁=a,T₂=*)
-    val p1 = P[1 pp 'a'].testIsProbability().also { println("p1 = $it") }
+    val p1 = P[1 to 'a'].testIsProbability().also { println("p1 = $it") }
     // P(T₁=a,T₂=b)
     val p2 = P['a', 'b'].testIsProbability().also { println("p2 = $it") }
     // P(T₁=a,T₂=*)

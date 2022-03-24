@@ -18,9 +18,9 @@ import kotlin.random.Random
  * producing a rank-(dims.size) tensor consisting of [dims].
  */
 fun NDArray<Double, DN>.sumOnto(vararg dims: Int = intArrayOf(0)) =
-  (0 until dim.d).fold(this pp 0) { (t, r), b ->
-    if (b in dims) t pp r + 1
-    else mk.math.sum<Double, DN, DN>(t, r) pp r
+  (0 until dim.d).fold(this to 0) { (t, r), b ->
+    if (b in dims) t to r + 1
+    else mk.math.sum<Double, DN, DN>(t, r) to r
   }.first
 
 /**
@@ -106,9 +106,9 @@ open class MarkovChain<T>(
     Caffeine.newBuilder().maximumSize(10_000).build()
 
   operator fun get(vararg variables: T?): Double =
-    get(*variables.mapIndexed { i, t -> i pp t }.toTypedArray())
+    get(*variables.mapIndexed { i, t -> i to t }.toTypedArray())
 
-  operator fun get(vararg variables: Π2<Int, T?>): Double =
+  operator fun get(vararg variables: Pair<Int, T?>): Double =
     variables.associate { (a, b) -> a to b }
       .let { map -> (0 until memory).map { map[it] } }.let {
         counter.nrmCounts.getEstimate(it).toDouble() / counter.total.toDouble()
