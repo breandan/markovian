@@ -1,6 +1,5 @@
 package edu.mcgill.markovian.mcmc
 
-import ai.hypergraph.kaliningraph.types.pp
 import org.jetbrains.kotlinx.multik.api.*
 import org.jetbrains.kotlinx.multik.ndarray.data.*
 import org.jetbrains.kotlinx.multik.ndarray.operations.toList

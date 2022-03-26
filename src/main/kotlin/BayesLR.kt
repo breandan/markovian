@@ -1,5 +1,4 @@
 import ai.hypergraph.kaliningraph.types.*
-import jetbrains.datalore.base.values.Color
 import jetbrains.letsPlot.*
 import jetbrains.letsPlot.geom.*
 import umontreal.ssj.probdist.NormalDist
