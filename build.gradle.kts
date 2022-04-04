@@ -3,10 +3,10 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
   `maven-publish`
-  kotlin("jvm") version "1.6.20-RC"
+  kotlin("jvm") version "1.6.20"
   id("com.github.ben-manes.versions") version "0.42.0"
   id("org.jetbrains.kotlin.jupyter.api") version "0.11.0-62"
-  id("com.google.devtools.ksp") version "1.6.20-RC-1.0.4"
+  id("com.google.devtools.ksp") version "1.6.20-1.0.4"
 }
 
 group = "com.github.breandan"
